@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# dshc — DSH Claude launcher (DeepSeek Harness fork)
+# web defaults to port 3090 so it never collides with a stock `dsh web` (3080).
+# Once apps/cli/dist exists in the dsh-claude checkout, it runs the fork build.
+set -euo pipefail
+DSHC_HOME="${DSHC_HOME:-/home/arthur/jarvis/dsh-claude}"
+DSHC_PORT="${DSHC_PORT:-3090}"
+CLI_DIST="$DSHC_HOME/apps/cli/dist/bin.js"
+BIN="$CLI_DIST"
+[ -f "$BIN" ] || BIN=/home/arthur/.local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js
+if [ "${1:-}" = "web" ] && ! printf '%s\n' "$@" | grep -q -- '--port'; then
+  exec node "$BIN" web --port "$DSHC_PORT" "${@:2}"
+fi
+exec node "$BIN" "$@"
