@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 # dshc — DSH Claude launcher (DeepSeek Harness fork)
-# web defaults to port 3090 so it never collides with a stock `dsh web` (3080).
-# Once apps/cli/dist exists in the dsh-claude checkout, it runs the fork build.
+#
+# Isolamento total da instância do senhor (dsh na 3080):
+#   DSH_HOME      → ~/.dshc   (settings, credenciais, skills, perfis, sessões)
+#   DSHC_WORKSPACE→ ~/dsh-claude-work (cwd do app: escopo dos projetos/sessões)
+# Porta padrão 3090. Tudo sobrescrevível por env: DSHC_DSH_HOME, DSHC_WORKSPACE,
+# DSHC_PORT. Rodar `dshc web` de qualquer lugar nunca toca a instância 3080.
 set -euo pipefail
-DSHC_HOME="${DSHC_HOME:-/home/arthur/jarvis/dsh-claude}"
+export DSH_HOME="${DSHC_DSH_HOME:-$HOME/.dshc}"
+DSHC_WORKSPACE="${DSHC_WORKSPACE:-$HOME/dsh-claude-work}"
 DSHC_PORT="${DSHC_PORT:-3090}"
+DSHC_HOME="${DSHC_HOME:-/home/arthur/jarvis/dsh-claude}"
+mkdir -p "$DSHC_WORKSPACE" "$DSH_HOME/profiles"
+cd "$DSHC_WORKSPACE"
 CLI_DIST="$DSHC_HOME/apps/cli/dist/bin.js"
 BIN="$CLI_DIST"
 [ -f "$BIN" ] || BIN=/home/arthur/.local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js
