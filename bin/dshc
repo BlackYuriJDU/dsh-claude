@@ -13,7 +13,7 @@ DSHC_PORT="${DSHC_PORT:-3090}"
 DSHC_HOME="${DSHC_HOME:-/home/arthur/jarvis/dsh-claude}"
 mkdir -p "$DSHC_WORKSPACE" "$DSH_HOME/profiles"
 cd "$DSHC_WORKSPACE"
-CLI_DIST="$DSHC_HOME/apps/cli/dist/bin.js"
+CLI_DIST="$DSHC_HOME/apps/cli/lib/bin.js"
 BIN="$CLI_DIST"
 [ -f "$BIN" ] || BIN=/home/arthur/.local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js
 if [ "${1:-}" = "web" ] && ! printf '%s\n' "$@" | grep -q -- '--port'; then

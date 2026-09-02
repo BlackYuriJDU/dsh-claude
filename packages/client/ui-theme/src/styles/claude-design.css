@@ -1,0 +1,539 @@
+/**
+ * Claude Design — warm-canvas editorial theme for DSH Claude (dshc).
+ *
+ * Loads LAST in the ui-theme sheet order (after base, design-platform,
+ * scrollbar, gradient-shadow-text and shiki) so it is the final word of the
+ * token cascade. Two override strategies only, keeping upstream mergeable:
+ *   1. Token re-pointing — every brand decision flows through --dsw-static-*
+ *      and --dsw-alias-* custom properties (light on `body`, dark on
+ *      `body[data-ds-dark-theme]`).
+ *   2. Structural hooks — CSS Modules compile to `<hash>_<local>`, so
+ *      `[class*='_local']` selectors stay stable for the few surfaces that
+ *      carry no token seam (hero headline, hero glow, focus rings).
+ *
+ * Palette: cream canvas #faf9f5, ink #141413, coral #cc785c (the only brand
+ * voltage), dark product chrome #181715. Serif display (Cormorant Garamond,
+ * weight 400–500, negative tracking) for headlines; Inter for body; JetBrains
+ * Mono for code. Blue is never a brand accent.
+ */
+
+/* ============================================================
+   0. Brand tokens (dsc-*) + font stacks
+   ============================================================ */
+
+:root {
+  /* Fonts — self-hosted faces from fonts.css (fonts.css loads first). */
+  --dsw-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue',
+    Helvetica, Arial, sans-serif;
+  --ds-font-family-code: 'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas,
+    'Liberation Mono', Menlo, Courier, 'PingFang SC', 'Microsoft YaHei';
+  --dsc-font-display: 'Cormorant Garamond', 'EB Garamond', 'Tiempos Headline',
+    Georgia, 'Times New Roman', serif;
+
+  /* Coral — the brand voltage. Scarce on elements, generous nowhere else. */
+  --dsc-coral-500: rgb(204, 120, 92);
+  --dsc-coral-600: rgb(169, 88, 62);
+  --dsc-coral-soft: rgb(223, 160, 133);
+
+  /* Warm companions (sparing use). */
+  --dsc-teal: rgb(93, 184, 166);
+  --dsc-amber: rgb(232, 165, 90);
+
+  /* Surfaces. */
+  --dsc-canvas: rgb(250, 249, 245);
+  --dsc-surface-soft: rgb(245, 240, 232);
+  --dsc-surface-card: rgb(239, 233, 222);
+  --dsc-surface-cream-strong: rgb(232, 224, 210);
+  --dsc-hairline: rgb(230, 223, 216);
+  --dsc-surface-dark: rgb(24, 23, 21);
+  --dsc-surface-dark-elevated: rgb(37, 35, 32);
+  --dsc-surface-dark-soft: rgb(31, 30, 27);
+
+  /* Ink & text. */
+  --dsc-ink: rgb(20, 20, 19);
+  --dsc-body: rgb(61, 61, 58);
+  --dsc-muted: rgb(108, 106, 100);
+  --dsc-muted-soft: rgb(142, 139, 130);
+  --dsc-on-dark: rgb(250, 249, 245);
+  --dsc-on-dark-soft: rgb(160, 157, 150);
+
+  /* Shape. */
+  --dsc-radius-sm: 6px;
+  --dsc-radius-md: 8px;
+  --dsc-radius-lg: 12px;
+  --dsc-radius-xl: 16px;
+  --dsc-radius-pill: 9999px;
+
+  /* Focus — coral border with a 3px coral-at-15% ring. */
+  --dsc-focus-ring: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+/* ============================================================
+   1. Light mode — cream canvas
+   ============================================================ */
+
+body {
+  /* Canvas & cream surfaces. */
+  --dsw-static-neutral-00: rgb(250, 249, 245);
+  --dsw-static-neutral-50: rgb(250, 249, 245);
+  --dsw-static-neutral-100: rgb(245, 240, 232);
+  --dsw-static-neutral-150: rgb(237, 232, 223);
+  --dsw-static-neutral-200: rgb(232, 224, 210);
+  --dsw-static-neutral-250: rgb(220, 214, 202);
+  --dsw-static-neutral-300: rgb(230, 223, 216);
+  --dsw-static-neutral-400: rgb(140, 138, 130);
+  --dsw-static-neutral-500: rgb(108, 106, 100);
+  --dsw-static-neutral-550: rgb(142, 139, 130);
+  --dsw-static-neutral-600: rgb(61, 61, 58);
+  --dsw-static-neutral-700: rgb(37, 37, 35);
+  --dsw-static-neutral-800: rgb(20, 20, 19);
+  --dsw-static-neutral-850: rgb(24, 23, 21);
+  --dsw-static-neutral-900: rgb(20, 20, 19);
+  --dsw-static-neutral-1000: rgb(0, 0, 0);
+
+  --dsw-static-neutral-bluish-00: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-50: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-60: rgb(245, 240, 232);
+  --dsw-static-neutral-bluish-75: rgb(243, 238, 229);
+  --dsw-static-neutral-bluish-100: rgb(245, 240, 232);
+  --dsw-static-neutral-bluish-150: rgb(239, 233, 222);
+  --dsw-static-neutral-bluish-200: rgb(232, 224, 210);
+  --dsw-static-neutral-bluish-300: rgb(230, 223, 216);
+  --dsw-static-neutral-bluish-400: rgb(140, 138, 130);
+  --dsw-static-neutral-bluish-500: rgb(108, 106, 100);
+  --dsw-static-neutral-bluish-600: rgb(142, 139, 130);
+  --dsw-static-neutral-bluish-700: rgb(61, 61, 58);
+  --dsw-static-neutral-bluish-750: rgb(37, 37, 35);
+  --dsw-static-neutral-bluish-800: rgb(20, 20, 19);
+  --dsw-static-neutral-bluish-850: rgb(24, 23, 21);
+  --dsw-static-neutral-bluish-875: rgb(24, 23, 21);
+  --dsw-static-neutral-bluish-900: rgb(20, 20, 19);
+  --dsw-static-neutral-bluish-950: rgb(20, 20, 19);
+  --dsw-static-neutral-bluish-1000: rgb(0, 0, 0);
+
+  /* Coral scale. */
+  --dsw-static-coral-50: rgb(255, 242, 237);
+  --dsw-static-coral-100: rgb(255, 228, 220);
+  --dsw-static-coral-200: rgb(255, 200, 184);
+  --dsw-static-coral-300: rgb(255, 160, 133);
+  --dsw-static-coral-400: rgb(204, 120, 92);
+  --dsw-static-coral-500: rgb(204, 120, 92);
+  --dsw-static-coral-600: rgb(169, 88, 62);
+  --dsw-static-coral-700: rgb(139, 68, 46);
+  --dsw-static-coral-800: rgb(110, 52, 35);
+  --dsw-static-coral-900: rgb(80, 38, 26);
+
+  /* Semantics (spec: error #c64545, success #5db872, warning #d4a017). */
+  --dsw-static-red-400: rgb(198, 69, 69);
+  --dsw-static-red-500: rgb(198, 69, 69);
+  --dsw-static-red-600: rgb(178, 55, 55);
+  --dsw-static-green-400: rgb(93, 184, 118);
+  --dsw-static-green-500: rgb(93, 184, 114);
+  --dsw-static-amber-400: rgb(232, 165, 90);
+  --dsw-static-amber-500: rgb(212, 160, 23);
+  --dsw-static-amber-600: rgb(161, 98, 7);
+
+  /* Background layers: canvas floor, soft/card elevation. */
+  --dsw-alias-bg-layer-1: var(--dsc-canvas);
+  --dsw-alias-bg-layer-2: var(--dsc-surface-soft);
+  --dsw-alias-bg-layer-3: var(--dsc-surface-card);
+  --dsw-alias-bg-layer-4: var(--dsc-surface-cream-strong);
+  --dsw-alias-bg-overlay: rgba(20, 20, 19, 0.4);
+  --dsw-alias-bg-skeleton: rgba(20, 20, 19, 0.06);
+
+  /* Brand: coral is the primary; ink remains the brand text. */
+  --dsw-alias-brand-primary: var(--dsc-coral-500);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: var(--dsc-coral-500);
+  --dsw-alias-brand-text: var(--dsc-ink);
+
+  /* Buttons: coral primary (#a9583e press), cream secondary. */
+  --dsw-alias-button-primary-fill: var(--dsc-coral-500);
+  --dsw-alias-button-primary-hover: var(--dsc-coral-600);
+  --dsw-alias-button-contrast-fill: var(--dsc-canvas);
+  --dsw-alias-button-elevated-fill: var(--dsc-surface-card);
+  --dsw-alias-button-floating-fill: var(--dsc-surface-cream-strong);
+  --dsw-alias-button-floating-hover: rgb(220, 214, 202);
+  --dsw-alias-button-ghost-active-border: var(--dsc-hairline);
+  --dsw-alias-button-ghost-active-fill: var(--dsc-surface-soft);
+  --dsw-alias-button-ghost-active-hover: var(--dsc-surface-card);
+  --dsw-alias-button-info-fill: var(--dsc-coral-500);
+  --dsw-alias-button-info-hover: var(--dsc-coral-600);
+  --dsw-alias-button-primary-dimmed: var(--dsc-surface-cream-strong);
+
+  /* Interactive. */
+  --dsw-alias-interactive-bg-hover: rgba(20, 20, 19, 0.04);
+  --dsw-alias-interactive-bg-hover-solid: var(--dsc-surface-card);
+  --dsw-alias-interactive-bg-hover-accent: rgba(204, 120, 92, 0.12);
+  --dsw-alias-interactive-bg-hover-danger: rgba(198, 69, 69, 0.12);
+  --dsw-alias-interactive-bg-active: rgba(20, 20, 19, 0.08);
+
+  /* Labels — warm ink ramp. */
+  --dsw-alias-label-primary: var(--dsc-ink);
+  --dsw-alias-label-primary-foreground: var(--dsc-canvas);
+  --dsw-alias-label-primary-bluish: var(--dsc-ink);
+  --dsw-alias-label-primary-dimmed: var(--dsc-body);
+  --dsw-alias-label-primary-inverted: var(--dsc-canvas);
+  --dsw-alias-label-secondary: var(--dsc-muted);
+  --dsw-alias-label-tertiary: var(--dsc-muted-soft);
+  --dsw-alias-label-caption: var(--dsc-muted-soft);
+  --dsw-alias-label-dimmed: var(--dsc-muted-soft);
+
+  /* Borders — hairline one elevation step, never ink lines. */
+  --dsw-alias-border-l1: rgba(20, 20, 19, 0.06);
+  --dsw-alias-border-l2: rgba(20, 20, 19, 0.1);
+  --dsw-alias-border-l2-darkmode-thin: rgba(20, 20, 19, 0.08);
+  --dsw-alias-border-l3: rgba(20, 20, 19, 0.14);
+  --dsw-alias-border-l4: rgba(20, 20, 19, 0.2);
+  --dsw-alias-border-inverted: rgba(250, 249, 245, 0.08);
+  --dsw-alias-border-inverted2: rgba(250, 249, 245, 0.06);
+
+  /* Markdown chips stay cream; the fenced block goes dark (section 3). */
+  --dsw-alias-markdown-citation: var(--dsc-surface-cream-strong);
+  --dsw-alias-markdown-code-block-banner: var(--dsc-surface-dark-soft);
+  --dsw-alias-markdown-code-block: var(--dsc-surface-dark);
+  --dsw-alias-markdown-code-segment-selected: var(--dsc-surface-card);
+  --dsw-alias-markdown-code-segment-unselected: var(--dsc-canvas);
+  --dsw-alias-markdown-inline-code: var(--dsc-surface-soft);
+  --dsw-alias-markdown-placeholder: var(--dsc-surface-card);
+  --dsw-alias-markdown-tag: var(--dsc-surface-card);
+
+  /* Scrollbar — warm. */
+  --dsw-alias-scrollbar-bg-l1: rgb(230, 223, 216);
+  --dsw-alias-scrollbar-bg-l2: rgb(220, 214, 202);
+  --dsw-alias-scrollbar-hover-l1: rgb(220, 214, 202);
+  --dsw-alias-scrollbar-hover-l2: rgb(210, 204, 192);
+
+  /* State — coral for business accents, teal strictly for status dots. */
+  --dsw-alias-state-business-primary: var(--dsc-coral-600);
+  --dsw-alias-state-business-tertiary: var(--dsc-surface-soft);
+  --dsw-alias-state-error-primary: rgb(178, 55, 55);
+  --dsw-alias-state-error-secondary: rgb(198, 69, 69);
+  --dsw-alias-state-success-primary: rgb(93, 184, 114);
+  --dsw-alias-state-success-secondary: rgb(93, 184, 118);
+  --dsw-alias-state-success-tertiary: rgb(35, 60, 44);
+  --dsw-alias-state-warn-label: rgb(161, 98, 7);
+  --dsw-alias-state-warn-primary: rgb(212, 160, 23);
+  --dsw-alias-state-warn-secondary: rgb(232, 165, 90);
+  --dsw-alias-state-warn-tertiary: rgb(39, 36, 31);
+
+  /* Toast / tooltip — dark chrome on cream. */
+  --dsw-alias-toast-bg: var(--dsc-surface-dark);
+  --dsw-alias-tooltip-bg: var(--dsc-surface-dark-elevated);
+
+  /* Product-specific seams. */
+  --dsw-specific-bubble: var(--dsc-surface-soft);
+  --dsw-specific-bubble-highlight: var(--dsc-surface-card);
+  --dsw-specific-input-major: var(--dsc-canvas);
+  --dsw-specific-login-input: var(--dsc-canvas);
+  --dsw-specific-menu: var(--dsc-surface-card);
+  --dsw-specific-selector: var(--dsc-surface-cream-strong);
+  --dsw-specific-sidebar-fill: var(--dsc-canvas);
+  --dsw-specific-sidebar-nav-item-active-accent: var(--dsc-coral-500);
+  --dsw-specific-sidebar-nav-item-active: var(--dsc-surface-card);
+  --dsw-specific-sidebar-nav-item-hover: var(--dsc-surface-soft);
+  --dsw-specific-tip: var(--dsc-surface-cream-strong);
+}
+
+/* ============================================================
+   2. Dark mode — warm dark, not cool slate
+   ============================================================ */
+
+body[data-ds-dark-theme] {
+  /* Core dark surfaces (#181715 floor). */
+  --dsw-static-neutral-00: rgb(24, 23, 21);
+  --dsw-static-neutral-50: rgb(31, 30, 27);
+  --dsw-static-neutral-100: rgb(37, 35, 32);
+  --dsw-static-neutral-150: rgb(45, 43, 39);
+  --dsw-static-neutral-200: rgb(52, 50, 45);
+  --dsw-static-neutral-250: rgb(60, 57, 52);
+  --dsw-static-neutral-300: rgb(75, 72, 66);
+  --dsw-static-neutral-400: rgb(120, 116, 108);
+  --dsw-static-neutral-500: rgb(160, 157, 150);
+  --dsw-static-neutral-550: rgb(140, 136, 128);
+  --dsw-static-neutral-600: rgb(200, 196, 188);
+  --dsw-static-neutral-700: rgb(220, 216, 208);
+  --dsw-static-neutral-800: rgb(240, 236, 228);
+  --dsw-static-neutral-850: rgb(250, 249, 245);
+  --dsw-static-neutral-900: rgb(250, 249, 245);
+  --dsw-static-neutral-1000: rgb(255, 255, 255);
+
+  --dsw-static-neutral-bluish-00: rgb(24, 23, 21);
+  --dsw-static-neutral-bluish-50: rgb(31, 30, 27);
+  --dsw-static-neutral-bluish-60: rgb(37, 35, 32);
+  --dsw-static-neutral-bluish-75: rgb(41, 39, 36);
+  --dsw-static-neutral-bluish-100: rgb(45, 43, 39);
+  --dsw-static-neutral-bluish-150: rgb(52, 50, 45);
+  --dsw-static-neutral-bluish-200: rgb(60, 57, 52);
+  --dsw-static-neutral-bluish-300: rgb(75, 72, 66);
+  --dsw-static-neutral-bluish-400: rgb(120, 116, 108);
+  --dsw-static-neutral-bluish-500: rgb(160, 157, 150);
+  --dsw-static-neutral-bluish-600: rgb(140, 136, 128);
+  --dsw-static-neutral-bluish-700: rgb(200, 196, 188);
+  --dsw-static-neutral-bluish-750: rgb(220, 216, 208);
+  --dsw-static-neutral-bluish-800: rgb(240, 236, 228);
+  --dsw-static-neutral-bluish-850: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-875: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-900: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-950: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-1000: rgb(255, 255, 255);
+
+  /* Coral holds in the dark; hover lightens instead of darkening. */
+  --dsw-alias-bg-layer-1: rgb(24, 23, 21);
+  --dsw-alias-bg-layer-2: rgb(31, 30, 27);
+  --dsw-alias-bg-layer-3: rgb(37, 35, 32);
+  --dsw-alias-bg-layer-4: rgb(45, 43, 39);
+  --dsw-alias-bg-overlay: rgba(0, 0, 0, 0.5);
+  --dsw-alias-bg-skeleton: rgba(250, 249, 245, 0.06);
+
+  --dsw-alias-brand-primary: var(--dsc-coral-500);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: var(--dsc-coral-500);
+  --dsw-alias-brand-text: var(--dsc-on-dark);
+
+  --dsw-alias-button-primary-fill: var(--dsc-coral-500);
+  --dsw-alias-button-primary-hover: var(--dsc-coral-soft);
+  --dsw-alias-button-contrast-fill: rgb(24, 23, 21);
+  --dsw-alias-button-elevated-fill: rgb(45, 43, 39);
+  --dsw-alias-button-floating-fill: rgb(52, 50, 45);
+  --dsw-alias-button-floating-hover: rgb(60, 57, 52);
+  --dsw-alias-button-ghost-active-border: rgb(75, 72, 66);
+  --dsw-alias-button-ghost-active-fill: rgb(37, 35, 32);
+  --dsw-alias-button-ghost-active-hover: rgb(45, 43, 39);
+  --dsw-alias-button-info-fill: var(--dsc-coral-500);
+  --dsw-alias-button-info-hover: var(--dsc-coral-soft);
+  --dsw-alias-button-primary-dimmed: rgb(52, 50, 45);
+
+  --dsw-alias-interactive-bg-hover: rgba(250, 249, 245, 0.06);
+  --dsw-alias-interactive-bg-hover-solid: rgb(45, 43, 39);
+  --dsw-alias-interactive-bg-hover-accent: rgba(204, 120, 92, 0.18);
+  --dsw-alias-interactive-bg-hover-danger: rgba(198, 69, 69, 0.15);
+  --dsw-alias-interactive-bg-active: rgba(250, 249, 245, 0.1);
+
+  --dsw-alias-label-primary: var(--dsc-on-dark);
+  --dsw-alias-label-primary-foreground: rgb(24, 23, 21);
+  --dsw-alias-label-primary-bluish: var(--dsc-on-dark);
+  --dsw-alias-label-primary-dimmed: rgb(220, 216, 208);
+  --dsw-alias-label-primary-inverted: rgb(24, 23, 21);
+  --dsw-alias-label-secondary: var(--dsc-on-dark-soft);
+  --dsw-alias-label-tertiary: rgb(120, 116, 108);
+  --dsw-alias-label-caption: rgb(120, 116, 108);
+  --dsw-alias-label-dimmed: rgb(120, 116, 108);
+
+  --dsw-alias-border-l1: rgba(250, 249, 245, 0.06);
+  --dsw-alias-border-l2: rgba(250, 249, 245, 0.1);
+  --dsw-alias-border-l2-darkmode-thin: rgba(250, 249, 245, 0.08);
+  --dsw-alias-border-l3: rgba(250, 249, 245, 0.14);
+  --dsw-alias-border-l4: rgba(250, 249, 245, 0.2);
+  --dsw-alias-border-inverted: rgba(20, 20, 19, 0.08);
+  --dsw-alias-border-inverted2: rgba(20, 20, 19, 0.06);
+
+  --dsw-alias-markdown-citation: rgb(52, 50, 45);
+  --dsw-alias-markdown-code-block-banner: var(--dsc-surface-dark-soft);
+  --dsw-alias-markdown-code-block: var(--dsc-surface-dark);
+  --dsw-alias-markdown-code-segment-selected: rgb(45, 43, 39);
+  --dsw-alias-markdown-code-segment-unselected: rgb(24, 23, 21);
+  --dsw-alias-markdown-inline-code: rgb(37, 35, 32);
+  --dsw-alias-markdown-placeholder: rgb(37, 35, 32);
+  --dsw-alias-markdown-tag: rgb(37, 35, 32);
+
+  --dsw-alias-scrollbar-bg-l1: rgb(52, 50, 45);
+  --dsw-alias-scrollbar-bg-l2: rgb(60, 57, 52);
+  --dsw-alias-scrollbar-hover-l1: rgb(60, 57, 52);
+  --dsw-alias-scrollbar-hover-l2: rgb(75, 72, 66);
+
+  --dsw-alias-state-business-primary: var(--dsc-coral-soft);
+  --dsw-alias-state-business-tertiary: rgb(37, 35, 32);
+  --dsw-alias-state-error-primary: rgb(224, 122, 122);
+  --dsw-alias-state-error-secondary: rgb(224, 122, 122);
+  --dsw-alias-state-success-primary: rgb(125, 201, 138);
+  --dsw-alias-state-success-secondary: rgb(125, 201, 138);
+  --dsw-alias-state-success-tertiary: rgb(35, 60, 44);
+  --dsw-alias-state-warn-label: rgb(212, 160, 23);
+  --dsw-alias-state-warn-primary: rgb(232, 165, 90);
+  --dsw-alias-state-warn-secondary: rgb(232, 165, 90);
+  --dsw-alias-state-warn-tertiary: rgb(39, 36, 31);
+
+  --dsw-alias-toast-bg: rgb(37, 35, 32);
+  --dsw-alias-tooltip-bg: rgb(37, 35, 32);
+
+  --dsw-specific-bubble: rgb(37, 35, 32);
+  --dsw-specific-bubble-highlight: rgb(45, 43, 39);
+  --dsw-specific-input-major: rgb(31, 30, 27);
+  --dsw-specific-login-input: rgb(24, 23, 21);
+  --dsw-specific-menu: rgb(37, 35, 32);
+  --dsw-specific-selector: rgb(45, 43, 39);
+  --dsw-specific-sidebar-fill: rgb(24, 23, 21);
+  --dsw-specific-sidebar-nav-item-active-accent: var(--dsc-coral-500);
+  --dsw-specific-sidebar-nav-item-active: rgb(37, 35, 32);
+  --dsw-specific-sidebar-nav-item-hover: rgb(31, 30, 27);
+  --dsw-specific-tip: rgb(45, 43, 39);
+}
+
+/* ============================================================
+   3. Code & product chrome — ALWAYS dark (signature element)
+   ============================================================ */
+
+/* Fenced blocks, read/diff/terminal/web/search cards all consume
+   --dsw-alias-markdown-code-block(-banner): the product chrome is dark in
+   both modes. Inside them the label ramp re-points to on-dark tones so the
+   inherited light-mode ink never lands on the dark surface. */
+[class*='_block'] {
+  --dsw-alias-label-primary: var(--dsc-on-dark);
+  --dsw-alias-label-secondary: rgb(201, 197, 188);
+  --dsw-alias-label-tertiary: var(--dsc-on-dark-soft);
+  --dsw-alias-label-caption: var(--dsc-on-dark-soft);
+  --dsw-alias-state-error-primary: rgb(224, 122, 122);
+  --dsw-alias-state-success-primary: rgb(125, 201, 138);
+}
+
+/* The banner row is the slightly elevated dark tone with muted labels. */
+[class*='_block'] [class*='_banner'],
+[class*='_block'] [class*='_infostring'] {
+  color: var(--dsc-on-dark-soft);
+}
+
+/* Un-highlighted code reads cream. */
+[class*='_block'] [class*='_plain'] {
+  color: var(--dsc-on-dark);
+}
+
+/* Warm syntax palette on #181715 — no saturated blue or purple.
+   Overrides the shiki sheet (:root light + body dark) with one palette. */
+:root {
+  --shiki-foreground: var(--dsc-on-dark);
+  --shiki-token-constant: rgb(224, 163, 116);
+  --shiki-token-string: rgb(168, 192, 124);
+  --shiki-token-comment: var(--dsc-muted-soft);
+  --shiki-token-keyword: rgb(217, 139, 111);
+  --shiki-token-parameter: rgb(232, 165, 90);
+  --shiki-token-function: rgb(217, 178, 106);
+  --shiki-token-string-expression: rgb(148, 184, 113);
+  --shiki-token-punctuation: var(--dsc-on-dark-soft);
+  --shiki-token-link: var(--dsc-teal);
+}
+
+body[data-ds-dark-theme] {
+  --shiki-foreground: var(--dsc-on-dark);
+  --shiki-token-constant: rgb(224, 163, 116);
+  --shiki-token-string: rgb(168, 192, 124);
+  --shiki-token-comment: var(--dsc-muted-soft);
+  --shiki-token-keyword: rgb(217, 139, 111);
+  --shiki-token-parameter: rgb(232, 165, 90);
+  --shiki-token-function: rgb(217, 178, 106);
+  --shiki-token-string-expression: rgb(148, 184, 113);
+  --shiki-token-punctuation: var(--dsc-on-dark-soft);
+  --shiki-token-link: var(--dsc-teal);
+}
+
+/* ============================================================
+   4. Typography — serif display, humanist sans, negative tracking
+   ============================================================ */
+
+/* Markdown headings: Copernicus-voice serif at 400–500, never bold. */
+body {
+  --dsw-font-markdown-h1: 500 26px/34px var(--dsc-font-display);
+  --dsw-font-markdown-h1-font-family: var(--dsc-font-display);
+  --dsw-font-markdown-h1-font-weight: 500;
+  --dsw-font-markdown-h1-line-height: 34px;
+  --dsw-font-markdown-h1-font-size: 26px;
+  --dsw-font-markdown-h1-font-style: normal;
+
+  --dsw-font-markdown-h2: 500 22px/30px var(--dsc-font-display);
+  --dsw-font-markdown-h2-font-family: var(--dsc-font-display);
+  --dsw-font-markdown-h2-font-weight: 500;
+  --dsw-font-markdown-h2-line-height: 30px;
+  --dsw-font-markdown-h2-font-size: 22px;
+  --dsw-font-markdown-h2-font-style: normal;
+
+  --dsw-font-markdown-h3: 500 18px/28px var(--dsc-font-display);
+  --dsw-font-markdown-h3-font-family: var(--dsc-font-display);
+  --dsw-font-markdown-h3-font-weight: 500;
+  --dsw-font-markdown-h3-line-height: 28px;
+  --dsw-font-markdown-h3-font-size: 18px;
+  --dsw-font-markdown-h3-font-style: normal;
+
+  --dsw-font-markdown-h4: 500 16px/26px var(--dsw-font-family);
+  --dsw-font-markdown-h4-font-family: var(--dsw-font-family);
+  --dsw-font-markdown-h4-font-weight: 500;
+  --dsw-font-markdown-h4-line-height: 26px;
+  --dsw-font-markdown-h4-font-size: 16px;
+  --dsw-font-markdown-h4-font-style: normal;
+}
+
+/* Negative tracking is non-negotiable on the serif display sizes. */
+[class*='_markdown'] h1,
+[class*='_markdown'] h2,
+[class*='_markdown'] h3 {
+  letter-spacing: -0.01em;
+}
+
+/* New-session hero headline: the one true display moment of the app. */
+[class*='_headline'] {
+  font-family: var(--dsc-font-display);
+  font-size: 30px;
+  line-height: 38px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+
+/* ============================================================
+   5. Brand chrome — focus, selection, motion, shadows
+   ============================================================ */
+
+/* Coral focus ring on text entry and keyboard-focusable controls. */
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--dsc-coral-500);
+  box-shadow: var(--dsc-focus-ring);
+}
+
+button:focus-visible,
+[role='button']:focus-visible {
+  outline: none;
+  box-shadow: var(--dsc-focus-ring);
+}
+
+/* Warm ink selection, never the browser default. */
+::selection {
+  background: rgba(204, 120, 92, 0.25);
+}
+
+/* Thinking-block fade + elevation shadows: warm ink, never cool gray. */
+body {
+  --dsw-linear-gradient-think: linear-gradient(
+    180deg,
+    rgb(250, 249, 245) 20.19%,
+    rgba(250, 249, 245, 0) 100%
+  );
+  --dsw-linear-think-select: linear-gradient(
+    180deg,
+    rgb(245, 240, 232) 20.19%,
+    rgba(245, 240, 232, 0) 100%
+  );
+  --dsw-shadow-lv1: 0 2px 4px 0 rgba(20, 20, 19, 0.05);
+  --dsw-shadow-lv1-blur: 0 4px 12px 0 rgba(20, 20, 19, 0.02);
+  --dsw-shadow-lv2: 0 4px 12px 0 rgba(20, 20, 19, 0.02),
+    0 2px 8px 0 rgba(20, 20, 19, 0.04);
+  --dsw-shadow-lv3: 0 0 1px 0 rgba(20, 20, 19, 0.2),
+    0 0 4px 0 rgba(20, 20, 19, 0.02), 0 12px 32px 0 rgba(20, 20, 19, 0.08);
+}
+
+body[data-ds-dark-theme] {
+  --dsw-linear-gradient-think: linear-gradient(
+    180deg,
+    rgb(24, 23, 21) 20.19%,
+    rgba(24, 23, 21, 0) 100%
+  );
+  --dsw-linear-think-select: linear-gradient(
+    180deg,
+    rgb(37, 35, 32) 20.19%,
+    rgba(37, 35, 32, 0) 100%
+  );
+}
+
+/* The DeepSeek blue hero backdrop has no place on the cream canvas —
+   Claude's hero is clean surface, depth comes from type and spacing. */
+[class*='_heroGlow'] {
+  display: none;
+}

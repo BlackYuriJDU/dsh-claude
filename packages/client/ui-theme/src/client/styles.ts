@@ -1,6 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
+import fonts from '../styles/fonts.css?inline'
 import base from '../styles/base.css?inline'
 import designPlatform from '../styles/design-platform.css?inline'
+import claudeDesign from '../styles/claude-design.css?inline'
 import scrollbar from '../styles/scrollbar.css?inline'
 import gradientShadowText from '../styles/gradient-shadow-text.css?inline'
 import shiki from '../styles/shiki.css?inline'
@@ -8,11 +10,13 @@ import shiki from '../styles/shiki.css?inline'
 const PLUGIN_ID = '@deepseek-ai/dsh-client-ui-theme'
 
 const STYLES = [
+  ['fonts.css', fonts],
   ['base.css', base],
   ['design-platform.css', designPlatform],
   ['scrollbar.css', scrollbar],
   ['gradient-shadow-text.css', gradientShadowText],
   ['shiki.css', shiki],
+  ['claude-design.css', claudeDesign],
 ] as const
 
 /**
