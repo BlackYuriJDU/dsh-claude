@@ -77,7 +77,7 @@ export function MicButton({ onDictate, disabled, t }: MicButtonProps) {
       let chunk = ''
       for (let index = event.resultIndex; index < event.results.length; index += 1) {
         const result = event.results[index]
-        if (result.isFinal) chunk += result[0]?.transcript ?? ''
+        if (result?.isFinal === true) chunk += result[0]?.transcript ?? ''
       }
       const trimmed = chunk.trim()
       if (trimmed !== '') onDictateRef.current(trimmed)

@@ -3,7 +3,7 @@
 // hand-drawn 16px line glyphs matching the reference design.
 
 import { IconPlusOutline16, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { MenuItem } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { MenuEntry, MenuItem } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { MouseEvent } from 'react'
 import type { ComposerBarProps } from '../contract/slots.ts'
 import inputCss from './InputBar.module.css'
@@ -136,12 +136,11 @@ const IconMemory = (
  * @param props - the PlusMenu props.
  * @returns the entry list.
  */
-function entriesOf(props: PlusMenuProps): readonly MenuItem[] {
+function entriesOf(props: PlusMenuProps): readonly MenuEntry[] {
   const { t, workspaces } = props
   const soon = (id: string, label: string): MenuItem => ({ id, label, disabled: true })
   const projectSubmenu: readonly MenuItem[] = [
     ...workspaces.map(workspace => ({ id: `ws:${workspace.id}`, label: workspace.title })),
-    { type: 'separator', id: 'ws-sep' },
     soon('ws-manage', t('menu.manageWorkspaces')),
   ]
   return [
