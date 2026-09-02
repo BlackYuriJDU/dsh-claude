@@ -27,8 +27,8 @@ import type { DraftDecorations } from '../input/decorations.ts'
 import type { EditRange } from '../input/contract.ts'
 import { attachmentErrorText, imageSizeText } from '../image-labels.ts'
 import { ReferenceIcon } from '../reference/ReferenceIcon.tsx'
-import { ContextMeter } from './ContextMeter.tsx'
-import { PermissionSelect } from './PermissionSelect.tsx'
+import { PlusMenu } from './PlusMenu.tsx'
+import { MicButton } from './MicButton.tsx'
 import { isSafariBrowser, repairSafariTextareaLayout } from './safari.ts'
 import css from './InputBar.module.css'
 
@@ -78,11 +78,12 @@ export type InputBarProps = ComposerBarProps
 
 export function InputBar({
   useSession, useInput, inputActions, keyboard, addImages, removeImage, draftImages,
-  resolveSubmitMode, toggleCommandMenu, stop, command, t,
+  resolveSubmitMode, toggleCommandMenu, stop, t,
   renderSlot, useNotices, useLexicon, useMenuLauncher,
   useProjection, sessionId, variant, disabled: inert = false, blocked,
   workspacePickerOpen = false, onRequestWorkspace,
   placeholder, accessory, overlay, leftItems, rightItems, footer,
+  workspaces = [], onPickWorkspace,
 }: InputBarProps) {
   const input = useInput(s => s)
   const notice = useNotices(s => s)
@@ -116,6 +117,33 @@ export function InputBar({
     setToast({ seq: toastSeq.current, text })
   }, [])
   const dismissToast = useCallback(() => { setToast(null) }, [])
+
+  // dshc composer chrome: the + menu, the Chat/Cowork segment, and the two
+  // capability toggles. Chat is the plain-conversation posture; Cowork keeps
+  // the full agent surface (v1: placeholder voice; tool gating lands with the
+  // tools phase). Toggles persist per browser until the tools phase wires
+  // them to real providers.
+  const [plusMenuOpen, setPlusMenuOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [composerMode, setComposerMode] = useState<'chat' | 'cowork'>('chat')
+  const [webSearchOn, setWebSearchOn] = useState(() => {
+    try { return window.localStorage.getItem('dshc:web-search') === '1' } catch { return false }
+  })
+  const [memoryOn, setMemoryOn] = useState(() => {
+    try { return window.localStorage.getItem('dshc:memory') !== '0' } catch { return true }
+  })
+  const toggleWebSearch = useCallback(() => {
+    setWebSearchOn(current => {
+      try { window.localStorage.setItem('dshc:web-search', current ? '0' : '1') } catch { /* storage unavailable */ }
+      return !current
+    })
+  }, [])
+  const toggleMemory = useCallback(() => {
+    setMemoryOn(current => {
+      try { window.localStorage.setItem('dshc:memory', current ? '0' : '1') } catch { /* storage unavailable */ }
+      return !current
+    })
+  }, [])
   // The deployment's image-intake limits (absent while no attachment service
   // is composed — the pre-check below then defers entirely to the host).
   const imageLimits = useProjection('imageLimits')
@@ -153,9 +181,9 @@ export function InputBar({
     }, 10)
   }
 
-  // The Access seat's data: the host-computed permissions projection
-  // (undefined = capability absent → the chip renders nothing).
-  const permissions = useProjection('permissions')
+  // dshc: the Access seat (permission preset chip) was removed — read and
+  // write stay natural and dangerous actions keep asking through the host's
+  // own approval flow.
 
   // A continuable child without its live parent cannot accept human input,
   // but its independent Stop below stays available while it runs.
@@ -534,6 +562,45 @@ export function InputBar({
     if (rejected !== null) showToast(rejected)
   }, [addImages, attachments, imageLimits, showToast, t])
 
+  // Dictation: append one final transcript chunk at the caret through the
+  // machine (the draft and its undo log stay consistent).
+  const dictate = useCallback((text: string): void => {
+    const el = inputRef.current
+    if (keyboard === undefined || el === null || locked || machineBusy) return
+    const { start, end } = selectionOf(el)
+    const prefix = draft === '' || draft.endsWith(' ') || draft.endsWith('\n') ? '' : ' '
+    const chunk = prefix + text
+    const next = draft.slice(0, start) + chunk + draft.slice(end)
+    keyboard.setDraft(next, { start, end, insertedLength: chunk.length })
+    restoreCaret(el, start + chunk.length)
+    keyboard.track(next, start + chunk.length)
+  }, [keyboard, draft, locked, machineBusy])
+
+  // Screenshot: one display frame → PNG → the ordinary image intake.
+  const captureScreen = useCallback((): void => {
+    void (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
+        const video = document.createElement('video')
+        video.srcObject = stream
+        video.muted = true
+        await video.play()
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const context = canvas.getContext('2d')
+        if (context !== null) context.drawImage(video, 0, 0)
+        stream.getTracks().forEach(track => track.stop())
+        if (context === null || canvas.width === 0) return
+        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'))
+        if (blob === null) return
+        intakeImages([new File([blob], 'captura de tela.png', { type: 'image/png' })])
+      } catch {
+        // The user dismissed the picker (or the engine refused): nothing to say.
+      }
+    })()
+  }, [intakeImages])
+
   const canAcceptDrop = !locked && !machineBusy && addImages !== undefined
 
   const onSelect = (e: React.SyntheticEvent<HTMLTextAreaElement>): void => {
@@ -573,12 +640,7 @@ export function InputBar({
     if (!empty && !disabled && !machineBusy) inputActions.submit()
   }
 
-  // The Access seat: the projection-fed permission chip (renders nothing
-  // while the permissions key is absent — permission-less host or Draft —
-  // or while the command face is absent with the session).
-  const accessSelect: ReactNode = command === undefined
-    ? null
-    : <PermissionSelect key={sessionId} value={permissions} locked={locked} command={command} t={t} />
+  // The Access seat: removed in dshc — no permission preset chip.
 
   // Mirror-layer decorations: a visible backdrop with transparent textarea
   // text. Claim tokens and references retain the draft's own glyph metrics,
@@ -753,7 +815,11 @@ export function InputBar({
                   // (the gate never consults plan mode), so the actionable hint wins.
                   : canSteerQueue
                     ? t('placeholder.steerQueue')
-                    : planActive ? t('placeholder.plan') : t('placeholder.default'))}
+                    : planActive
+                      ? t('placeholder.plan')
+                      : composerMode === 'cowork'
+                        ? t('placeholder.cowork')
+                        : t('placeholder.default'))}
               rows={2}
               onChange={onChange}
               onKeyDown={onKeyDown}
@@ -769,22 +835,59 @@ export function InputBar({
         </div>
         <div className={css.row}>
           <div className={css.tools}>
-            <Tooltip label={t('input.commands')} side="top" delayMs={500}>
+            <PlusMenu
+              open={plusMenuOpen}
+              onToggle={() => { setPlusMenuOpen(open => !open) }}
+              onClose={() => { setPlusMenuOpen(false) }}
+              disabled={locked}
+              keepFocus={keepFocus}
+              onFiles={() => { fileInputRef.current?.click() }}
+              onScreenshot={captureScreen}
+              onSkills={onToggleCommandMenu}
+              workspaces={workspaces}
+              onPickWorkspace={(workspaceId) => { onPickWorkspace?.(workspaceId); setPlusMenuOpen(false) }}
+              webSearch={webSearchOn}
+              memory={memoryOn}
+              onToggleWebSearch={toggleWebSearch}
+              onToggleMemory={toggleMemory}
+              t={t}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                intakeImages(Array.from(e.target.files ?? []))
+                e.target.value = ''
+              }}
+            />
+            <div className={css.segmented} role="tablist" aria-label={t('mode.label')}>
               <button
                 type="button"
-                className={css.add}
-                aria-label={t('input.commands')}
-                aria-haspopup="listbox"
-                aria-expanded={commandMenuOpen}
-                disabled={locked || toggleCommandMenu === undefined}
+                role="tab"
+                aria-selected={composerMode === 'chat'}
+                className={composerMode === 'chat' ? css.segmentActive : css.segment}
+                disabled={locked}
                 onMouseDown={keepFocus}
-                onClick={onToggleCommandMenu}
+                onClick={() => { setComposerMode('chat') }}
               >
-                <IconPlusOutline16 size={14} />
+                {t('mode.chat')}
               </button>
-            </Tooltip>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={composerMode === 'cowork'}
+                className={composerMode === 'cowork' ? css.segmentActive : css.segment}
+                disabled={locked}
+                onMouseDown={keepFocus}
+                onClick={() => { setComposerMode('cowork') }}
+              >
+                {t('mode.cowork')}
+              </button>
+            </div>
             <div className={css.modes}>
-              {accessSelect}
               {renderSlot('conversation.input.plan', { locked })}
             </div>
             {leftItems}
@@ -792,7 +895,7 @@ export function InputBar({
           <div className={css.trailing}>
             {rightItems}
             {renderSlot('conversation.input.model', { locked: modelSeatLocked })}
-            <ContextMeter useProjection={useProjection} t={t} />
+            <MicButton onDictate={dictate} disabled={locked} t={t} />
             {interruptible && (
               <Tooltip label={t('input.stop')} side="top" delayMs={500}>
                 <button

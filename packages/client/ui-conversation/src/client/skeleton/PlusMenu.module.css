@@ -1,0 +1,17 @@
+/* PlusMenu row affordances: the shortcut hint rides the label's right edge
+   like the reference menu, muted against the row's own text color. */
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.hint {
+  color: var(--dsw-alias-label-tertiary);
+  font-family: var(--ds-font-family-code);
+  font-size: 11px;
+  line-height: 14px;
+}

@@ -547,6 +547,10 @@ export interface ComposerBarOwnerProps {
   rightItems?: ReactNode
   /** composer.dock entries (stats line), rendered under the card inside the bar's width column. */
   footer?: ReactNode
+  /** Workspace list (id + title) feeding the composer's add-to-project submenu. */
+  workspaces?: ReadonlyArray<{ readonly id: string; readonly title: string }>
+  /** Pick a workspace for the new session (the add-to-project submenu write path). */
+  onPickWorkspace?: (workspaceId: string) => void
 }
 
 /** Injected share of the composer-bar entry (package-internal faces). */

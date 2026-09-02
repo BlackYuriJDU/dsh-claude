@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import type { WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ConversationSlotProps, InputZone } from '../contract/slots.ts'
-import { HeroGlow, HeroShell, WorkspaceChip, workspaceLabel } from './EmptyHero.tsx'
+import { HeroShell } from './EmptyHero.tsx'
 import css from './ConversationRoot.module.css'
 
 /** Full props composed from the slot contract. */
@@ -21,7 +21,6 @@ export function ConversationRoot({
   const pending = useSession(s => s.pending) ?? []
   const session = useSession(s => s)
   const inputState = useInput(s => s)
-  const cwd = useSessions(s => sessionId === undefined ? undefined : s.byId[sessionId]?.cwd)
   const summaryBlank = useSessions(s => sessionId === undefined ? undefined : s.byId[sessionId]?.blank)
   const workspaces = useWorkspaces(s => s)
   // A plugin this package cannot import (ui-model-selection) says this session cannot
@@ -30,7 +29,32 @@ export function ConversationRoot({
 
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pendingWorkspaceId, setPendingWorkspaceId] = useState<WorkspaceId | undefined>()
-  const pickerAnchor = useRef<HTMLButtonElement>(null)
+
+  /**
+   * Pick a workspace for the new-session flow: the pending id bridges until
+   * the session lands in it (or the pick is undone on failure).
+   */
+  const pickWorkspace = useCallback((workspaceId: WorkspaceId): void => {
+    setPendingWorkspaceId(workspaceId)
+    void selectWorkspace(workspaceId).catch(() => {
+      setPendingWorkspaceId(current => current === workspaceId ? undefined : current)
+    })
+  }, [selectWorkspace])
+
+  // dshc: the hero carries no workspace chip — the deployment's workspace is
+  // picked automatically on cold start, so the composer is live the moment
+  // the page opens. One attempt per mount; a failed pick leaves the inert
+  // recovery path (never a retry loop).
+  const autoPickTriedRef = useRef(false)
+  useEffect(() => {
+    if (autoPickTriedRef.current) return
+    if (sessionId !== undefined) return
+    if (workspaces.phase !== 'ready') return
+    const target = workspaces.items.at(0)
+    if (target === undefined) return
+    autoPickTriedRef.current = true
+    pickWorkspace(target.workspaceId)
+  }, [sessionId, workspaces.phase, workspaces.items, pickWorkspace])
 
   // Publishes the seat's live height as --dsh-composer-height on the scroll
   // body so floating controls (ChatView back-to-bottom) clear the composer as
@@ -81,49 +105,13 @@ export function ConversationRoot({
   const zone: InputZone | undefined =
     session === undefined || inputState === undefined ? undefined : { session, input: inputState }
 
-  // The chip is a selector; label resolution walks the flow top-down:
-  //   1. a just-picked workspace (pending) → its title;
-  //   2. cold start, no session yet → placeholder ("Choose workspace");
-  //   3. the blank session's workspace is in the list → its title;
-  //   4. list still loading → cwd folder name bridges so the title does not
-  //      flash on refresh (empty cwd → placeholder);
-  //   5. list ready but no owning workspace (deleted from the sidebar) →
-  //      placeholder, never the deleted folder's name via cwd.
+  // The auto-picked workspace resolves the title; undefined only in the
+  // transient window before the workspace list is ready (or with no
+  // workspaces at all), which keeps the bar inert until the pick lands.
   const chipTitle = pendingWorkspace?.title
-    ?? (sessionId === undefined
-      ? undefined
-      : sessionWorkspace?.title
-        ?? (workspaces.phase === 'ready' || cwd === undefined || cwd === ''
-          ? undefined
-          : workspaceLabel(cwd)))
+    ?? (sessionId === undefined ? undefined : sessionWorkspace?.title)
 
-  const heroWorkspaceRow = (
-    <div className={css.heroWorkspaceRow}>
-      <WorkspaceChip
-        buttonRef={pickerAnchor}
-        label={chipTitle}
-        menuOpen={pickerOpen}
-        onClick={() => { setPickerOpen(open => !open) }}
-        t={t}
-      />
-      {renderSlot('conversation.hero.workspace', {
-        open: pickerOpen,
-        anchorRef: pickerAnchor,
-        selectedId: pendingWorkspaceId ?? sessionWorkspace?.workspaceId,
-        onPick: (workspaceId) => {
-          setPickerOpen(false)
-          setPendingWorkspaceId(workspaceId)
-          void selectWorkspace(workspaceId).catch(() => {
-            setPendingWorkspaceId(current => current === workspaceId ? undefined : current)
-          })
-        },
-        onClose: () => { setPickerOpen(false) },
-      })}
-      {renderSlot('conversation.hero.agentPreset', {})}
-    </div>
-  )
-
-  // The placeholder chip ("Choose workspace") and the Workspace-trigger input travel
+  // The inert posture and the Workspace-trigger input travel
   // together: no workspace picked yet (cold start, no session at all), or a
   // blank session whose workspace vanished (deleted from the sidebar). The
   // bar is ONE session-maybe slot rendered unconditionally — inert is a prop,
@@ -151,6 +139,14 @@ export function ConversationRoot({
     overlay: renderSlot('conversation.input.overlay', {}),
     leftItems: zone === undefined ? null : renderSlot('conversation.input.left', zone),
     rightItems: zone === undefined ? null : renderSlot('conversation.input.right', zone),
+    // dshc: the add-to-project submenu rides the hero bar only — a live
+    // session's workspace is fixed for its lifetime.
+    ...(hero
+      ? {
+        workspaces: workspaces.items.map(item => ({ id: item.workspaceId, title: item.title })),
+        onPickWorkspace: pickWorkspace,
+      }
+      : {}),
     // Stats band under the card, inside the bar's width column so both
     // share one constraint (composer.dock = stats-line family).
     footer: !hero && zone !== undefined ? renderSlot('conversation.composer.dock', zone) : null,
@@ -158,9 +154,7 @@ export function ConversationRoot({
 
   const composerBar = (
     <div className={clsx(css.composerStack, hero && css.composerHero)}>
-      {hero && <HeroGlow className={css.heroGlow} />}
       {hero && <HeroShell t={t} renderSlot={renderSlot} />}
-      {hero && heroWorkspaceRow}
       {zone !== undefined && renderSlot('conversation.input.dock', zone)}
       {inputBar}
     </div>

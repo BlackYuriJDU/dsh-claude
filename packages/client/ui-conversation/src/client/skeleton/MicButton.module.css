@@ -1,0 +1,43 @@
+/* The composer microphone: quiet ghost at rest, coral pulse while dictating. */
+
+.mic,
+.recording {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.mic:hover:not(:disabled),
+.recording:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.mic:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.recording {
+  color: var(--dsc-coral-500, #cc785c);
+  animation: mic-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(204, 120, 92, 0.25);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgba(204, 120, 92, 0.08);
+  }
+}

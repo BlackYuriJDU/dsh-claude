@@ -8,6 +8,51 @@
    empty state; the transition between the two is a position move of one
    component. */
 
+/* ===== dshc composer chrome ===== */
+
+/* Chat | Cowork segment: pill pair on the card, active = canvas + hairline. */
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.segment,
+.segmentActive {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: 500 12.5px/18px var(--dsw-font-family);
+  cursor: pointer;
+}
+
+.segment:hover:not(:disabled) {
+  color: var(--dsw-alias-label-primary);
+}
+
+.segment:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.segmentActive {
+  background: var(--dsc-canvas, rgb(250, 249, 245));
+  color: var(--dsw-alias-label-primary);
+  box-shadow: 0 1px 2px rgba(20, 20, 19, 0.08);
+}
+
+:root [data-ds-dark-theme] .segmentActive,
+body[data-ds-dark-theme] .segmentActive {
+  background: var(--dsc-surface-dark-elevated, rgb(37, 35, 32));
+}
+
+/* ===== end dshc composer chrome ===== */
+
 .root {
   display: flex;
   flex-direction: column;
