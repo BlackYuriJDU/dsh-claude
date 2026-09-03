@@ -74,7 +74,10 @@ export function ConversationSessionHeader({
   const ancestry = useSessions(s => deriveAncestry(s, sessionId), equalBreadcrumbs)
   const composerPhase = useSession(s => s.composerPhase)
   const blank = useSession(s => s.blank)
-  const hideChrome = blank && composerPhase === 'blank'
+  // dshc: session header chrome (session log, PTC chip, Chat/Trajectory tabs,
+  // background-jobs action) is removed wholesale — the conversation starts
+  // straight at the transcript, like the reference interface.
+  const hideChrome = true
 
   return (
     <header

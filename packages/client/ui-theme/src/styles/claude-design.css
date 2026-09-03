@@ -125,6 +125,22 @@ body {
   --dsw-static-coral-900: rgb(80, 38, 26);
 
   /* Semantics (spec: error #c64545, success #5db872, warning #d4a017). */
+  /* Legacy deepseek-blue scale re-pointed to the coral family: nothing in the
+     product may shimmer blue (e.g. the turn-status gradient reads these raw
+     statics directly). */
+  --dsw-static-deepseek-50: rgb(255, 242, 237);
+  --dsw-static-deepseek-100: rgb(255, 228, 220);
+  --dsw-static-deepseek-200: rgb(255, 200, 184);
+  --dsw-static-deepseek-300: rgb(255, 160, 133);
+  --dsw-static-deepseek-400: rgb(223, 160, 133);
+  --dsw-static-deepseek-450: rgb(214, 142, 114);
+  --dsw-static-deepseek-500: rgb(204, 120, 92);
+  --dsw-static-deepseek-600: rgb(169, 88, 62);
+  --dsw-static-deepseek-700-delete: rgb(139, 68, 46);
+  --dsw-static-deepseek-800: rgb(110, 52, 35);
+  --dsw-static-deepseek-900: rgb(80, 38, 26);
+
+  /* Semantics (spec: error #c64545, success #5db872, warning #d4a017). */
   --dsw-static-red-400: rgb(198, 69, 69);
   --dsw-static-red-500: rgb(198, 69, 69);
   --dsw-static-red-600: rgb(178, 55, 55);
@@ -240,45 +256,60 @@ body {
    ============================================================ */
 
 body[data-ds-dark-theme] {
-  /* Core dark surfaces (#181715 floor). */
-  --dsw-static-neutral-00: rgb(24, 23, 21);
-  --dsw-static-neutral-50: rgb(31, 30, 27);
-  --dsw-static-neutral-100: rgb(37, 35, 32);
-  --dsw-static-neutral-150: rgb(45, 43, 39);
-  --dsw-static-neutral-200: rgb(52, 50, 45);
-  --dsw-static-neutral-250: rgb(60, 57, 52);
-  --dsw-static-neutral-300: rgb(75, 72, 66);
-  --dsw-static-neutral-400: rgb(120, 116, 108);
-  --dsw-static-neutral-500: rgb(160, 157, 150);
-  --dsw-static-neutral-550: rgb(140, 136, 128);
-  --dsw-static-neutral-600: rgb(200, 196, 188);
-  --dsw-static-neutral-700: rgb(220, 216, 208);
-  --dsw-static-neutral-800: rgb(240, 236, 228);
-  --dsw-static-neutral-850: rgb(250, 249, 245);
-  --dsw-static-neutral-900: rgb(250, 249, 245);
-  --dsw-static-neutral-1000: rgb(255, 255, 255);
+  /* Warm-dark static ladder: SAME luminance order as upstream's ramp (00
+     lightest … 1000 darkest — dark mode picks the high steps as surfaces via
+     aliases), each step hue-shifted warm. Never invert the ladder: raw
+     statics are used directly as dark backgrounds across the app. */
+  --dsw-static-neutral-00: rgb(255, 254, 251);
+  --dsw-static-neutral-50: rgb(250, 249, 245);
+  --dsw-static-neutral-100: rgb(240, 236, 228);
+  --dsw-static-neutral-150: rgb(237, 233, 224);
+  --dsw-static-neutral-200: rgb(232, 226, 215);
+  --dsw-static-neutral-250: rgb(225, 218, 206);
+  --dsw-static-neutral-300: rgb(218, 211, 199);
+  --dsw-static-neutral-400: rgb(170, 166, 158);
+  --dsw-static-neutral-500: rgb(140, 137, 130);
+  --dsw-static-neutral-550: rgb(120, 117, 110);
+  --dsw-static-neutral-600: rgb(100, 97, 90);
+  --dsw-static-neutral-700: rgb(70, 67, 62);
+  --dsw-static-neutral-800: rgb(45, 43, 40);
+  --dsw-static-neutral-850: rgb(32, 30, 28);
+  --dsw-static-neutral-900: rgb(24, 23, 21);
+  --dsw-static-neutral-1000: rgb(0, 0, 0);
 
-  --dsw-static-neutral-bluish-00: rgb(24, 23, 21);
-  --dsw-static-neutral-bluish-50: rgb(31, 30, 27);
-  --dsw-static-neutral-bluish-60: rgb(37, 35, 32);
-  --dsw-static-neutral-bluish-75: rgb(41, 39, 36);
-  --dsw-static-neutral-bluish-100: rgb(45, 43, 39);
-  --dsw-static-neutral-bluish-150: rgb(52, 50, 45);
-  --dsw-static-neutral-bluish-200: rgb(60, 57, 52);
-  --dsw-static-neutral-bluish-300: rgb(75, 72, 66);
-  --dsw-static-neutral-bluish-400: rgb(120, 116, 108);
-  --dsw-static-neutral-bluish-500: rgb(160, 157, 150);
-  --dsw-static-neutral-bluish-600: rgb(140, 136, 128);
-  --dsw-static-neutral-bluish-700: rgb(200, 196, 188);
-  --dsw-static-neutral-bluish-750: rgb(220, 216, 208);
-  --dsw-static-neutral-bluish-800: rgb(240, 236, 228);
-  --dsw-static-neutral-bluish-850: rgb(250, 249, 245);
-  --dsw-static-neutral-bluish-875: rgb(250, 249, 245);
-  --dsw-static-neutral-bluish-900: rgb(250, 249, 245);
-  --dsw-static-neutral-bluish-950: rgb(250, 249, 245);
-  --dsw-static-neutral-bluish-1000: rgb(255, 255, 255);
+  --dsw-static-neutral-bluish-00: rgb(255, 254, 251);
+  --dsw-static-neutral-bluish-50: rgb(250, 249, 245);
+  --dsw-static-neutral-bluish-60: rgb(247, 245, 240);
+  --dsw-static-neutral-bluish-75: rgb(244, 241, 235);
+  --dsw-static-neutral-bluish-100: rgb(240, 236, 228);
+  --dsw-static-neutral-bluish-150: rgb(237, 233, 224);
+  --dsw-static-neutral-bluish-200: rgb(232, 226, 215);
+  --dsw-static-neutral-bluish-300: rgb(215, 209, 197);
+  --dsw-static-neutral-bluish-400: rgb(181, 175, 163);
+  --dsw-static-neutral-bluish-500: rgb(158, 152, 141);
+  --dsw-static-neutral-bluish-600: rgb(136, 130, 120);
+  --dsw-static-neutral-bluish-700: rgb(102, 97, 88);
+  --dsw-static-neutral-bluish-750: rgb(72, 68, 61);
+  --dsw-static-neutral-bluish-800: rgb(58, 54, 48);
+  --dsw-static-neutral-bluish-850: rgb(48, 45, 40);
+  --dsw-static-neutral-bluish-875: rgb(40, 37, 33);
+  --dsw-static-neutral-bluish-900: rgb(31, 29, 26);
+  --dsw-static-neutral-bluish-950: rgb(24, 23, 21);
+  --dsw-static-neutral-bluish-1000: rgb(15, 14, 13);
 
   /* Coral holds in the dark; hover lightens instead of darkening. */
+  --dsw-static-deepseek-50: rgb(80, 38, 26);
+  --dsw-static-deepseek-100: rgb(110, 52, 35);
+  --dsw-static-deepseek-200: rgb(139, 68, 46);
+  --dsw-static-deepseek-300: rgb(169, 88, 62);
+  --dsw-static-deepseek-400: rgb(223, 160, 133);
+  --dsw-static-deepseek-450: rgb(214, 142, 114);
+  --dsw-static-deepseek-500: rgb(204, 120, 92);
+  --dsw-static-deepseek-600: rgb(214, 142, 114);
+  --dsw-static-deepseek-700-delete: rgb(110, 52, 35);
+  --dsw-static-deepseek-800: rgb(80, 38, 26);
+  --dsw-static-deepseek-900: rgb(60, 28, 20);
+
   --dsw-alias-bg-layer-1: rgb(24, 23, 21);
   --dsw-alias-bg-layer-2: rgb(31, 30, 27);
   --dsw-alias-bg-layer-3: rgb(37, 35, 32);
@@ -536,4 +567,29 @@ body[data-ds-dark-theme] {
    Claude's hero is clean surface, depth comes from type and spacing. */
 [class*='_heroGlow'] {
   display: none;
+}
+
+/* The mark breathes — slow, alive, like the reference starburst. */
+@keyframes burst-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.055);
+    opacity: 0.94;
+  }
+}
+
+[class*='_markHitbox'] svg {
+  animation: burst-breathe 4.2s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*='_markHitbox'] svg {
+    animation: none;
+  }
 }
