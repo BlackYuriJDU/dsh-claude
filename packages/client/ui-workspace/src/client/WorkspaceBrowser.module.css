@@ -38,13 +38,71 @@
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
+/* ===== dshc: Claude sidebar sections ===== */
+
+.projectList {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px 6px 8px;
+}
+
+.projectItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13.5px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.projectItem:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.projectItemIcon {
+  flex: none;
+  display: inline-flex;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.projectItemName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pinHint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 8px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+}
+
+.pinHintIcon {
+  flex: none;
+  display: inline-flex;
+}
+
 /* Section header: title, an inline search control, and the two trailing
    actions. Expanding search collapses the action cluster and takes its room. */
 .sectionHeader {
   flex: none;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 4px;
   height: 36px;
   padding-left: 4px;

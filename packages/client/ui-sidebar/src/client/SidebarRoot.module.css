@@ -107,10 +107,9 @@
   justify-content: flex-start;
 }
 
-/* Brand group (figma I133:7632): the full wordmark rides the text ink
-   (figma flows: the main-screen instance is black; blue is brand
-   emphasis only). A button only in behavior (New Session shortcut): the
-   pointer cursor is the sole affordance — no hover chrome on the mark. */
+/* Brand group: the serif wordmark rides the text ink. A button only in
+   behavior (New Session shortcut): the pointer cursor is the sole
+   affordance — no hover chrome on the mark. */
 .brand {
   flex: 1;
   min-width: 0;
@@ -147,15 +146,13 @@
   gap: 6px;
   min-width: 0;
   height: 24px;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 24px;
-  letter-spacing: 0.04em;
 }
 
 .fallbackBrandName {
-  font-size: 17px;
-  letter-spacing: 0px;
+  font-family: var(--dsc-font-display, Georgia, 'Times New Roman', serif);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
@@ -183,30 +180,10 @@
   height: 36px;
 }
 
-/* Rail logo swap: collapsed, the toggle rests as the whale mark (brand ink,
-   no hover circle) and hovering reveals the panel icon — the expand
-   affordance (figma sidebar-hover flow). Expanded it is a plain panel icon. */
-.collapsed .toggle .panelIcon {
-  display: none;
-}
-
-.collapsed .toggle:hover .panelIcon {
-  display: inline;
-}
-
-.collapsed .toggle:hover .railMark {
-  display: none;
-}
-
-.railMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Rail icons ride the primary ink (figma rail spec); expanded keeps the
-   secondary icon-button ink. */
+/* Collapsed: the toggle is the rail's only occupant. */
 .collapsed .iconButton {
+  width: 36px;
+  height: 36px;
   color: var(--dsw-alias-label-primary);
 }
 
@@ -324,6 +301,134 @@
   display: flex;
   justify-content: center;
   width: auto;
+}
+
+/* ===== dshc: Claude sidebar layout ===== */
+
+/* Feature nav rows (Projetos / Artefatos / Código / Personalizar). */
+.navRows {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 6px;
+}
+
+.navRow,
+.designRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13.5px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.navRow:hover:not(:disabled),
+.designRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.navRow:disabled {
+  cursor: default;
+}
+
+.navIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.navRow:hover:not(:disabled) .navIcon,
+.designRow:hover .navIcon {
+  color: var(--dsw-alias-label-primary);
+}
+
+.navLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Design row: pinned above the profile foot. */
+.designRow {
+  margin: 6px 2px 4px;
+}
+
+/* Profile foot: avatar + name + chevron; opens the settings popover. */
+.profileRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 44px;
+  padding: 0 8px;
+  margin: 0 2px 2px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+}
+
+.profileRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsc-surface-card, rgb(239, 233, 222));
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.profileName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.profileChevron {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
+
+/* The real settings trigger stays mounted but invisible; the popover's
+   Configurações row clicks it through (keeps ui-settings wiring intact). */
+.hiddenSettings {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
