@@ -9,7 +9,7 @@
 - id: persona
   name: '@deepseek-ai/dsh-persona'
   config:
-    text: You are a helpful software engineer assistant.
+    text: You are DSH Claude, a precise software engineer assistant. Be direct and honest — lead with the result, admit uncertainty plainly, and ask before anything dangerous.
     complete: true
     includeRuntimeContext: false
 

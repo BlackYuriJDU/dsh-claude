@@ -8,16 +8,13 @@
 import type { IndexInjection } from '@deepseek-ai/dsh-host-webserver'
 import { DEFAULT_PREFERENCE, type ThemePreference } from './theme-settings.ts'
 
-/** Build the inline script body for one schema-validated built-in preference. */
+/** Build the inline script body for one schema-validated built-in preference.
+    DSH Claude is dark-only: the attribute is set unconditionally. */
 function bootThemeScript(preference: ThemePreference): string {
   return `(() => {
   const preference = ${JSON.stringify(preference)}
-  const systemDark = preference === 'system'
-    && typeof matchMedia !== 'undefined'
-    && matchMedia('(prefers-color-scheme: dark)').matches
-  const dark = preference === 'dark' || systemDark
-  document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-  document.body.toggleAttribute('data-ds-dark-theme', dark)
+  document.documentElement.style.colorScheme = 'dark'
+  document.body.toggleAttribute('data-ds-dark-theme', preference === 'dark')
 })()`
 }
 

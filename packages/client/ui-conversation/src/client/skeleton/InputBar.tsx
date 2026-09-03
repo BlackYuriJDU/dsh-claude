@@ -912,6 +912,7 @@ export function InputBar({
                 </button>
               </Tooltip>
             )}
+            {(!empty || primaryStops) && (
             <Tooltip label={primaryLabel} side="top" delayMs={500}>
               <button
                 type="button"
@@ -932,6 +933,7 @@ export function InputBar({
                 )}
               </button>
             </Tooltip>
+            )}
           </div>
         </div>
       </div>

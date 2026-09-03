@@ -120,10 +120,11 @@ describe('ui-theme apply', () => {
     // Copy rides the standard locale seat: the entry declares the namespace.
     expect(b.slots.entries(SLOT).find(e => e.component === AppearanceRow)!.locale).toBe(SETTINGS_NS)
 
-    face.setTheme('system')
-    expect(theme.getTheme().preference).toBe('system')
-    expect(instance.getSnapshot().preference).toBe('system')
-    await vi.waitFor(() => { expect(b.mutate).toHaveBeenCalledTimes(2) })
+    face.setTheme('dark')
+    expect(theme.getTheme().preference).toBe('dark')
+    expect(instance.getSnapshot().preference).toBe('dark')
+    // Dark-only: re-setting the sole preference is a no-op — no Host write.
+    expect(b.mutate).not.toHaveBeenCalled()
   })
 
   it('loads Host settings at boot, refreshes its namespace, and keeps remote browsers process-local', async () => {
@@ -141,10 +142,6 @@ describe('ui-theme apply', () => {
     b.ctx.remote.$dispatch('settings/document-updated', ['unrelated', 0])
     await vi.waitFor(() => { expect(b.describe).toHaveBeenCalledTimes(3) })
     expect(theme.getTheme().preference).toBe('dark')
-    b.setHostPreference('light')
-    b.ctx.remote.$dispatch('settings/document-updated', [THEME_SETTINGS_NAMESPACE, 0])
-    await vi.waitFor(() => { expect(theme.getTheme().preference).toBe('light') })
-    b.setHostPreference('dark')
     b.ctx.emit('connection/reset')
     await vi.waitFor(() => { expect(theme.getTheme().preference).toBe('dark') })
 
@@ -170,7 +167,7 @@ describe('ui-theme apply', () => {
     const fiber = b.ctx.plugin({ inject: [...inject], apply })
     await fiber.await()
     const theme = b.ctx.get('theme') as ThemeRuntime
-    expect(theme.getTheme().preference).toBe('system')
+    expect(theme.getTheme().preference).toBe('dark')
     pending.resolve(await describe())
     await vi.waitFor(() => { expect(theme.getTheme().preference).toBe('dark') })
     await fiber.dispose()
@@ -183,7 +180,7 @@ describe('ui-theme apply', () => {
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const theme = b.ctx.get('theme') as ThemeRuntime
     await vi.waitFor(() => { expect(b.describe).toHaveBeenCalledTimes(2) })
-    expect(theme.getTheme().preference).toBe('system')
+    expect(theme.getTheme().preference).toBe('dark')
   })
 
   it('recovers after an HMR collapse of the declaring entry (stale disposer must not block)', async () => {

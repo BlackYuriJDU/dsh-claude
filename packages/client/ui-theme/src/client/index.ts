@@ -144,9 +144,6 @@ const BUILTIN_INSPECT_TOKENS: readonly ThemeTokenInspection[] = Object.freeze([
  * through {@link setTheme}; continuous sync only through the `theme/change`
  * event. {@link overrideTokens} stacks partial token layers over the active
  * theme without touching the registry.
- * The service holds the `prefers-color-scheme` media query (environment
- * sensing, not presentation) and re-emits when the OS scheme flips while the
- * preference is `system`.
  */
 export class ThemeRuntime {
   private readonly ctx: Context
@@ -155,34 +152,20 @@ export class ThemeRuntime {
   private preference: ThemePreference
   private revision = 0
   private snapshot: ThemeSnapshot
-  private readonly media: MediaQueryList | undefined
   /** Override layers by source; seq (monotonic) is the stacking order. */
   private readonly overrides = new Map<string, { seq: number; tokens: ThemeTokenOverrides }>()
   private overrideSeq = 0
 
   /**
    * @param ctx - owning context (change events are emitted on it; the
-   * media-query and scope listeners are released through ctx.effect on dispose).
+   * scope listener is released through ctx.effect on dispose).
    * @param host - durable preference scope owned by the same plugin.
    */
   constructor(ctx: Context, host: SettingsScope<ThemeSettings>) {
     this.ctx = ctx
     this.host = host
     this.preference = DEFAULT_PREFERENCE
-    // Non-browser runs (node e2e booting the client tree) have no matchMedia.
-    this.media = typeof matchMedia === 'undefined' ? undefined : matchMedia('(prefers-color-scheme: dark)')
     this.snapshot = this.buildSnapshot()
-    if (this.media !== undefined) {
-      const media = this.media
-      const onChange = (): void => {
-        if (this.preference !== 'system') return
-        this.publish()
-      }
-      ctx.effect(() => {
-        media.addEventListener('change', onChange)
-        return () => { media.removeEventListener('change', onChange) }
-      }, 'ui-theme: prefers-color-scheme listener')
-    }
     ctx.effect(() => host.subscribe(() => { this.adopt() }), 'ui-theme: settings scope adoption')
     this.adopt()
   }
@@ -291,9 +274,8 @@ export class ThemeRuntime {
   }
 
   private buildSnapshot(): ThemeSnapshot {
-    const resolvedId = this.preference === 'system'
-      ? (this.media?.matches === true ? 'dark' : 'light')
-      : this.preference
+    // Dark-only product: the preference is the resolved id by construction.
+    const resolvedId = this.preference
     // Both built-ins always exist; a registered preference id resolves or has
     // been reset by its disposer, so the lookup cannot miss.
     const active = this.themes.find(t => t.id === resolvedId)

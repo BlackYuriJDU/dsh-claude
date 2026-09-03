@@ -2,8 +2,9 @@
 
 import z from '@deepseek-ai/schemastery'
 
-/** Built-in preferences accepted at the registry and settings boundaries. */
-export const THEME_PREFERENCES = ['light', 'dark', 'system'] as const
+/** Built-in preferences accepted at the registry and settings boundaries.
+    DSH Claude is dark-only: the light palette never resolves. */
+export const THEME_PREFERENCES = ['dark'] as const
 
 /** Settings namespace owned by the theme plugin. */
 export const THEME_SETTINGS_NAMESPACE = 'ui-theme'
@@ -15,7 +16,7 @@ export const THEME_PREFERENCE_FIELD = 'preference'
 export type ThemePreference = typeof THEME_PREFERENCES[number]
 
 /** Default preference when the user-settings document has no override. */
-export const DEFAULT_PREFERENCE: ThemePreference = 'system'
+export const DEFAULT_PREFERENCE: ThemePreference = 'dark'
 
 /** Durable theme section shared by the Host schema and the browser scope. */
 export interface ThemeSettings {
