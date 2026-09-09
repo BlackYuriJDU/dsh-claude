@@ -17,6 +17,12 @@ export {
   sandboxDenialMarker,
   validateEscalationArgs,
 } from './escalation.ts'
+export {
+  approveDangerousOperation,
+  classifyDangerousCommand,
+  dangerRuleIds,
+} from './danger.ts'
+export type { CommandFamily, DangerousCommandMatch } from './danger.ts'
 export type { EscalationApproval, EscalationApprover, EscalationOutcome, EscalationRequest } from './escalation.ts'
 export { canonicalPath, writableRoots } from './roots.ts'
 
