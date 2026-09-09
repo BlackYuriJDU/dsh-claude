@@ -38,7 +38,7 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
           color: 'inherit',
         }}
       >
-        DSH Claude
+        Claude
       </span>
     </span>
   )
