@@ -11,6 +11,7 @@ export const zh = {
   'section.workspaces': '工作区',
   'section.projects': '项目',
   'section.conversations': '会话与任务',
+  'section.sessions': '会话',
   'projects.pinHint': '固定项目以显示在这里',
   'viewOptions.label': '视图选项',
   'groupBy.label': '分组方式',

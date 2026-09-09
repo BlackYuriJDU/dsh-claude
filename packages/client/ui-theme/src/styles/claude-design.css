@@ -498,13 +498,14 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* New-session hero headline: the one true display moment of the app. */
+/* New-session hero headline: the one true display moment of the app.
+   Size measured against the claude.ai reference screenshot (~44px serif). */
 [class*='_headline'] {
   font-family: var(--dsc-font-display);
-  font-size: 30px;
-  line-height: 38px;
+  font-size: 44px;
+  line-height: 52px;
   font-weight: 500;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
 /* ============================================================

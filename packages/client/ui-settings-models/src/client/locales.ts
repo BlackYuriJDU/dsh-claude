@@ -1,7 +1,5 @@
 /** Copy dictionaries for the Models settings section. */
 
-import { WELCOME_NOTICE_COPY } from '../onboarding-copy.ts'
-
 /** English strings (the key-set source of truth for this pair). */
 export const en = {
   nav: 'Models',
@@ -89,15 +87,16 @@ export const en = {
   customNeedsModels: 'A custom provider needs at least one model.',
   create: 'Create provider',
   creating: 'Creating\u2026',
-  welcomeTitle: WELCOME_NOTICE_COPY.en.title,
-  welcomeBody: WELCOME_NOTICE_COPY.en.body,
-  welcomeContinue: WELCOME_NOTICE_COPY.en.continueLabel,
-  welcomeError: 'The acknowledgement could not be saved. Please try again.',
-  onboardingTitle: 'Add an API key to get started',
-  onboardingDescription: 'Configure the official DeepSeek provider to start building.',
-  onboardingLater: 'Configure later',
-  onboardingSave: 'Save and continue',
-  onboardingSaving: 'Saving…',
+  profileTitle: 'Boas-vindas ao DSH Claude',
+  profileName: 'Nome',
+  profileEmail: 'Email',
+  profileEmailHint: 'Esse email não parece válido.',
+  profileContinue: 'Continuar',
+  profileError: 'Não foi possível salvar seu perfil. Tente novamente.',
+  providerTitle: 'Adicione um provedor',
+  providerDescription: 'Conecte um provedor de modelos com sua chave de API para começar.',
+  providerAdd: 'Adicionar provedor',
+  providerLater: 'Agora não',
   keyRequired: 'Enter an API key to continue.',
 }
 
@@ -191,14 +190,15 @@ export const zh: { [Key in keyof typeof en]: string } = {
   customNeedsModels: '自定义提供方至少需要一个模型。',
   create: '创建提供方',
   creating: '创建中\u2026',
-  welcomeTitle: WELCOME_NOTICE_COPY.zh.title,
-  welcomeBody: WELCOME_NOTICE_COPY.zh.body,
-  welcomeContinue: WELCOME_NOTICE_COPY.zh.continueLabel,
-  welcomeError: '暂时无法保存确认状态，请重试。',
-  onboardingTitle: '添加一个 API Key 开始使用',
-  onboardingDescription: '配置 DeepSeek 官方模型，即可开始使用。',
-  onboardingLater: '稍后配置',
-  onboardingSave: '保存并继续',
-  onboardingSaving: '保存中…',
+  profileTitle: '欢迎来到 DSH Claude',
+  profileName: '名称',
+  profileEmail: '邮箱',
+  profileEmailHint: '这个邮箱地址似乎无效。',
+  profileContinue: '继续',
+  profileError: '无法保存你的资料，请重试。',
+  providerTitle: '添加一个提供方',
+  providerDescription: '使用你的 API 密钥连接一个模型提供方，即可开始。',
+  providerAdd: '添加提供方',
+  providerLater: '暂不添加',
   keyRequired: '请输入 API 密钥后继续。',
 }
