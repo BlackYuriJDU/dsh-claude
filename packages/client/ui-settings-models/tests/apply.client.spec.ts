@@ -7,12 +7,10 @@ import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply as settingsApply, inject as settingsInject } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { apply, inject, refreshIfLoaded } from '@deepseek-ai/dsh-client-ui-settings-models/client'
-import {
-  WELCOME_NOTICE_ACK_FIELD, WELCOME_NOTICE_SETTINGS_NAMESPACE, WELCOME_NOTICE_VERSION,
-} from '../src/onboarding-copy.ts'
+import { ONBOARDING_SETTINGS_NAMESPACE } from '../src/client/profile-store.ts'
 import { ModelsSection } from '../src/client/ModelsSection.tsx'
-import { DeepSeekOnboardingDialog } from '../src/client/DeepSeekOnboardingDialog.tsx'
-import { WelcomeNotice } from '../src/client/WelcomeNotice.tsx'
+import { ProfileOnboarding } from '../src/client/ProfileOnboarding.tsx'
+import { ProviderOnboarding } from '../src/client/ProviderOnboarding.tsx'
 
 // These specs assert the shipped Chinese copy. The lane has no jsdom `window`,
 // so browser-language detection never runs and a fresh LocaleRuntime opens on
@@ -73,18 +71,17 @@ describe('ui-settings-models apply', () => {
     expect(injected.api).toBeDefined()
     const onboarding = before.slots.entries('settings.onboarding')
     expect(onboarding).toHaveLength(2)
-    expect(onboarding.find(entry => entry.options.id === 'welcome-notice')).toMatchObject({
-      component: WelcomeNotice,
-      options: { id: 'welcome-notice', order: -100 },
+    expect(onboarding.find(entry => entry.options.id === 'profile')).toMatchObject({
+      component: ProfileOnboarding,
+      options: { id: 'profile', order: -100 },
     })
-    const deepSeek = onboarding.find(entry => entry.options.id === 'deepseek-official')!
-    expect(deepSeek.component).toBe(DeepSeekOnboardingDialog)
-    expect(deepSeek.options).toMatchObject({ id: 'deepseek-official', order: 0 })
-    const deepSeekInjected = (
-      deepSeek.inject as unknown as () => import('../src/client/DeepSeekOnboardingDialog.tsx').DeepSeekOnboardingInjected
+    const provider = onboarding.find(entry => entry.options.id === 'provider')!
+    expect(provider.component).toBe(ProviderOnboarding)
+    expect(provider.options).toMatchObject({ id: 'provider', order: 0 })
+    const providerInjected = (
+      provider.inject as unknown as () => import('../src/client/ProviderOnboarding.tsx').ProviderOnboardingInjected
     )()
-    expect(deepSeekInjected.hooks.models).toBe(injected.controller.store)
-    expect(deepSeekInjected.api).toBeDefined()
+    expect(providerInjected.hooks.models).toBe(injected.controller.store)
 
     const after = await bench()
     await after.ctx.plugin({ inject: [...inject], apply }).await()
@@ -153,19 +150,19 @@ describe('ui-settings-models apply', () => {
     expect(() => b.locale.register('settings.models', 'en', {})).not.toThrow()
   })
 
-  it('keeps remote-browser acknowledgement in process memory', async () => {
+  it('keeps a remote browser profile process-local', async () => {
     const b = await bench(false)
     declare(b.slots)
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const entry = b.slots.entries('settings.onboarding')
-      .find(candidate => candidate.options.id === 'welcome-notice')!
+      .find(candidate => candidate.options.id === 'profile')!
     const injected = (
-      entry.inject as unknown as () => import('../src/client/WelcomeNotice.tsx').WelcomeNoticeInjected
+      entry.inject as unknown as () => import('../src/client/ProfileOnboarding.tsx').ProfileOnboardingInjected
     )()
 
     await injected.controller.load()
     expect(injected.controller.store.getSnapshot()).toEqual({
-      status: 'ready', acknowledged: false, error: null,
+      status: 'ready', profiled: false, error: null,
     })
   })
 })
@@ -203,10 +200,10 @@ describe('pushed invalidations', () => {
     declare(b.slots)
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const entry = b.slots.entries('settings.onboarding')
-      .find(candidate => candidate.options.id === 'deepseek-official')!
+      .find(candidate => candidate.options.id === 'provider')!
     const injected = (
       entry.inject as unknown as
-      () => import('../src/client/DeepSeekOnboardingDialog.tsx').DeepSeekOnboardingInjected
+      () => import('../src/client/ProviderOnboarding.tsx').ProviderOnboardingInjected
     )()
     injected.controller.store.update((state) => { state.status = 'ready' })
     const load = vi.spyOn(injected.controller, 'load').mockResolvedValue()
@@ -214,22 +211,22 @@ describe('pushed invalidations', () => {
     expect(load).toHaveBeenCalledTimes(1)
   })
 
-  it('welcome state follows the shared mirror across document commits', async () => {
-    // The welcome notice derives from its settings scope: a document commit
+  it('profile state follows the shared mirror across document commits', async () => {
+    // The profile step derives from its settings scope: a document commit
     // reaches it through the mirror's one refresh, with no routing here.
-    const acknowledgement = { current: undefined as string | undefined }
+    const profile = { current: {} as Record<string, unknown> }
     const settings = {
       describe: vi.fn(() => Promise.resolve({
-        rpcId: 'apply-welcome' as never,
+        rpcId: 'apply-profile' as never,
         result: {
           ok: true as const,
           value: {
             writable: true,
             hasDocument: false,
             namespaces: [{
-              ns: WELCOME_NOTICE_SETTINGS_NAMESPACE,
+              ns: ONBOARDING_SETTINGS_NAMESPACE,
               schema: {},
-              value: acknowledgement.current === undefined ? {} : { [WELCOME_NOTICE_ACK_FIELD]: acknowledgement.current },
+              value: profile.current,
               applies: 'live' as const,
               secrets: [],
               revision: 0,
@@ -242,19 +239,19 @@ describe('pushed invalidations', () => {
     declare(b.slots)
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const entry = b.slots.entries('settings.onboarding')
-      .find(candidate => candidate.options.id === 'welcome-notice')!
+      .find(candidate => candidate.options.id === 'profile')!
     const injected = (
       entry.inject as unknown as
-      () => import('../src/client/WelcomeNotice.tsx').WelcomeNoticeInjected
+      () => import('../src/client/ProfileOnboarding.tsx').ProfileOnboardingInjected
     )()
     await injected.controller.load()
     await vi.waitFor(() => {
-      expect(injected.hooks.welcome.getSnapshot()).toMatchObject({ status: 'ready', acknowledged: false })
+      expect(injected.hooks.profile.getSnapshot()).toMatchObject({ status: 'ready', profiled: false })
     })
-    acknowledgement.current = WELCOME_NOTICE_VERSION
+    profile.current = { userName: 'Arthur' }
     b.ctx.remote.$dispatch('settings/document-updated', ['ui-onboarding', 1])
     await vi.waitFor(() => {
-      expect(injected.hooks.welcome.getSnapshot()).toMatchObject({ status: 'ready', acknowledged: true })
+      expect(injected.hooks.profile.getSnapshot()).toMatchObject({ status: 'ready', profiled: true })
     })
   })
 

@@ -12,8 +12,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
-  Button, IconCloseFill14, IconPersonalizationOutline16,
-  IconProjectAddOutline16, IconSearchOutline16, Menu, Modal, Tooltip,
+  Button, IconCloseFill14,
+  IconProjectAddOutline16, IconSearchOutline16, Modal, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type {
   SessionId, SessionListState, SessionSearchResultItem, WorkspaceId, WorkspaceView,
@@ -21,7 +21,7 @@ import type {
 import type { WorkspaceBrowserProps } from './contract/slots.ts'
 import type { SessionNode, SessionOrderBy } from './tree.ts'
 import { deriveFlat, deriveSearchResults, UNGROUPED_KEY } from './tree.ts'
-import { ProjectRowItem, SearchResultItem, SessionNodeItem } from './rows/Rows.tsx'
+import { SearchResultItem, SessionNodeItem } from './rows/Rows.tsx'
 import { FLAT_SESSION_ORDER_KEY } from './stores.ts'
 import { WorkspacePickFlow } from './WorkspacePicker.tsx'
 import css from './WorkspaceBrowser.module.css'
@@ -35,8 +35,6 @@ const EXPAND_SLIDE_MS = 300
 const SEARCH_DEBOUNCE_MS = 250
 /** `session.search` wire bound, measured in JavaScript UTF-16 code units. */
 const SEARCH_QUERY_MAX_CODE_UNITS = 500
-/** Session rows visible per Workspace before the local overflow control. */
-const COLLAPSED_SESSION_LIMIT = 5
 
 /** Keep controlled input and RPC payload inside the session.search wire contract. */
 function sanitizeSearchQuery(value: string): string {
@@ -47,11 +45,6 @@ function sanitizeSearchQuery(value: string): string {
   const next = withoutNul.charCodeAt(end)
   if (last >= 0xD800 && last <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) end--
   return withoutNul.slice(0, end)
-}
-
-/** Immutable membership toggle for the local expand-all array. */
-function toggled(list: readonly string[], key: string): string[] {
-  return list.includes(key) ? list.filter(k => k !== key) : [...list, key]
 }
 
 /**
@@ -146,8 +139,7 @@ function nextSessionOrderAccount({
 
 type SessionTreeProps = Pick<
   WorkspaceBrowserProps,
-  'useSessions' | 'startSession' | 'open' | 'forkSession'
-  | 'insertWorkspaceBefore' | 'insertSessionBefore' | 't'
+  'useSessions' | 'startSession' | 'open' | 'forkSession' | 't'
 > & {
   /** Host account home for POSIX hover-path abbreviation. */
   home?: string | undefined
@@ -180,6 +172,20 @@ type SessionTreeProps = Pick<
 
 /** The scrolling session tree; unmounting drops the sessions subscription and expand-all state. */
 /** The flat "In one list" body: every session is one draggable top-level row. */
+
+/**
+ * Active flat-list row drag: which shared order account it commits into and
+ * the row half currently hovered (null between hover targets).
+ */
+interface DragState {
+  /** Session-order account the drag writes (FLAT_SESSION_ORDER_KEY). */
+  accountKey: string
+  /** The dragged session row. */
+  sessionId: SessionNode['id']
+  /** Current hover target: row id + pointer half, or none between rows. */
+  over: { id: SessionNode['id']; half: 'before' | 'after' } | null
+}
+
 function FlatList({
   useSessions, open, forkSession, onSessionRename, onSessionArchive, archivedSessionIds,
   orderBy, sessionOrderByAccount, sessionUpdatedAtByAccount, syncSessionOrderAccount, setSessionOrder, t,
@@ -377,7 +383,6 @@ function SearchResults({
  */
 export function WorkspaceBrowser({
   wide,
-  expandSidebar,
   useSessions,
   useWorkspaces,
   useStore,
@@ -388,27 +393,21 @@ export function WorkspaceBrowser({
   forkSession,
   renameWorkspace,
   deleteWorkspace,
-  insertWorkspaceBefore,
   archiveSession,
-  insertSessionBefore,
   createWorkspace,
   searchSessions,
   searchResultLimit,
   useDirectoryFlow,
-  useHostDescription,
   renderSlot,
   t,
 }: WorkspaceBrowserProps) {
-  const home = useHostDescription(description => description?.home)
   const workspaces = useWorkspaces(state => state.items)
   const workspacePhase = useWorkspaces(state => state.phase)
   const archivedSessionIds = useWorkspaces(state => state.archivedSessionIds)
   // Live occupancy of this surface's directory-flow hole (the same source the
   // flow reads): a composition without a picking affordance can add nothing.
   const directoryFlowAvailable = useDirectoryFlow(occupied => occupied)
-  const groupBy = useStore(s => s.groupBy)
   const orderBy = useStore(s => s.orderBy)
-  const groupExpansion = useStore(s => s.groupExpansion)
   const sessionOrderByAccount = useStore(s => s.sessionOrderByAccount)
   const sessionUpdatedAtByAccount = useStore(s => s.sessionUpdatedAtByAccount)
   const currentBlankSessionId = useSessions((state) => {
@@ -480,6 +479,16 @@ export function WorkspaceBrowser({
     if (!wide || !searchExpanded || searchOnExpand) return
     searchInput.current?.focus({ preventScroll: true })
   }, [wide, searchExpanded, searchOnExpand])
+
+  // The profile foot's search control (ui-sidebar, no dependency on this
+  // package) expands + lands in this browser's search through a window event;
+  // the existing searchExpanded effect above takes the focus once mounted.
+  useEffect(() => {
+    if (!wide) return
+    const onSidebarSearch = (): void => { setSearchExpanded(true) }
+    window.addEventListener('dshc:sidebar-search', onSidebarSearch)
+    return () => { window.removeEventListener('dshc:sidebar-search', onSidebarSearch) }
+  }, [wide])
 
   // Outside-click dismissal stays off while the rail gesture is in flight
   // (searchOnExpand): the rail click flips the shell wide and mounts this
@@ -665,7 +674,7 @@ export function WorkspaceBrowser({
         )}
       </div>
       <div className={css.projectList}>
-        {workspaces.items.map(item => (
+        {workspaces.map(item => (
           <button
             key={item.workspaceId}
             type="button"
@@ -680,7 +689,7 @@ export function WorkspaceBrowser({
             <span className={css.projectItemName}>{item.title}</span>
           </button>
         ))}
-        {workspaces.items.length === 0 && (
+        {workspaces.length === 0 && (
           <div className={css.pinHint}>
             <span className={css.pinHintIcon} aria-hidden>
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
