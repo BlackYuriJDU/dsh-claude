@@ -68,11 +68,11 @@ describe('CoralBurst', () => {
 describe('BrandWordmark', () => {
   it('can render the name with or without its leading mark', () => {
     const view = render(<primitives.BrandWordmark />)
-    expect(view.container.textContent).toContain('DSH Claude')
+    expect(view.container.textContent).toContain('Claude')
     expect(view.container.querySelectorAll('svg')).toHaveLength(1)
 
     view.rerender(<primitives.BrandWordmark includeMark={false} />)
     expect(view.container.querySelectorAll('svg')).toHaveLength(0)
-    expect(view.container.textContent).toContain('DSH Claude')
+    expect(view.container.textContent).toContain('Claude')
   })
 })

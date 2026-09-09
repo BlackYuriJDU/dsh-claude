@@ -1,9 +1,11 @@
 /**
  * Sidebar shell (Claude layout): serif wordmark, the "Novo" pill, the four
- * feature nav rows, the browsing region (Projetos + Conversas e tarefas), the
- * Design row, and the profile foot whose popover carries Configurações /
- * Idioma / Receber ajuda. Collapse reduces the column to a single panel
- * toggle — nothing else rides the rail.
+ * feature nav rows (Projetos and Artefatos open their own modals; Código and
+ * Personalizar stay disabled), the browsing region (Projetos + Conversas e
+ * tarefas), and the profile foot — a hairline pill whose
+ * popover carries the email heading plus Configurações (gear) / Idioma /
+ * Receber ajuda, with search and collapse controls to its right. Collapse
+ * reduces the column to a single panel toggle — nothing else rides the rail.
  *
  * Collapse is a slide plus crossfade: content freezes at its expanded width
  * (inline style) and fades out in place while the sliding column (AppFrame
@@ -15,8 +17,10 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import clsx from 'clsx'
 import {
-  IconNewChatOutline16, IconPanelLeftOutline16, Menu, Tooltip,
+  IconPanelLeftOutline16, IconPlusOutline16, IconSearchOutline16,
+  IconSettingsOutline16, Menu, Modal, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SidebarRootComponentProps } from './contract/slots.ts'
 import css from './SidebarRoot.module.css'
 
@@ -27,6 +31,9 @@ const COLLAPSE_SETTLE_MS = 150
  * How long the column's scrollbars stay drawn after the pointer leaves it.
  */
 const SCROLLBAR_LINGER_MS = 2000
+
+/** Window event the browser region listens to: expand + focus its search. */
+export const SIDEBAR_SEARCH_EVENT = 'dshc:sidebar-search'
 
 /** Line icons for the feature nav rows and the profile popover (16px grid). */
 const stroke = {
@@ -45,10 +52,13 @@ const IconProjects = (
   </svg>
 )
 
+/* Filled twin four-point stars (the reference draws them solid). */
+const fill = { fill: 'currentColor', stroke: 'none' } as const
+
 const IconArtifacts = (
   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-    <path {...stroke} d="M8 2.2 9.6 6 13.4 7.6 9.6 9.2 8 13 6.4 9.2 2.6 7.6 6.4 6 8 2.2Z" />
-    <path {...stroke} d="M12.6 11.2l.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7.7-1.7Z" />
+    <path {...fill} d="M8 2.2 9.6 6 13.4 7.6 9.6 9.2 8 13 6.4 9.2 2.6 7.6 6.4 6 8 2.2Z" />
+    <path {...fill} d="M12.6 11.2l.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7.7-1.7Z" />
   </svg>
 )
 
@@ -62,13 +72,6 @@ const IconCustomize = (
   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
     <circle {...stroke} cx="8" cy="5.2" r="2.6" />
     <path {...stroke} d="M2.8 13.6c.6-2.6 2.7-4 5.2-4s4.6 1.4 5.2 4" />
-  </svg>
-)
-
-const IconDesign = (
-  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-    <path {...stroke} d="M8 1.8a6.2 6.2 0 1 0 0 12.4c.9 0 1.4-.6 1.4-1.3 0-.4-.2-.7-.4-1-.2-.3-.4-.6-.4-1 0-.7.6-1.3 1.4-1.3h1.6a2.6 2.6 0 0 0 2.6-2.6A6.2 6.2 0 0 0 8 1.8Z" />
-    <path {...stroke} d="M4.8 7.4h.01M7.2 4.6h.01M10.4 5.4h.01" strokeWidth="1.7" />
   </svg>
 )
 
@@ -89,6 +92,8 @@ const IconHelp = (
 
 /** localStorage key holding the displayed owner name (shared with the hero). */
 const USER_NAME_STORE_KEY = 'dshc:user-name'
+/** localStorage key holding the displayed owner email (popover heading). */
+const USER_EMAIL_STORE_KEY = 'dshc:user-email'
 const DEFAULT_USER_NAME = 'Arthur'
 
 /**
@@ -106,6 +111,18 @@ function ownerNameOf(): string {
 }
 
 /**
+ * The displayed owner email: the localStorage override when present.
+ * @returns the popover heading email, or empty when none was given.
+ */
+function ownerEmailOf(): string {
+  try {
+    return window.localStorage.getItem(USER_EMAIL_STORE_KEY)?.trim() ?? ''
+  } catch {
+    return ''
+  }
+}
+
+/**
  * Render the sidebar column shell.
  * @param props - composed slot props (runtime share + injected callbacks, contract/slots.ts).
  * @returns the sidebar element tree.
@@ -115,6 +132,8 @@ export function SidebarRoot({
   width,
   startSession,
   toggleSidebar,
+  useWorkspaces,
+  workspaces,
   t,
   renderSlot,
 }: SidebarRootComponentProps) {
@@ -179,12 +198,21 @@ export function SidebarRoot({
   const openSettings = (): void => {
     hiddenSettings.current?.querySelector('button')?.click()
   }
+  // The foot search control rides the browser region's own search affordance
+  // through a window event (decoupled: no ui-workspace dependency here).
+  const requestSearch = (): void => {
+    window.dispatchEvent(new CustomEvent(SIDEBAR_SEARCH_EVENT))
+  }
 
-  const navRows: readonly { id: string; label: string; icon: ReactNode }[] = [
-    { id: 'projects', label: t('nav.projects'), icon: IconProjects },
-    { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts },
-    { id: 'code', label: t('nav.code'), icon: IconCode },
-    { id: 'customize', label: t('nav.customize'), icon: IconCustomize },
+  // Projetos / Artefatos modals.
+  const [projectsOpen, setProjectsOpen] = useState(false)
+  const [artifactsOpen, setArtifactsOpen] = useState(false)
+
+  const navRows: readonly { id: string; label: string; icon: ReactNode; open: (() => void) | undefined }[] = [
+    { id: 'projects', label: t('nav.projects'), icon: IconProjects, open: () => { setProjectsOpen(true) } },
+    { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts, open: () => { setArtifactsOpen(true) } },
+    { id: 'code', label: t('nav.code'), icon: IconCode, open: undefined },
+    { id: 'customize', label: t('nav.customize'), icon: IconCustomize, open: undefined },
   ]
 
   return (
@@ -206,20 +234,10 @@ export function SidebarRoot({
           <span className={css.brandIdentity} aria-hidden="true">
             <span className={css.brandName}>
               {renderSlot('sidebar.brand.name', {}, {
-                fallback: <span className={css.fallbackBrandName}>DSH Claude</span>,
+                fallback: <span className={css.fallbackBrandName}>Claude</span>,
               })}
             </span>
           </span>
-          <Tooltip label={t('toggle.collapse')} delayMs={500}>
-            <button
-              type="button"
-              className={clsx(css.iconButton, css.toggle)}
-              aria-label={t('toggle.collapse')}
-              onClick={() => { toggleSidebar() }}
-            >
-              <IconPanelLeftOutline16 size={16} />
-            </button>
-          </Tooltip>
         </div>
       )}
       {/* Collapsed rail: the panel toggle alone (reference behavior). */}
@@ -245,7 +263,7 @@ export function SidebarRoot({
           aria-label={t('session.new.label')}
           onClick={() => { startSession() }}
         >
-          <IconNewChatOutline16 size={14} />
+          <IconPlusOutline16 size={16} />
           <span className={clsx(css.newSessionLabel, css.wide)}>{t('session.new')}</span>
         </button>
       )}
@@ -253,10 +271,19 @@ export function SidebarRoot({
       {wide && (
         <nav className={css.navRows} aria-label={t('nav.label')}>
           {navRows.map(row => (
-            <button key={row.id} type="button" className={css.navRow} disabled>
-              <span className={css.navIcon}>{row.icon}</span>
-              <span className={css.navLabel}>{row.label}</span>
-            </button>
+            row.open === undefined
+              ? (
+                <button key={row.id} type="button" className={css.navRow} disabled title={t('nav.soon')}>
+                  <span className={css.navIcon}>{row.icon}</span>
+                  <span className={css.navLabel}>{row.label}</span>
+                </button>
+              )
+              : (
+                <button key={row.id} type="button" className={css.navRow} onClick={row.open}>
+                  <span className={css.navIcon}>{row.icon}</span>
+                  <span className={css.navLabel}>{row.label}</span>
+                </button>
+              )
           ))}
         </nav>
       )}
@@ -270,13 +297,6 @@ export function SidebarRoot({
       )}
 
       {wide && (
-        <button type="button" className={css.designRow}>
-          <span className={css.navIcon}>{IconDesign}</span>
-          <span className={css.navLabel}>{t('nav.design')}</span>
-        </button>
-      )}
-
-      {wide && (
         <div className={css.footArea}>
           {/* The real settings trigger stays mounted, visually hidden: the
               profile popover's Configurações row clicks it through. */}
@@ -285,39 +305,172 @@ export function SidebarRoot({
               {renderSlot('sidebar.settings', { wide })}
             </div>
           </div>
-          <Menu
-            open={profileOpen}
-            anchor={(
-              <button
-                ref={profileRef}
-                type="button"
-                className={css.profileRow}
-                aria-haspopup="menu"
-                aria-expanded={profileOpen}
-                onClick={() => { setProfileOpen(open => !open) }}
-              >
-                <span className={css.avatar} aria-hidden="true">
-                  {ownerNameOf().charAt(0).toUpperCase()}
-                </span>
-                <span className={css.profileName}>{ownerNameOf()}</span>
-                <span className={css.profileChevron} aria-hidden>⌄</span>
-              </button>
-            )}
-            items={[
-              { id: 'settings', label: t('profile.settings') },
-              { id: 'language', label: t('profile.language'), icon: IconLanguage },
-              { id: 'help', label: t('profile.help'), icon: IconHelp },
-            ]}
-            onSelect={(id) => {
-              setProfileOpen(false)
-              if (id === 'settings') openSettings()
-            }}
-            onClose={() => { setProfileOpen(false) }}
-            align="start"
-            side="top"
-          />
+          <div className={css.footRow}>
+            {/* Additive action seat beside the profile pill (contract). */}
+            <div className={css.footerActions}>
+              {renderSlot('sidebar.footer.action', { wide })}
+            </div>
+            <Menu
+              open={profileOpen}
+              anchor={(
+                <button
+                  ref={profileRef}
+                  type="button"
+                  className={css.profileRow}
+                  aria-haspopup="menu"
+                  aria-expanded={profileOpen}
+                  onClick={() => { setProfileOpen(open => !open) }}
+                >
+                  <span className={css.avatar} aria-hidden="true">
+                    {ownerNameOf().charAt(0).toUpperCase()}
+                  </span>
+                  <span className={css.profileName}>{ownerNameOf()}</span>
+                  <span className={css.profileChevron} aria-hidden>⌄</span>
+                </button>
+              )}
+              items={[
+                ...(ownerEmailOf() === '' ? [] : [{ type: 'label' as const, id: 'email', text: ownerEmailOf() }]),
+                { id: 'settings', label: t('profile.settings'), icon: <IconSettingsOutline16 size={16} /> },
+                { id: 'language', label: t('profile.language'), icon: IconLanguage },
+                { id: 'help', label: t('profile.help'), icon: IconHelp },
+              ]}
+              onSelect={(id) => {
+                setProfileOpen(false)
+                if (id === 'settings') openSettings()
+              }}
+              onClose={() => { setProfileOpen(false) }}
+              align="start"
+              side="top"
+            />
+            <div className={css.footCluster}>
+              <Tooltip label={t('profile.search')} delayMs={500}>
+                <button
+                  type="button"
+                  className={css.iconButton}
+                  aria-label={t('profile.search')}
+                  onClick={requestSearch}
+                >
+                  <IconSearchOutline16 size={16} />
+                </button>
+              </Tooltip>
+              <Tooltip label={t('toggle.collapse')} delayMs={500}>
+                <button
+                  type="button"
+                  className={css.iconButton}
+                  aria-label={t('toggle.collapse')}
+                  onClick={() => { toggleSidebar() }}
+                >
+                  <IconPanelLeftOutline16 size={16} />
+                </button>
+              </Tooltip>
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Modals mount only while open: the ProjectsModal's reactive source
+          rides the runtime's standard hook, so a closed modal reads nothing. */}
+      {projectsOpen && (
+        <ProjectsModal
+          onClose={() => { setProjectsOpen(false) }}
+          useWorkspaces={useWorkspaces}
+          workspaces={workspaces}
+          t={t}
+        />
+      )}
+      {artifactsOpen && (
+        <Modal
+          open
+          onClose={() => { setArtifactsOpen(false) }}
+          closeLabel={t('close')}
+          title={t('artifacts.modal.title')}
+        >
+          <p className={css.modalBody}>{t('artifacts.empty')}</p>
+        </Modal>
+      )}
     </div>
+  )
+}
+
+/**
+ * The Projetos modal: the workspace registry with connect-on-click, directory
+ * creation, per-project open-folder, and a one-line footer explaining the v1
+ * context story (folder files + root AGENTS.md reach the agent).
+ * @param props - open state, close callback, reactive list source, injected
+ *   workspaces actions, and the locale seat.
+ * @returns the modal element tree.
+ */
+function ProjectsModal(props: {
+  onClose: () => void
+  useWorkspaces: SidebarRootComponentProps['useWorkspaces']
+  workspaces: SidebarRootComponentProps['workspaces']
+  t: SidebarRootComponentProps['t']
+}) {
+  const { onClose, useWorkspaces, workspaces, t } = props
+  const list = useWorkspaces(state => state.items)
+  const [creating, setCreating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const connect = (workspaceId: WorkspaceId): void => {
+    onClose()
+    void workspaces.connect(workspaceId).catch(() => {})
+  }
+  const createProject = async (): Promise<void> => {
+    setError(null)
+    setCreating(true)
+    try {
+      const path = await workspaces.pickDirectory()
+      if (path === null) return
+      const created = await workspaces.create({ path })
+      onClose()
+      await workspaces.connect(created.workspaceId)
+    } catch {
+      setError(t('projects.error'))
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      closeLabel={t('close')}
+      title={t('projects.modal.title')}
+      footer={<p className={css.modalFooterNote}>{t('projects.footer')}</p>}
+    >
+      {list.length === 0
+        ? <p className={css.modalEmpty}>{t('projects.empty')}</p>
+        : (
+            <ul className={css.projectList}>
+              {list.map(project => (
+                <li key={project.workspaceId} className={css.projectItem}>
+                  <button type="button" className={css.projectMain} onClick={() => { connect(project.workspaceId) }}>
+                    <span className={css.projectTitle}>{project.title}</span>
+                    <span className={css.projectPath}>{project.path}</span>
+                  </button>
+                  <Tooltip label={t('projects.openFolder')} delayMs={500}>
+                    <button
+                      type="button"
+                      className={css.iconButton}
+                      aria-label={t('projects.openFolder')}
+                      onClick={() => { void workspaces.openPath(project.path).catch(() => {}) }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+                        <path {...stroke} d="M2 5.2A1.2 1.2 0 0 1 3.2 4h3l1.4 1.6h5.2A1.2 1.2 0 0 1 14 6.8v4A1.2 1.2 0 0 1 12.8 12H3.2A1.2 1.2 0 0 1 2 10.8V5.2Z" />
+                      </svg>
+                    </button>
+                  </Tooltip>
+                </li>
+              ))}
+            </ul>
+          )}
+      {error === null ? null : <p className={css.modalError} role="alert">{error}</p>}
+      <div className={css.modalActions}>
+        <button type="button" className={css.modalPrimary} disabled={creating} onClick={() => { void createProject() }}>
+          {creating ? t('projects.creating') : t('projects.new')}
+        </button>
+      </div>
+    </Modal>
   )
 }

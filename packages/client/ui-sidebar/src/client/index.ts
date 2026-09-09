@@ -36,6 +36,15 @@ export function apply(ctx: ClientContext): void {
     // (current Session Workspace, then recent Workspace).
     startSession: (workspaceId) => { ctx.workspaces.startSession(workspaceId) },
     toggleSidebar: () => { ctx.layout.toggleSidebar() },
+    // The write actions the shell's Projetos modal wires (connect-on-click,
+    // create from the Host directory picker, open-folder). The modal's
+    // reactive list source is the runtime's standard useWorkspaces hook.
+    workspaces: {
+      connect: workspaceId => ctx.workspaces.connectWorkspace(workspaceId),
+      create: input => ctx.workspaces.create(input),
+      pickDirectory: () => ctx.workspaces.pickDirectory(),
+      openPath: path => ctx.workspaces.openPath(path),
+    },
   })
   ctx.effect(
     () => ctx.slots.register({
