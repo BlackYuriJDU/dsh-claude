@@ -717,6 +717,71 @@ describe('sandbox escalation through the generic task producer', () => {
   })
 })
 
+describe('destructive-command gate', () => {
+  const destructive = {
+    command: 'rm -rf destructive-gate-target',
+    description: 'test destructive gate',
+  }
+
+  it('denies a destructive command when no approval service is composed', async () => {
+    const { ctx } = await setupSandboxed()
+    const result = await call(ctx, 'bash', destructive, sandboxAgent())
+    expect(result.isError).toBe(true)
+    expect(text(result)).toContain('requires approval, but no approval service is composed')
+  })
+
+  it('asks before running and lets a grant execute', async () => {
+    const { ctx, bash } = await setupSandboxed(true)
+    const reasons: Array<string | undefined> = []
+    ctx.on('approval/request', (req) => {
+      reasons.push(req.reason)
+      return Promise.resolve<ApprovalOutcome>('allowed-once')
+    })
+    const result = await call(ctx, 'bash', destructive, sandboxAgent(undefined, ctx))
+    expect(result.isError).toBe(false)
+    // The recording executor's stdout proves the granted command actually ran.
+    expect(text(result)).toContain('ok')
+    expect(bash.modes.length).toBe(1)
+    expect(reasons).toEqual(['destructive command: recursive delete (rm -r / --recursive)'])
+  })
+
+  it('denies on rejection and cancellation with nothing executed', async () => {
+    for (const outcome of ['rejected', 'cancelled'] as const) {
+      const { ctx, bash } = await setupSandboxed(true)
+      ctx.on('approval/request', () => Promise.resolve<ApprovalOutcome>(outcome))
+      const result = await call(ctx, 'bash', destructive, sandboxAgent())
+      expect(result.isError).toBe(true)
+      expect(text(result)).toContain(outcome === 'rejected' ? 'the user rejected this destructive command' : 'was cancelled')
+      expect(bash.modes).toEqual([])
+    }
+  })
+
+  it('leaves routine commands ungated (no ask, no denial)', async () => {
+    const withoutService = await setupSandboxed()
+    const result = await call(withoutService.ctx, 'bash', { command: 'printf UNGATED_OK', description: 'ungated probe' })
+    expect(result.isError).toBe(false)
+    // The recording executor's stdout proves the routine command ran ungated.
+    expect(text(result)).toContain('ok')
+    expect(withoutService.bash.modes.length).toBe(1)
+
+    const { ctx } = await setupSandboxed(true)
+    const prompted = vi.fn()
+    ctx.on('approval/request', () => { prompted(); return Promise.resolve<ApprovalOutcome>('allowed-once') })
+    for (const command of ['rm -f stale.lock', 'git push origin main', 'printf ok']) {
+      await call(ctx, 'bash', { command, description: 'ungated probe' }, sandboxAgent())
+    }
+    expect(prompted).not.toHaveBeenCalled()
+  })
+
+  it('gates the background path before a job is created', async () => {
+    const { ctx } = await setupSandboxed(true)
+    ctx.on('approval/request', () => Promise.resolve<ApprovalOutcome>('rejected'))
+    const result = await call(ctx, 'bash', { ...destructive, run_in_background: true }, sandboxAgent())
+    expect(result.isError).toBe(true)
+    expect(text(result)).toContain('the user rejected this destructive command')
+  })
+})
+
 describe('renderProcessRead', () => {
   const base: ShellProcessRead = { delta: 'out\n', lossy: false }
 

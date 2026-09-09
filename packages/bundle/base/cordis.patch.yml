@@ -163,16 +163,17 @@
     - id: subprocess
       name: '@deepseek-ai/dsh-subprocess-local'
 
-    # Every shipped CLI mode starts with the same file-effect boundary.
-    # The environment remains an explicit deployment override; otherwise fresh
-    # sessions pin workspace-write + ask through the permission service below.
+    # Every shipped CLI mode starts with the same file-effect boundary. This
+    # fork's posture is ALWAYS full access (no sandbox walls, no mode ladder);
+    # the environment remains an explicit deployment escape hatch. Destructive
+    # commands are guarded by the approval gate in the shell tools instead.
     - id: sandbox
       name: '@deepseek-ai/dsh-sandbox-local'
 
     - id: sandbox-policy
       name: '@deepseek-ai/dsh-sandbox-policy'
       config:
-        mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+        mode: !!js process.env.DSH_PERMISSION_MODE ?? 'danger-full-access'
         workspaceRoot: !!js process.cwd()
 
     - id: bash-sandbox
@@ -185,24 +186,24 @@
       name: '@deepseek-ai/dsh-pwsh-sandbox'
       disabled: !!js process.platform !== 'win32'
 
+    # Full access never disables the approval channel: destructive or
+    # dangerous operations ask before running (fail-closed without answerers).
     - id: approval
       name: '@deepseek-ai/dsh-user-approval'
       config:
-        policy: !!js "(process.env.DSH_PERMISSION_MODE ?? 'workspace-write') === 'danger-full-access' ? 'never' : 'ask'"
+        policy: 'ask'
 
+    # One posture only: the read-only / workspace-write / danger-full-access
+    # distinction is gone. The id keeps the `Full access` product label.
     - id: permission
       name: '@deepseek-ai/dsh-permission-presets'
       config:
         presets:
-          read-only:
-            sandbox: read-only
-            approval: ask
-          workspace-write:
-            sandbox: workspace-write
-            approval: ask
           danger-full-access:
             sandbox: danger-full-access
-            approval: never
+            approval: ask
+            name: danger-full-access
+            description: Full file access; destructive or dangerous operations ask for approval.
 
     - id: shell-env
       name: '@deepseek-ai/dsh-shell-env'
