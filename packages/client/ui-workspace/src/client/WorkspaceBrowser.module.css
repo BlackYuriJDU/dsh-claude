@@ -120,7 +120,10 @@
 
 .sectionLabel {
   flex: none;
-  max-width: 45%;
+  /* dshc: the reference shows the full "Conversas e tarefas" — at narrow
+     sidebars more of the label shows before the icon cluster claims its
+     share (the search collapses to an icon anyway). */
+  max-width: 62%;
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
