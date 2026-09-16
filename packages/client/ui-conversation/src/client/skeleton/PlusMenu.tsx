@@ -23,6 +23,8 @@ export interface PlusMenuProps {
   disabled: boolean
   /** Suppress focus steal on trigger press (the bar's own helper). */
   keepFocus: (event: MouseEvent<HTMLButtonElement>) => void
+  /** Which way the card opens: down on the floating hero, up in a live session. */
+  side: 'bottom' | 'top'
   /** Open the file picker (Adicionar arquivos ou fotos). */
   onFiles: () => void
   /** Capture a screen frame and attach it (Fazer captura de tela). */
@@ -169,6 +171,7 @@ export function PlusMenu(props: PlusMenuProps) {
   return (
     <Menu
       open={open}
+      side={props.side}
       anchor={
         <button
           type="button"

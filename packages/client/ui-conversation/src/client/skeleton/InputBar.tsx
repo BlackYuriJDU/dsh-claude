@@ -841,6 +841,9 @@ export function InputBar({
               onClose={() => { setPlusMenuOpen(false) }}
               disabled={locked}
               keepFocus={keepFocus}
+              // dshc: floating hero capsule → the menu drops down (room below);
+              // a live session pins the card to the floor → the menu opens up.
+              side={variant === 'hero' ? 'bottom' : 'top'}
               onFiles={() => { fileInputRef.current?.click() }}
               onScreenshot={captureScreen}
               onSkills={onToggleCommandMenu}
@@ -863,6 +866,10 @@ export function InputBar({
                 e.target.value = ''
               }}
             />
+            {/* dshc: the Chat/Cowork segment, the plan seat, and the extra
+                left seats belong to the greeting screen only — a live
+                session's capsule carries the +, the text, mic, send. */}
+            {variant === 'hero' && (
             <div className={css.segmented} role="tablist" aria-label={t('mode.label')}>
               <button
                 type="button"
@@ -887,14 +894,20 @@ export function InputBar({
                 {t('mode.cowork')}
               </button>
             </div>
-            <div className={css.modes}>
-              {renderSlot('conversation.input.plan', { locked })}
-            </div>
-            {leftItems}
+            )}
+            {variant === 'hero' && (
+              <div className={css.modes}>
+                {renderSlot('conversation.input.plan', { locked })}
+              </div>
+            )}
+            {variant === 'hero' && leftItems}
           </div>
           <div className={css.trailing}>
-            {rightItems}
-            {renderSlot('conversation.input.model', { locked: modelSeatLocked })}
+            {/* dshc: the session-mode capsule carries only the +, mic, and
+                send/stop; the model seat drops below the card and the hero
+                chrome (Chat/Cowork, plan, extra seats) stays in the hero. */}
+            {variant === 'hero' && rightItems}
+            {variant === 'hero' && renderSlot('conversation.input.model', { locked: modelSeatLocked })}
             <MicButton onDictate={dictate} disabled={locked} t={t} />
             {interruptible && (
               <Tooltip label={t('input.stop')} side="top" delayMs={500}>
@@ -937,6 +950,13 @@ export function InputBar({
           </div>
         </div>
       </div>
+      {/* Session mode: the model seat lives OUTSIDE the capsule, right-aligned
+          under the card (the reference's compact composer). */}
+      {variant === 'composer' && (
+        <div className={css.underRow}>
+          {renderSlot('conversation.input.model', { locked: modelSeatLocked })}
+        </div>
+      )}
       {footer}
     </div>
   )

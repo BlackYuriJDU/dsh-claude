@@ -9,7 +9,7 @@ import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { SlotTestRuntime, usePinnedBrowserLanguages, stubSettingsScope } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply, inject, type EmptyWorkspaceOwnerProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
 
-usePinnedBrowserLanguages('zh-CN')
+usePinnedBrowserLanguages('en-US')
 
 const SID = 's1' as SessionId
 
@@ -95,7 +95,7 @@ describe('resident composer', () => {
     expect(textarea).not.toBeNull()
     expect(textarea!.disabled).toBe(false)
     expect(textarea!.readOnly).toBe(true)
-    expect(textarea!.getAttribute('aria-label')).toBe('选择工作区')
+    expect(textarea!.getAttribute('aria-label')).toBe('Choose workspace')
     expect(textarea!.getAttribute('aria-haspopup')).toBe('menu')
     expect(textarea!.getAttribute('aria-expanded')).toBe('false')
     await runtime.dispose()
