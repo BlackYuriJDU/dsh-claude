@@ -2,9 +2,8 @@ import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
 import type { IndexInjection } from '@deepseek-ai/dsh-host-webserver'
 import { SettingsProvider, settingsNamespace, type SettingsNamespace } from '@deepseek-ai/dsh-settings'
-import {
-  DEFAULT_PREFERENCE, THEME_SETTINGS_NAMESPACE, apply,
-} from '@deepseek-ai/dsh-client-ui-theme'
+import { DEFAULT_PREFERENCE, THEME_SETTINGS_NAMESPACE, apply } from '@deepseek-ai/dsh-client-ui-theme'
+import { DEFAULT_CHAT_FONT } from '../src/theme-settings.ts'
 
 class MemorySettings extends SettingsProvider {
   readonly writable = true
@@ -34,10 +33,11 @@ describe('ui-theme host', () => {
     const fiber = ctx.plugin({ apply })
     await fiber.await()
     const ns = settingsNamespace(THEME_SETTINGS_NAMESPACE)
-    expect(ctx.settings.get(ns)).toEqual({ preference: DEFAULT_PREFERENCE })
-    await ctx.settings.update(ns, { preference: 'dark' })
-    expect(ctx.settings.get(ns)).toEqual({ preference: 'dark' })
+    expect(ctx.settings.get(ns)).toEqual({ preference: DEFAULT_PREFERENCE, chatFont: DEFAULT_CHAT_FONT })
+    await ctx.settings.update(ns, { preference: 'dark', chatFont: 'mono' })
+    expect(ctx.settings.get(ns)).toEqual({ preference: 'dark', chatFont: 'mono' })
     await expect(ctx.settings.update(ns, { preference: 'sepia' })).rejects.toThrow()
+    await expect(ctx.settings.update(ns, { preference: 'dark', chatFont: 'comic-sans' })).rejects.toThrow()
     await fiber.dispose()
     expect(ctx.settings.describe().map(row => row.ns)).not.toContain(ns)
   })
