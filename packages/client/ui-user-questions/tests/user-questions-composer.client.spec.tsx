@@ -12,7 +12,6 @@ import { PendingQuestion, type QuestionComposerProps } from '../src/client/contr
 import { QuestionComposer, parseRecommendedLabel } from '../src/client/QuestionComposer.tsx'
 import { en } from '../src/client/locales.ts'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
-import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
 
 afterEach(cleanup)
 
@@ -41,7 +40,7 @@ const kit = {
 const QUESTIONS = [
   {
     id: 'profile', header: 'Preference', question: 'Pick the candidate profile',
-    detail: 'Choose per the current opening's priority.',
+    detail: 'Choose per the current opening\'s priority.',
     options: [
       { label: 'Shipping engineer (Recommended)', description: 'Prioritizes engineering delivery.' },
       { label: 'Research potential', description: 'Prioritizes research ability.' },
@@ -80,18 +79,18 @@ describe('QuestionComposer', () => {
     expect(screen.getByText('1 / 3')).toBeTruthy()
     expect(screen.getByText('Recommended')).toBeTruthy()
     expect(screen.getByText('Shipping engineer')).toBeTruthy()
-    const detail = screen.getByText('Choose per the current opening's priority.')
+    const detail = screen.getByText('Choose per the current opening\'s priority.')
     const scrollRegion = detail.closest('[data-question-scroll]')
     expect(scrollRegion).toBeTruthy()
     expect(scrollRegion?.contains(screen.getByRole('radio', { name: /Shipping engineer/ }))).toBe(true)
-    expect(scrollRegion?.contains(screen.getByText('Next question').closest('button'))).toBe(false)
+    expect(scrollRegion?.contains(screen.getByRole('button', { name: 'Next', exact: true }))).toBe(false)
     fireEvent.keyDown(screen.getByRole('radio', { name: /Shipping engineer/ }), { key: 'Enter' })
     expect(respond).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('radio', { name: /Shipping engineer/ }))
 
     expect(screen.getByText('2 / 3')).toBeTruthy()
     // detail is per-question: the second question carries none.
-    expect(screen.queryByText('Choose per the current opening's priority.')).toBeNull()
+    expect(screen.queryByText('Choose per the current opening\'s priority.')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Fill the answer' })).toBeNull()
     const custom = screen.getByPlaceholderText('Type your answer')
     fireEvent.change(custom, { target: { value: 'Must debug production issues independently' } })
@@ -148,7 +147,7 @@ describe('QuestionComposer', () => {
     const { carrier, respond } = wait()
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    expect((screen.getByText('Next question').closest('button') as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('button', { name: 'Next', exact: true }) as HTMLButtonElement).disabled).toBe(true)
     fireEvent.click(screen.getByRole('radio', { name: 'Research potential' }))
     expect(screen.getByText('2 / 3')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Skip this question' }))
