@@ -1,17 +1,27 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import type {
   SidebarFooterActionOwnerProps, SidebarRootComponentProps, SidebarSectionOwnerProps,
   SidebarSettingsOwnerProps,
 } from '../src/client/contract/slots.ts'
-import { SidebarRoot, SIDEBAR_SEARCH_EVENT } from '../src/client/SidebarRoot.tsx'
+import { DesignRow } from '../src/client/DesignRow.tsx'
+import { SidebarRoot, SIDEBAR_DESIGN_EVENT, SIDEBAR_SEARCH_EVENT } from '../src/client/SidebarRoot.tsx'
 import { en } from '../src/client/locales.ts'
 
 // English-dictionary translate stub: the shell renders the same copy the
 // assertions below query by accessible name.
 const t: SidebarRootComponentProps['t'] = key => (en as Record<string, string>)[key] ?? key
+
+/** The popover's locale face, with the switch spied per mount. */
+function localeFace() {
+  return {
+    active: () => 'pt',
+    options: () => [{ id: 'pt', label: 'Português' }, { id: 'en', label: 'English' }],
+    set: vi.fn(),
+  }
+}
 
 afterEach(() => {
   cleanup()
@@ -47,6 +57,7 @@ function mountShell({ collapsed = false, width = 300, items = [] as readonly unk
 } = {}) {
   const startSession = vi.fn()
   const toggleSidebar = vi.fn()
+  const locale = localeFace()
   const connect = vi.fn(() => Promise.resolve('s-1' as never))
   const create = vi.fn(() => Promise.resolve(project as never))
   const pickDirectory = vi.fn(() => Promise.resolve('/home/arthur/novo'))
@@ -62,6 +73,7 @@ function mountShell({ collapsed = false, width = 300, items = [] as readonly unk
       collapsed={current.collapsed} width={current.width}
       useSessions={neverHook} useWorkspaces={listHook(items) as never}
       startSession={startSession} toggleSidebar={toggleSidebar} t={t}
+      locale={locale}
       workspaces={{ connect, create, pickDirectory, openPath }}
       renderSlot={((
         key: string,
@@ -86,6 +98,7 @@ function mountShell({ collapsed = false, width = 300, items = [] as readonly unk
   return {
     startSession,
     toggleSidebar,
+    locale,
     connect,
     create,
     pickDirectory,
@@ -129,20 +142,20 @@ describe('SidebarRoot shell', () => {
       collapsed={false} width={300}
       useSessions={neverHook} useWorkspaces={listHook() as never}
       startSession={vi.fn()} toggleSidebar={vi.fn()} t={t}
+      locale={localeFace()}
       workspaces={{ connect: vi.fn(), create: vi.fn(), pickDirectory: vi.fn(), openPath: vi.fn() }}
       renderSlot={((_key: string, _owner: unknown, options?: { fallback?: ReactNode }) =>
         options?.fallback ?? null) as SidebarRootComponentProps['renderSlot']}
     />)
-    expect(screen.getByText('Claude')).toBeTruthy()
+    expect(screen.getByText('DeepSeek Harness Claude')).toBeTruthy()
     expect(container.querySelector('svg')).not.toBeNull()
   })
 
-  it('opens Projetos and Artefatos modals and leaves Código/Personalizar disabled', () => {
+  it('opens Projetos and Artefatos modals and leaves Personalizar disabled', () => {
     const b = mountShell({ items: [project] })
-    const rows = screen.getAllByRole('button', { name: new RegExp(`${en['nav.projects']}|${en['nav.artifacts']}|${en['nav.code']}|${en['nav.customize']}`) })
-    expect(rows).toHaveLength(4)
+    const rows = screen.getAllByRole('button', { name: new RegExp(`${en['nav.projects']}|${en['nav.artifacts']}|${en['nav.customize']}`) })
+    expect(rows).toHaveLength(3)
     expect(rows[2]!).toHaveProperty('disabled', true)
-    expect(rows[3]!).toHaveProperty('disabled', true)
 
     fireEvent.click(screen.getByRole('button', { name: en['nav.projects'] }))
     expect(screen.getByRole('dialog', { name: en['projects.modal.title'] })).toBeTruthy()
@@ -178,25 +191,88 @@ describe('SidebarRoot shell', () => {
     expect(b.openPath).toHaveBeenCalledWith('/home/arthur/projeto')
   })
 
-  it('shows the stored email as the popover heading and arms the settings gear', () => {
+  it('shows the stored email as the popover heading and moves the settings gear to the foot cluster', () => {
     window.localStorage.setItem('dshc:user-email', 'arthur@example.com')
+    window.localStorage.setItem('dshc:user-name', 'Arthur')
     mountShell()
+    // The settings gear left the popover for the foot cluster (the swap with
+    // the former search seat); it carries the gear icon and clicking it must
+    // not throw (the hidden trigger is the only settings wire it clicks).
+    const gear = screen.getByRole('button', { name: en['profile.settings'] })
+    expect(gear.querySelector('svg')).not.toBeNull()
+    expect(() => { fireEvent.click(gear) }).not.toThrow()
+    // The popover: heading email + the three rows (search, Idioma, Receber
+    // ajuda) — Configurações is no longer among them.
     fireEvent.click(screen.getByRole('button', { name: 'Arthur' }))
     expect(screen.getByText('arthur@example.com')).toBeTruthy()
-    // Configurações carries the gear icon; selecting it clicks the hidden
-    // settings trigger through.
-    const settingsRow = screen.getByRole('menuitem', { name: en['profile.settings'] })
-    expect(settingsRow.querySelector('svg')).not.toBeNull()
+    expect(screen.getByRole('menuitem', { name: en['profile.search'] })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: en['profile.language'] })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: en['profile.help'] })).toBeTruthy()
+    expect(screen.queryByRole('menuitem', { name: en['profile.settings'] })).toBeNull()
   })
 
-  it('the foot search control asks the browsing region for its search box', () => {
+  it('the Idioma submenu carries the shipped locales and writes the choice', () => {
+    window.localStorage.setItem('dshc:user-name', 'Arthur')
+    const b = mountShell()
+    fireEvent.click(screen.getByRole('button', { name: 'Arthur' }))
+    const language = screen.getByRole('menuitem', { name: en['profile.language'] })
+    expect(language.getAttribute('aria-haspopup')).toBe('menu')
+    // Hovering opens the submenu with the registry's self-described labels.
+    fireEvent.mouseEnter(language)
+    expect(screen.getByRole('menuitem', { name: 'Português' })).toBeTruthy()
+    expect(screen.getByRole('menuitem', { name: 'English' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('menuitem', { name: 'English' }))
+    expect(b.locale.set).toHaveBeenCalledWith('en')
+  })
+
+  it('Receber ajuda opens the fork repository in a new tab', () => {
+    window.localStorage.setItem('dshc:user-name', 'Arthur')
+    const open = vi.spyOn(window, 'open').mockReturnValue(null)
+    mountShell()
+    fireEvent.click(screen.getByRole('button', { name: 'Arthur' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: en['profile.help'] }))
+    expect(open).toHaveBeenCalledWith('https://github.com/BlackYuriJDU/dsh-claude', '_blank', 'noopener,noreferrer')
+    open.mockRestore()
+  })
+
+  it('the popover search row asks the browsing region for its search box', () => {
+    window.localStorage.setItem('dshc:user-name', 'Arthur')
     const b = mountShell()
     const listener = vi.fn()
     window.addEventListener(SIDEBAR_SEARCH_EVENT, listener)
-    fireEvent.click(screen.getByRole('button', { name: en['profile.search'] }))
+    fireEvent.click(screen.getByRole('button', { name: 'Arthur' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: en['profile.search'] }))
     expect(listener).toHaveBeenCalledOnce()
     expect(b.toggleSidebar).not.toHaveBeenCalled()
     window.removeEventListener(SIDEBAR_SEARCH_EVENT, listener)
+  })
+
+  it('the Design footer row opens the shell Artefatos modal through the event seam', () => {
+    mountShell()
+    const artifactDialog = () => screen.queryByRole('dialog', { name: en['artifacts.modal.title'] })
+    expect(artifactDialog()).toBeNull()
+    // The seam is the documented export: the seat occupant (DesignRow) and
+    // any other registrant dispatch it, the shell owns the modal state.
+    act(() => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) })
+    expect(artifactDialog()).not.toBeNull()
+    expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: en.close }))
+    expect(artifactDialog()).toBeNull()
+    // Repeatable: the listener lives for the column's lifetime.
+    act(() => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) })
+    expect(artifactDialog()).not.toBeNull()
+  })
+
+  it('the Design row occupant dispatches the seam on click and mirrors the nav geometry', () => {
+    const listener = vi.fn()
+    window.addEventListener(SIDEBAR_DESIGN_EVENT, listener)
+    render(<DesignRow t={t} />)
+    const row = screen.getByRole('button', { name: en['design.label'] })
+    // Nav-row geometry: line icon riding the icon seat, label beside it.
+    expect(row.querySelector('svg')).not.toBeNull()
+    fireEvent.click(row)
+    expect(listener).toHaveBeenCalledOnce()
+    window.removeEventListener(SIDEBAR_DESIGN_EVENT, listener)
   })
 
   it('hands the region its wide flag and clamps expandSidebar to the collapsed state', () => {

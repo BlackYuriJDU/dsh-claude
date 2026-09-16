@@ -7,10 +7,7 @@
  */
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createLayoutStore } from '@deepseek-ai/dsh-client-ui-layout/src/client/stores.ts'
-import {
-  DETAILS_DEFAULT, DETAILS_MAX, DETAILS_MIN,
-  SIDEBAR_DEFAULT, SIDEBAR_MAX, SIDEBAR_MIN,
-} from '@deepseek-ai/dsh-client-ui-layout/src/client/columns.ts'
+import { DETAILS_DEFAULT, DETAILS_MAX, DETAILS_MIN, SIDEBAR_DEFAULT, SIDEBAR_MAX, SIDEBAR_MIN } from '@deepseek-ai/dsh-client-ui-layout/src/client/columns.ts'
 
 const PERSIST_KEY = 'dsh.layout.panels'
 

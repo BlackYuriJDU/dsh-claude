@@ -50,7 +50,7 @@ describe('ui-sidebar apply', () => {
     // Copy rides the standard locale seat, not the inject face.
     expect(b.slots.entries('sidebar')[0]!.locale).toBe('sidebar')
     const injected = (b.slots.entries('sidebar')[0]!.inject as () => SidebarRootInjected)()
-    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar', 'workspaces'])
+    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar', 'locale', 'workspaces'])
     // The Projetos modal's reactive list source rides the runtime's standard
     // useWorkspaces hook — only the write face crosses the inject.
     // Both arms delegate to the runtime's shared New Session action.
@@ -60,6 +60,11 @@ describe('ui-sidebar apply', () => {
     expect(b.workspaces.startSession).toHaveBeenLastCalledWith(undefined)
     injected.toggleSidebar()
     expect(b.layout.toggleSidebar).toHaveBeenCalledOnce()
+    // The Idioma face reads the runtime's locale service and writes through it.
+    expect(injected.locale.active()).toBe('en')
+    expect(injected.locale.options().map(option => option.id)).toEqual(['en', 'pt'])
+    injected.locale.set('pt')
+    expect(injected.locale.active()).toBe('pt')
     // The Projetos modal's write face delegates to the workspaces domain.
     void injected.workspaces.connect('ws-1' as never)
     void injected.workspaces.create({ path: '/p' })
