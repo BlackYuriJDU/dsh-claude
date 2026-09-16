@@ -75,7 +75,7 @@ export function ProfileOnboarding(props: ProfileOnboardingProps): ReactNode {
           <Input
             value={name}
             onChange={event => { setName(event.target.value) }}
-            placeholder="Arthur"
+            placeholder=""
             autoFocus
           />
         </label>
