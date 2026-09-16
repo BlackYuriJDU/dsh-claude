@@ -16,7 +16,6 @@ import { planReviewOf, type QuestionComposerProps, type QuestionWait } from '../
 import { QuestionComposer } from '../src/client/QuestionComposer.tsx'
 import { en } from '../src/client/locales.ts'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
-import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
 
 afterEach(cleanup)
 
