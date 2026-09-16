@@ -1,11 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CordisDynamicPackageId, CordisDynamicPluginId } from '../src/types.ts'
 import { missingServices } from '../src/lifecycle.ts'
-import {
-  AGENT_A, call, CONSUMER_CODE, CONTENT_OUTPUT_CODE, dummyTool, LISTENER_CODE, mount,
-  PROVIDER_CODE, REVERSE_TOOL_CODE, setup, text,
-  running,
-} from './helpers.ts'
+import { AGENT_A, call, CONSUMER_CODE, CONTENT_OUTPUT_CODE, dummyTool, LISTENER_CODE, mount, PROVIDER_CODE, REVERSE_TOOL_CODE, setup, text, running } from './helpers.ts'
 
 /**
  * Cross-package composition through ordinary cordis provide/inject semantics:

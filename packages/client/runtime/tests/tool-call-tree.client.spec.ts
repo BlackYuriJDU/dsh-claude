@@ -1,9 +1,7 @@
 import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
 import { describe, expect, it } from 'vitest'
 import type { RunningToolCall, ToolCallBlock } from '../src/client/sessions/conversation.ts'
-import {
-  MAX_TOOL_CALL_TREE_DEPTH, ToolCallTree,
-} from '../src/client/sessions/tool-call-tree.ts'
+import { MAX_TOOL_CALL_TREE_DEPTH, ToolCallTree } from '../src/client/sessions/tool-call-tree.ts'
 
 const at = (seq: number, type: string, data: Record<string, unknown>): SessionEvent =>
   ({ seq, time: 1_700_000_000_000 + seq, type, data }) as unknown as SessionEvent

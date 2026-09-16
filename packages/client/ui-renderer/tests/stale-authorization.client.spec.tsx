@@ -6,9 +6,7 @@
 import { describe, expect, it } from 'vitest'
 import { act, render } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import {
-  StaleAuthorizationError, type SlotEntryDef, type SlotSpec, type StoredEntry,
-} from '@deepseek-ai/dsh-client-ui-slots'
+import { StaleAuthorizationError, type SlotEntryDef, type SlotSpec, type StoredEntry } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RenderOpts, SlotRendererHost } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { createSlotRenderer } from '../src/client/scoped-slots.tsx'
 
