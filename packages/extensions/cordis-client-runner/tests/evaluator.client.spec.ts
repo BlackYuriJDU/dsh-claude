@@ -8,12 +8,7 @@
 import * as React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import type { CordisDynamicPluginId } from '@deepseek-ai/dsh-api-remotes/client'
-import {
-  DynamicCordisStyles,
-  DYNAMIC_CLIENT_REDIRECTS,
-  evaluateClientHalf,
-  isDynamicCordisPlugin,
-} from '../src/client/evaluator.ts'
+import { DynamicCordisStyles, DYNAMIC_CLIENT_REDIRECTS, evaluateClientHalf, isDynamicCordisPlugin } from '../src/client/evaluator.ts'
 import type { DynamicCordisClosureEnv, DynamicCordisEvaluatedPlugin } from '../src/client/evaluator.ts'
 
 const ID = 'dyn-1' as CordisDynamicPluginId

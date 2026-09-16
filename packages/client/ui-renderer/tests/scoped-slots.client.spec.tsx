@@ -11,10 +11,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render } from '@testing-library/react'
 import { useEffect, useState, type ReactNode } from 'react'
-import {
-  SlotOwnershipError, StaleAuthorizationError,
-  type ActionsDecl, type SlotEntryDef, type SlotSpec, type StoreHandle, type StoredEntry,
-} from '@deepseek-ai/dsh-client-ui-slots'
+import { SlotOwnershipError, StaleAuthorizationError, type ActionsDecl, type SlotEntryDef, type SlotSpec, type StoreHandle, type StoredEntry } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionMaybeProvideInfo } from '@deepseek-ai/dsh-client-ui-slots'
 import type {
   RenderOpts, SessionProvideInfo, SlotRendererHost, StoreInstanceLike,

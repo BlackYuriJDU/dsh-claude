@@ -9,9 +9,7 @@
  */
 import { describe, expect, it, vi } from 'vitest'
 import { act, render } from '@testing-library/react'
-import {
-  SlotCore, StaleAuthorizationError, type PropsRenderSlots, type SlotRendererHost,
-} from '@deepseek-ai/dsh-client-ui-slots'
+import { SlotCore, StaleAuthorizationError, type PropsRenderSlots, type SlotRendererHost } from '@deepseek-ai/dsh-client-ui-slots'
 import { createSlotRenderer } from '../src/client/scoped-slots.tsx'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
