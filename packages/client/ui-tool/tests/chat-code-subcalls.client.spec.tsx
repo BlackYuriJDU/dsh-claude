@@ -12,10 +12,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { stubSettingsScope } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
-import {
-  ConversationEventRegistry, ConversationViewRegistry, createSnapshotStore,
-  EMPTY_CONVERSATION_VIEWS, SlotRegistry,
-} from '@deepseek-ai/dsh-client-runtime/client'
+import { ConversationEventRegistry, ConversationViewRegistry, createSnapshotStore, EMPTY_CONVERSATION_VIEWS, SlotRegistry } from '@deepseek-ai/dsh-client-runtime/client'
 import type {
   ConversationSnapshot, RunningToolCall, SessionId, SessionListState,
   ToolCallBlock, ToolResultNode, WorkspaceListState,
