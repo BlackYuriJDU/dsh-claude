@@ -1,5 +1,6 @@
-// The dshc brand wordmark: coral burst + "DSH Claude" in the display serif.
-// Text-based on purpose — the product name is live text, not letterform art.
+// The dshc brand wordmark: coral burst + "DeepSeek Harness Claude" in the
+// display serif. Text-based on purpose — the product name is live text, not
+// letterform art.
 
 import { CoralBurst } from './CoralBurst.tsx'
 import type { IconProps } from './icons/props.ts'
@@ -38,7 +39,7 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
           color: 'inherit',
         }}
       >
-        Claude
+        DeepSeek Harness Claude
       </span>
     </span>
   )
