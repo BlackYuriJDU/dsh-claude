@@ -13,7 +13,7 @@ exports[`sidebar shell snapshots > renders the collapsed rail after the crossfad
       class="logoRow"
     >
       <button
-        aria-label="Abrir barra lateral"
+        aria-label="Open sidebar"
         class="iconButton toggle"
         type="button"
       >
@@ -57,14 +57,14 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
             <span
               class="fallbackBrandName"
             >
-              Claude
+              DeepSeek Harness Claude
             </span>
           </div>
         </span>
       </span>
     </div>
     <button
-      aria-label="Nova sessão"
+      aria-label="New session"
       class="newSession"
       type="button"
     >
@@ -79,11 +79,11 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
       <span
         class="newSessionLabel wide"
       >
-        Novo
+        New
       </span>
     </button>
     <nav
-      aria-label="Navegação"
+      aria-label="Navigation"
       class="navRows"
     >
       <button
@@ -104,7 +104,7 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
         <span
           class="navLabel"
         >
-          Projetos
+          Projects
         </span>
       </button>
       <button
@@ -125,36 +125,13 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
         <span
           class="navLabel"
         >
-          Artefatos
+          Artifacts
         </span>
       </button>
       <button
         class="navRow"
         disabled=""
-        title="Em breve"
-        type="button"
-      >
-        <span
-          class="navIcon"
-        >
-          <svg
-            aria-hidden="true"
-            data-content="385b197c"
-            height="16"
-            viewBox="0 0 16 16"
-            width="16"
-          />
-        </span>
-        <span
-          class="navLabel"
-        >
-          Código
-        </span>
-      </button>
-      <button
-        class="navRow"
-        disabled=""
-        title="Em breve"
+        title="Coming soon"
         type="button"
       >
         <span
@@ -171,7 +148,7 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
         <span
           class="navLabel"
         >
-          Personalizar
+          Personalize
         </span>
       </button>
     </nav>
@@ -200,18 +177,40 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
         </div>
       </div>
       <div
-        class="footRow"
+        class="footerActions"
       >
         <div
-          class="footerActions"
+          data-slot="sidebar.footer.action"
+          style="display: contents;"
         >
-          <div
-            data-slot="sidebar.footer.action"
-            style="display: contents;"
-          />
+          <button
+            class="navRow"
+            type="button"
+          >
+            <span
+              class="navIcon"
+            >
+              <svg
+                aria-hidden="true"
+                data-content="f05efdfd"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              />
+            </span>
+            <span
+              class="navLabel"
+            >
+              Design
+            </span>
+          </button>
         </div>
+      </div>
+      <div
+        class="footRow"
+      >
         <span
-          class="root"
+          class="root menuStretch"
         >
           <button
             aria-expanded="false"
@@ -222,14 +221,11 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
             <span
               aria-hidden="true"
               class="avatar"
-            >
-              A
-            </span>
+              style="background: var(--dsc-coral-500, #cc785c);"
+            />
             <span
               class="profileName"
-            >
-              Arthur
-            </span>
+            />
             <span
               aria-hidden="true"
               class="profileChevron"
@@ -242,12 +238,12 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
           class="footCluster"
         >
           <button
-            aria-label="Buscar conversas"
+            aria-label="Settings"
             class="iconButton"
             type="button"
           >
             <svg
-              data-content="4ca56c6d"
+              data-content="6d8cd466"
               fill="none"
               height="16"
               viewBox="0 0 16 16"
@@ -256,7 +252,7 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
             />
           </button>
           <button
-            aria-label="Recolher barra lateral"
+            aria-label="Collapse sidebar"
             class="iconButton"
             type="button"
           >
@@ -276,7 +272,7 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
 </div>
 `;
 
-exports[`sidebar shell snapshots > renders the expanded column in the default locale (zh, no setLocale) 1`] = `
+exports[`sidebar shell snapshots > renders the expanded column in the default locale (en, no setLocale) 1`] = `
 <div
   data-slot="sidebar"
   style="display: contents;"
@@ -302,14 +298,14 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
             <span
               class="fallbackBrandName"
             >
-              Claude
+              DeepSeek Harness Claude
             </span>
           </div>
         </span>
       </span>
     </div>
     <button
-      aria-label="新对话"
+      aria-label="New session"
       class="newSession"
       type="button"
     >
@@ -324,11 +320,11 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
       <span
         class="newSessionLabel wide"
       >
-        新对话
+        New
       </span>
     </button>
     <nav
-      aria-label="导航"
+      aria-label="Navigation"
       class="navRows"
     >
       <button
@@ -349,7 +345,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
         <span
           class="navLabel"
         >
-          项目
+          Projects
         </span>
       </button>
       <button
@@ -370,36 +366,13 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
         <span
           class="navLabel"
         >
-          工件
+          Artifacts
         </span>
       </button>
       <button
         class="navRow"
         disabled=""
-        title="即将上线"
-        type="button"
-      >
-        <span
-          class="navIcon"
-        >
-          <svg
-            aria-hidden="true"
-            data-content="385b197c"
-            height="16"
-            viewBox="0 0 16 16"
-            width="16"
-          />
-        </span>
-        <span
-          class="navLabel"
-        >
-          代码
-        </span>
-      </button>
-      <button
-        class="navRow"
-        disabled=""
-        title="即将上线"
+        title="Coming soon"
         type="button"
       >
         <span
@@ -416,7 +389,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
         <span
           class="navLabel"
         >
-          个性化
+          Personalize
         </span>
       </button>
     </nav>
@@ -445,18 +418,40 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
         </div>
       </div>
       <div
-        class="footRow"
+        class="footerActions"
       >
         <div
-          class="footerActions"
+          data-slot="sidebar.footer.action"
+          style="display: contents;"
         >
-          <div
-            data-slot="sidebar.footer.action"
-            style="display: contents;"
-          />
+          <button
+            class="navRow"
+            type="button"
+          >
+            <span
+              class="navIcon"
+            >
+              <svg
+                aria-hidden="true"
+                data-content="f05efdfd"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              />
+            </span>
+            <span
+              class="navLabel"
+            >
+              Design
+            </span>
+          </button>
         </div>
+      </div>
+      <div
+        class="footRow"
+      >
         <span
-          class="root"
+          class="root menuStretch"
         >
           <button
             aria-expanded="false"
@@ -467,14 +462,11 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
             <span
               aria-hidden="true"
               class="avatar"
-            >
-              A
-            </span>
+              style="background: var(--dsc-coral-500, #cc785c);"
+            />
             <span
               class="profileName"
-            >
-              Arthur
-            </span>
+            />
             <span
               aria-hidden="true"
               class="profileChevron"
@@ -487,12 +479,12 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
           class="footCluster"
         >
           <button
-            aria-label="搜索对话"
+            aria-label="Settings"
             class="iconButton"
             type="button"
           >
             <svg
-              data-content="4ca56c6d"
+              data-content="6d8cd466"
               fill="none"
               height="16"
               viewBox="0 0 16 16"
@@ -501,7 +493,7 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
             />
           </button>
           <button
-            aria-label="收起侧边栏"
+            aria-label="Collapse sidebar"
             class="iconButton"
             type="button"
           >

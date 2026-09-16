@@ -85,8 +85,8 @@
 }
 
 /* Logo row: expanded carries the serif wordmark alone (the reference has no
-   toggle beside it — the collapse control moved to the content column's
-   floating button and the profile foot); the rail keeps its toggle. */
+   toggle beside it — the collapse control lives in the profile foot's
+   cluster); the rail keeps its toggle. */
 .logoRow {
   flex: none;
   display: flex;
@@ -274,8 +274,10 @@
   padding-left: 0;
 }
 
-/* Footer seats: additive actions stack above Settings. Each occupant owns its
-   button geometry and hover chrome. */
+/* Footer seats: additive actions stack above the profile pill as full-width
+   rows (the reference's Design row). The unoccupied seat renders no boxes —
+   the seat wrapper is zero-height — so the pill and its cluster keep the row.
+   Each occupant owns its button geometry and hover chrome. */
 .footArea {
   flex: none;
   display: flex;
@@ -291,6 +293,7 @@
 
 .footerActions {
   display: flex;
+  flex-direction: column;
 }
 
 .collapsed .footArea {
@@ -375,6 +378,13 @@
   margin: 0 2px 2px;
 }
 
+/* The Menu's anchor wrapper is the row's flex item: stretch it so the pill
+   (flex: 1 inside the wrapper) fills the row left of the control cluster. */
+.menuStretch {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
 .profileRow {
   flex: 1;
   min-width: 0;
@@ -415,6 +425,13 @@
   color: var(--dsw-alias-label-primary);
   font-size: 12px;
   font-weight: 500;
+  overflow: hidden;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profileName {

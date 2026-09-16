@@ -35,6 +35,12 @@ const SCROLLBAR_LINGER_MS = 2000
 /** Window event the browser region listens to: expand + focus its search. */
 export const SIDEBAR_SEARCH_EVENT = 'dshc:sidebar-search'
 
+/** Window event the Design footer row dispatches: open the shell's Artefatos modal. */
+export const SIDEBAR_DESIGN_EVENT = 'dshc:sidebar-design'
+
+/** The help destination (this fork's repository). */
+const HELP_URL = 'https://github.com/BlackYuriJDU/dsh-claude'
+
 /** Line icons for the feature nav rows and the profile popover (16px grid). */
 const stroke = {
   fill: 'none',
@@ -59,12 +65,6 @@ const IconArtifacts = (
   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
     <path {...fill} d="M8 2.2 9.6 6 13.4 7.6 9.6 9.2 8 13 6.4 9.2 2.6 7.6 6.4 6 8 2.2Z" />
     <path {...fill} d="M12.6 11.2l.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7.7-1.7Z" />
-  </svg>
-)
-
-const IconCode = (
-  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-    <path {...stroke} d="m5.4 4.6-3.4 3.4 3.4 3.4M10.6 4.6 14 8l-3.4 3.4" />
   </svg>
 )
 
@@ -94,19 +94,21 @@ const IconHelp = (
 const USER_NAME_STORE_KEY = 'dshc:user-name'
 /** localStorage key holding the displayed owner email (popover heading). */
 const USER_EMAIL_STORE_KEY = 'dshc:user-email'
-const DEFAULT_USER_NAME = 'Arthur'
+/** localStorage key holding the owner avatar (data URL; the settings Perfil row owns it). */
+const USER_AVATAR_STORE_KEY = 'dshc:avatar'
+/** Window event the settings' profile rows dispatch: profile facts changed. */
+const PROFILE_UPDATED_EVENT = 'dshc:profile-updated'
 
 /**
- * The displayed owner name: the localStorage override when present, else the
- * built-in default.
+ * The displayed owner name: the localStorage override when present, else
+ * empty — an unset name is the onboarding's signal to ask (light popup).
  * @returns the profile row name.
  */
 function ownerNameOf(): string {
   try {
-    const stored = window.localStorage.getItem(USER_NAME_STORE_KEY)?.trim()
-    return stored !== undefined && stored !== '' ? stored : DEFAULT_USER_NAME
+    return window.localStorage.getItem(USER_NAME_STORE_KEY)?.trim() ?? ''
   } catch {
-    return DEFAULT_USER_NAME
+    return ''
   }
 }
 
@@ -122,6 +124,24 @@ function ownerEmailOf(): string {
   }
 }
 
+/** Avatar fills the reference ships: warm, humanist, distinct per person. */
+const AVATAR_COLORS = [
+  'var(--dsc-coral-500, #cc785c)', '#8f7ce8', '#4f9bb6', '#b78a52',
+  '#7fa265', '#c46a8a', '#6a85c9', '#b08d5f',
+] as const
+
+/**
+ * Pick the avatar fill for a name: a hash across the palette, so the color
+ * is arbitrary (name-shuffled) yet stable across remounts and reloads.
+ * @param name - the displayed owner name.
+ * @returns a CSS color value.
+ */
+function avatarColorOf(name: string): string {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!
+}
+
 /**
  * Render the sidebar column shell.
  * @param props - composed slot props (runtime share + injected callbacks, contract/slots.ts).
@@ -132,6 +152,7 @@ export function SidebarRoot({
   width,
   startSession,
   toggleSidebar,
+  locale,
   useWorkspaces,
   workspaces,
   t,
@@ -204,14 +225,43 @@ export function SidebarRoot({
     window.dispatchEvent(new CustomEvent(SIDEBAR_SEARCH_EVENT))
   }
 
+  // The Design footer row (an additive occupant of the footer-action seat)
+  // opens the shell's own Artefatos modal through the same window-event seam.
+  useEffect(() => {
+    const openDesign = (): void => { setArtifactsOpen(true) }
+    window.addEventListener(SIDEBAR_DESIGN_EVENT, openDesign)
+    return () => { window.removeEventListener(SIDEBAR_DESIGN_EVENT, openDesign) }
+  }, [])
+
   // Projetos / Artefatos modals.
   const [projectsOpen, setProjectsOpen] = useState(false)
   const [artifactsOpen, setArtifactsOpen] = useState(false)
 
+  // dshc: the owner avatar (a data URL the settings Perfil row owns) — the
+  // letter fallback stays for an unset avatar, and the settings surface
+  // announces changes through the profile event.
+  const [avatar, setAvatar] = useState<string>(() => {
+    try {
+      return window.localStorage.getItem(USER_AVATAR_STORE_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  useEffect(() => {
+    const syncAvatar = (): void => {
+      try {
+        setAvatar(window.localStorage.getItem(USER_AVATAR_STORE_KEY) ?? '')
+      } catch {
+        // Storage denied: the letter fallback stands.
+      }
+    }
+    window.addEventListener(PROFILE_UPDATED_EVENT, syncAvatar)
+    return () => { window.removeEventListener(PROFILE_UPDATED_EVENT, syncAvatar) }
+  }, [])
+
   const navRows: readonly { id: string; label: string; icon: ReactNode; open: (() => void) | undefined }[] = [
     { id: 'projects', label: t('nav.projects'), icon: IconProjects, open: () => { setProjectsOpen(true) } },
     { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts, open: () => { setArtifactsOpen(true) } },
-    { id: 'code', label: t('nav.code'), icon: IconCode, open: undefined },
     { id: 'customize', label: t('nav.customize'), icon: IconCustomize, open: undefined },
   ]
 
@@ -234,7 +284,7 @@ export function SidebarRoot({
           <span className={css.brandIdentity} aria-hidden="true">
             <span className={css.brandName}>
               {renderSlot('sidebar.brand.name', {}, {
-                fallback: <span className={css.fallbackBrandName}>Claude</span>,
+                fallback: <span className={css.fallbackBrandName}>DeepSeek Harness Claude</span>,
               })}
             </span>
           </span>
@@ -305,11 +355,13 @@ export function SidebarRoot({
               {renderSlot('sidebar.settings', { wide })}
             </div>
           </div>
+          {/* Additive action rows sit above the profile pill as full-width
+              rows (the reference's Design row); the unoccupied seat renders
+              no boxes, so the pill and its cluster keep their seat. */}
+          <div className={css.footerActions}>
+            {renderSlot('sidebar.footer.action', { wide })}
+          </div>
           <div className={css.footRow}>
-            {/* Additive action seat beside the profile pill (contract). */}
-            <div className={css.footerActions}>
-              {renderSlot('sidebar.footer.action', { wide })}
-            </div>
             <Menu
               open={profileOpen}
               anchor={(
@@ -321,8 +373,14 @@ export function SidebarRoot({
                   aria-expanded={profileOpen}
                   onClick={() => { setProfileOpen(open => !open) }}
                 >
-                  <span className={css.avatar} aria-hidden="true">
-                    {ownerNameOf().charAt(0).toUpperCase()}
+                  <span
+                    className={css.avatar}
+                    aria-hidden="true"
+                    style={avatar === '' ? { background: avatarColorOf(ownerNameOf()) } : undefined}
+                  >
+                    {avatar === ''
+                      ? ownerNameOf().charAt(0).toUpperCase()
+                      : <img className={css.avatarImage} src={avatar} alt="" />}
                   </span>
                   <span className={css.profileName}>{ownerNameOf()}</span>
                   <span className={css.profileChevron} aria-hidden>⌄</span>
@@ -330,27 +388,35 @@ export function SidebarRoot({
               )}
               items={[
                 ...(ownerEmailOf() === '' ? [] : [{ type: 'label' as const, id: 'email', text: ownerEmailOf() }]),
-                { id: 'settings', label: t('profile.settings'), icon: <IconSettingsOutline16 size={16} /> },
-                { id: 'language', label: t('profile.language'), icon: IconLanguage },
+                { id: 'search', label: t('profile.search'), icon: <IconSearchOutline16 size={16} /> },
+                {
+                  id: 'language',
+                  label: t('profile.language'),
+                  icon: IconLanguage,
+                  submenu: locale.options().map(option => ({ id: option.id, label: option.label })),
+                },
                 { id: 'help', label: t('profile.help'), icon: IconHelp },
               ]}
               onSelect={(id) => {
                 setProfileOpen(false)
-                if (id === 'settings') openSettings()
+                if (id === 'search') requestSearch()
+                else if (id === 'pt' || id === 'en') locale.set(id)
+                else if (id === 'help') window.open(HELP_URL, '_blank', 'noopener,noreferrer')
               }}
               onClose={() => { setProfileOpen(false) }}
               align="start"
               side="top"
+              className={clsx(css.menuStretch)}
             />
             <div className={css.footCluster}>
-              <Tooltip label={t('profile.search')} delayMs={500}>
+              <Tooltip label={t('profile.settings')} delayMs={500}>
                 <button
                   type="button"
                   className={css.iconButton}
-                  aria-label={t('profile.search')}
-                  onClick={requestSearch}
+                  aria-label={t('profile.settings')}
+                  onClick={openSettings}
                 >
-                  <IconSearchOutline16 size={16} />
+                  <IconSettingsOutline16 size={16} />
                 </button>
               </Tooltip>
               <Tooltip label={t('toggle.collapse')} delayMs={500}>

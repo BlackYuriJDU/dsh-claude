@@ -19,6 +19,13 @@ const t: SidebarRootComponentProps['t'] = key => (en as Record<string, string>)[
 /** The shell never reads the global hooks; the props share carries them regardless. */
 const neverHook = (() => { throw new Error('shell must not read global hooks') }) as never
 
+/** Inert locale face: these specs exercise only the pointer/scrollbar state. */
+const locale = {
+  active: () => 'pt',
+  options: () => [{ id: 'pt', label: 'Português' }, { id: 'en', label: 'English' }],
+  set: () => {},
+}
+
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
@@ -34,6 +41,7 @@ function mountColumn(): { column: HTMLElement; quiet: () => boolean } {
       collapsed={false} width={300}
       useSessions={neverHook} useWorkspaces={neverHook}
       startSession={vi.fn()} toggleSidebar={vi.fn()} t={t}
+      locale={locale}
       renderSlot={((_key: string, owner: SidebarSectionOwnerProps) =>
         <div data-testid="region" data-wide={owner.wide} />) as SidebarRootComponentProps['renderSlot']}
     />,

@@ -40,8 +40,9 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      */
     'sidebar.settings': { kind: 'single'; scope: 'root'; owner: SidebarSettingsOwnerProps }
     /**
-     * Optional actions beside Settings at the sidebar foot. Declared by this
-     * package's 'sidebar' entry; each action receives only the column state.
+     * Optional full-width action rows above the profile pill at the sidebar
+     * foot. Declared by this package's 'sidebar' entry; each action receives
+     * only the column state.
      */
     'sidebar.footer.action': { kind: 'list'; scope: 'root'; owner: SidebarFooterActionOwnerProps }
   }
@@ -102,6 +103,8 @@ export type SidebarRootInjected = {
   startSession: (workspaceId?: WorkspaceId) => void
   /** Toggle the sidebar column through the layout service. */
   toggleSidebar: () => void
+  /** The locale face the profile popover's Idioma submenu rides. */
+  locale: SidebarLocaleInjected
   /** Write actions the shell's Projetos modal wires. */
   workspaces: {
     /** Connect a Workspace to its reusable-or-fresh blank session and open it. */
@@ -113,6 +116,21 @@ export type SidebarRootInjected = {
     /** Open a filesystem path with the Host OS default application. */
     openPath: (path: string) => Promise<void>
   }
+}
+
+/**
+ * The popover's locale face: snapshot reads evaluated at render time (a
+ * popover opening re-renders, so getter reads are fresh enough for a menu)
+ * plus the durable preference write. Read through the runtime's locale
+ * service, never a value import (bundle purity).
+ */
+export type SidebarLocaleInjected = {
+  /** Active locale id at call time. */
+  active: () => string
+  /** Selectable locales (id + self-described label) at call time. */
+  options: () => readonly { id: string; label: string }[]
+  /** Switch the active locale (durable preference). */
+  set: (id: string) => void
 }
 
 /**
