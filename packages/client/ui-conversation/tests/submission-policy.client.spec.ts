@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest'
 import { stubSettingsScope } from '@deepseek-ai/dsh-client-test-runtime'
-import {
-  ComposerSubmissionPolicy, DEFAULT_BUSY_ENTER_BEHAVIOR,
-} from '../src/client/input/submission-policy.ts'
+import { ComposerSubmissionPolicy, DEFAULT_BUSY_ENTER_BEHAVIOR } from '../src/client/input/submission-policy.ts'
 import type { ConversationSettings } from '../src/submission-settings.ts'
 
 describe('ComposerSubmissionPolicy', () => {

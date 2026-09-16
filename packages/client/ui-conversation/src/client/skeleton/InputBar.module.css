@@ -64,6 +64,17 @@ body[data-ds-dark-theme] .segmentActive {
   padding: 0 var(--dsh-composer-side-clearance) 8px;
 }
 
+/* dshc: the under-card model seat row (session mode only) — the capsule
+   carries + / mic / send, the model reads below it, right-aligned. */
+.underRow {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: var(--dsh-composer-card-max-width);
+  padding: 4px 4px 0;
+  box-sizing: border-box;
+}
+
 .hero {
   /* No bottom pad in the centered hero, but the side clearance must survive:
      the hero wrapper is full-width on narrow viewports, so this padding is

@@ -10,6 +10,10 @@
   min-width: 0;
   background: var(--dsw-alias-bg-base);
 
+  /* dshc: the Chat-font preference (ui-theme) points this variable at the
+     selected stack; headings override with the display face. */
+  font-family: var(--dsh-chat-font-family, var(--dsw-font-family));
+
   /* Shared width axis for the whole column: one content width W
      (--dsh-chat-content-width) for the transcript, the dock cards
      (todo/goal/queue: card minus four insets, 4 x 8 = 32), and the takeover

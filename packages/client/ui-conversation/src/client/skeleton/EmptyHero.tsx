@@ -60,7 +60,9 @@ function greetingKeyOf(): 'morning' | 'afternoon' | 'evening' {
  */
 export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
   const greeting = t(`hero.greeting.${greetingKeyOf()}`)
-  const headline: ReactNode = `${greeting}, ${ownerNameOf()}`
+  const storedName = ownerNameOf()
+  // An unset name (the onboarding popup will ask for it) greets bare.
+  const headline: ReactNode = storedName === '' ? greeting : `${greeting}, ${storedName}`
   return (
     <div className={css.root}>
       <div className={css.stack}>
