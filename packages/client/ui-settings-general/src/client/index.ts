@@ -21,11 +21,14 @@ import type {
 } from './shell-contract.ts'
 import { SettingsRoot } from './SettingsRoot.tsx'
 import { CloseLabel, HeaderContent, TriggerContent } from './chrome.tsx'
+import { AccountSection } from './AccountSection.tsx'
 import { GeneralSection } from './GeneralSection.tsx'
+import { SoonSection } from './SoonSection.tsx'
+import type { ProfileSection } from './ProfileRows.tsx'
 import { SettingsDocumentAction } from './SettingsDocumentAction.tsx'
 import type { SettingsDocumentActionInjected } from './SettingsDocumentAction.tsx'
 import { SettingsDocumentStore } from './settings-document-store.ts'
-import { en, zh, type SettingsKey } from './locales.ts'
+import { en, pt, type SettingsKey } from './locales.ts'
 
 export type {
   CloseLabelProps, HeaderContentProps, TriggerContentProps,
@@ -33,6 +36,13 @@ export type {
 export type {
   GeneralSectionComponentProps,
 } from './GeneralSection.tsx'
+export type { AccountSectionComponentProps, AccountSectionInjected } from './AccountSection.tsx'
+export { AccountSection } from './AccountSection.tsx'
+export type { ProfileSection } from './ProfileRows.tsx'
+export {
+  PROFILE_UPDATED_EVENT, ProfileRows, USER_AVATAR_STORE_KEY,
+  avatarDataUrlOf, ownerAvatarOf, ownerAvatarSet,
+} from './ProfileRows.tsx'
 export type { SettingsDocumentActionInjected, SettingsDocumentActionProps } from './SettingsDocumentAction.tsx'
 export type { SettingsDocumentState } from './settings-document-store.ts'
 export { SettingsDocumentStore } from './settings-document-store.ts'
@@ -61,13 +71,17 @@ export const inject = ['slots', 'locale', 'connection', 'settingsScope']
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-settings-general: dictionaries')
+  ctx.effect(() => ctx.locale.register(NS, { en, pt }), 'ui-settings-general: dictionaries')
 
   // Copy freshness is framework-owned: components read the standard `t`
   // seat, and the nav label is a thunk the owner resolves per render — no
   // locale/change re-registration wiring.
   const t = ctx.locale.bind(NS)
   const connection = ctx.get('connection') as ConnectionHandle
+  // The durable profile scope (ui-onboarding) feeds the General Perfil block
+  // and the Account section; the schema tolerates the new fields today, so
+  // both work before the host schema declaration lands (next restart).
+  const profileHost = ctx.settingsScope.bind<ProfileSection>({ namespace: 'ui-onboarding' })
   // The action follows the shared describe mirror, whose owning plugin
   // already refreshes it on document commits and reconnects.
   const documentController = connection.isLoopback
@@ -83,13 +97,21 @@ export function apply(ctx: ClientContext): void {
   // The settings shell: this package occupies the sidebar-owned hole and
   // declares the settings slots. Ledger → nav-row projection as an observable
   // source (uSES contract: getSnapshot returns the cached rows until the
-  // ledger version moves). Labels may be locale-following thunks, so the cache
-  // key includes the locale revision and subscribers ride both sources.
+  // ledger version moves). Labels may be locale-following thunks, so the
+  // cache key includes the locale revision and subscribers ride both sources.
+  // Group + soon flags are shell-owned (deployment vocabulary): sections this
+  // deployment knows render under the two reference groups; unknown ids land
+  // on the Configurações group.
   let rowsVersion = -1
   let rowsRevision = -1
   let rows: readonly SettingsSectionRow[] = []
   let onboardingVersion = -1
   let onboardingSteps: readonly SettingsOnboardingStep[] = []
+  const GROUP_BY_ID: Record<string, SettingsSectionRow['group']> = {
+    general: 'config', account: 'config', models: 'config',
+    skills: 'personalize', connectors: 'personalize', plugins: 'personalize', memory: 'personalize',
+  }
+  const SOON_IDS = new Set(['connectors', 'plugins'])
   const shellInjected = (): SettingsRootInjected => ({
     hooks: {
       sections: {
@@ -107,6 +129,13 @@ export function apply(ctx: ClientContext): void {
                 label: resolveSlotLabel(e.options.label) ?? '',
               }))
               .sort((a, b) => a.order - b.order)
+              .map(row => ({
+                ...row,
+                group: GROUP_BY_ID[row.id] ?? 'config',
+                // exactOptionalPropertyTypes: the flags only appear on soon
+                // rows (a spread, never an explicit undefined).
+                ...(SOON_IDS.has(row.id) ? { soon: true as const, soonLabel: t('soon') } : {}),
+              }))
           }
           return rows
         },
@@ -137,6 +166,7 @@ export function apply(ctx: ClientContext): void {
         subscribe: listener => ctx.slots.subscribe('settings.onboarding', listener),
       },
     },
+    groupLabels: () => ({ config: t('group.config'), personalize: t('group.personalize') }),
   })
   ctx.slots.inject('sidebar.settings', () => ctx.slots.register({
     name: 'sidebar.settings',
@@ -166,12 +196,40 @@ export function apply(ctx: ClientContext): void {
   }
   ctx.slots.inject('settings.close', () =>
     ctx.slots.register({ name: 'settings.close', locale: NS }, CloseLabel))
+  // General: the shell-owned Perfil block plus the feature preference rows.
   ctx.slots.inject('settings.section', () => ctx.slots.register({
     name: 'settings.section',
     id: 'general',
     order: 0,
     label: () => t('general.nav'),
     locale: NS,
+    inject: () => ({ profile: profileHost }),
     children: { 'settings.general.item': { kind: 'list', scope: 'root' } },
   }, GeneralSection))
+  // Conta: the current email, read-only, from the same durable profile scope.
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
+    id: 'account',
+    order: 1,
+    label: () => t('account.nav'),
+    locale: NS,
+    inject: () => ({ profile: profileHost }),
+  }, AccountSection))
+  // Conectores / Plugins: the reference's "coming soon" placeholders. The
+  // shell owns both rows (the projection marks them soon); their components
+  // render null — the nav never selects them.
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
+    id: 'connectors',
+    order: 11,
+    label: () => t('connectors.nav'),
+    locale: NS,
+  }, SoonSection))
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
+    id: 'plugins',
+    order: 12,
+    label: () => t('plugins.nav'),
+    locale: NS,
+  }, SoonSection))
 }

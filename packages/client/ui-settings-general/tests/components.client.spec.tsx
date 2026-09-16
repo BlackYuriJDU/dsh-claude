@@ -53,7 +53,17 @@ describe('GeneralSection', () => {
     const renderSlot = vi.fn(
       ((key: string) => <div data-testid={`slot-${key}`} />) as GeneralSectionComponentProps['renderSlot'],
     )
-    const props: GeneralSectionComponentProps = { ...kit, renderSlot, close: vi.fn() }
+    const snapshot = {
+      status: 'ready' as const, value: {}, base: {}, user: {},
+      revision: 0, writable: true, mode: 'host' as const,
+    }
+    const profile: GeneralSectionComponentProps['profile'] = {
+      getSnapshot: () => snapshot,
+      subscribe: () => () => {},
+      set: vi.fn(async () => {}),
+      unset: vi.fn(async () => {}),
+    }
+    const props: GeneralSectionComponentProps = { ...kit, renderSlot, close: vi.fn(), t, profile }
     const view = render(<GeneralSection {...props} />)
     return { view, renderSlot }
   }
