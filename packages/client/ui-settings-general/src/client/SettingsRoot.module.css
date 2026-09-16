@@ -118,6 +118,35 @@
   gap: 4px;
 }
 
+/* Nav group: a small section header (Configurações / Personalizar) above its
+   cell stack, per the reference rail. */
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navGroupLabel {
+  padding: 10px 12px 2px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary);
+  user-select: none;
+}
+
+.navSoon {
+  flex: none;
+  margin-left: auto;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.navCell:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
 /* Nav cell (figma .Setting-nav-cell 501:29962): 164x40, r12, pad
    (12,9,16,9), gap 8; label 14/400 lh22; selected fill #EBEEF2. */
 .navCell {

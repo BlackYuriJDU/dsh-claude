@@ -53,6 +53,7 @@ function mount({
     useSessions,
     useWorkspaces: unusedHook,
     wide,
+    groupLabels: () => ({ config: 'Settings', personalize: 'Personalize' }),
     useOnboardingSteps: select => select(steps),
     useSections: (select) => {
       const [, force] = useState(0)
