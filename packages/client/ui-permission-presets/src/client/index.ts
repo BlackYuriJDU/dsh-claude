@@ -25,11 +25,7 @@ import type { ClientContext, SessionFace } from '@deepseek-ai/dsh-client-runtime
 import type { CommandUiContract, SelectOption } from '@deepseek-ai/dsh-client-ui-commands/client'
 import type { ClientSessionContext } from '@deepseek-ai/dsh-client-ui-input-trigger/client'
 import type { PermissionSelect } from '@deepseek-ai/dsh-permission-presets/client'
-import { PermissionRow } from './PermissionRow.tsx'
-import type { PermissionRowInjected } from './PermissionRow.tsx'
-import {
-  accessEn, accessZh, en, zh,
-} from './locales.ts'
+import { accessEn, en } from './locales.ts'
 import {
   displayPermissionPreset, FULL_ACCESS_PRESET,
 } from './presentation.ts'
@@ -85,53 +81,29 @@ export function apply(ctx: ClientContext): void {
   // owns the same safety copy under its own locale namespace.
   /* jscpd:ignore-start */
   ctx.effect(() => {
-    const disposers = [
-      ctx.locale.register(ACCESS_NS, 'zh', {
-        'confirm.title': accessZh['confirm.title'],
-        'confirm.description': accessZh['confirm.description'],
-        'confirm.acknowledge': accessZh['confirm.acknowledge'],
-        'confirm.cancel': accessZh['confirm.cancel'],
-        'confirm.enable': accessZh['confirm.enable'],
-      }),
-      ctx.locale.register(ACCESS_NS, 'en', {
-        'confirm.title': accessEn['confirm.title'],
-        'confirm.description': accessEn['confirm.description'],
-        'confirm.acknowledge': accessEn['confirm.acknowledge'],
-        'confirm.cancel': accessEn['confirm.cancel'],
-        'confirm.enable': accessEn['confirm.enable'],
-      }),
-    ]
-    return () => { for (const dispose of disposers) dispose() }
+    return ctx.locale.register(ACCESS_NS, 'en', {
+      'confirm.title': accessEn['confirm.title'],
+      'confirm.description': accessEn['confirm.description'],
+      'confirm.acknowledge': accessEn['confirm.acknowledge'],
+      'confirm.cancel': accessEn['confirm.cancel'],
+      'confirm.enable': accessEn['confirm.enable'],
+    })
   }, 'ui-permission: Full access confirmation dictionaries')
   /* jscpd:ignore-end */
   const t = ctx.locale.bind(ACCESS_NS)
   const sessionFor = (session: ClientSessionContext): SessionFace | undefined =>
     sessions.binding(session.sessionId)?.session
 
-  ctx.effect(() => ctx.locale.register('settings.permission', { zh, en }), 'ui-permission: settings row dictionaries')
+  ctx.effect(() => ctx.locale.register('settings.permission', { en }), 'ui-permission: settings row dictionaries')
 
   const connection = ctx.get('connection') as ConnectionHandle
-  // The row follows the shared describe mirror, whose owning plugin already
-  // refreshes it on document commits and reconnects.
+  // dshc: the General-settings row left the reworked General section (the
+  // permission posture is deployment-fixed); the /permission decoration below
+  // keeps its controller — the store stays mounted for it.
   const controller = new PermissionPresetSettingsController(
     ctx.settingsScope.describe(), connection.api, ctx.settingsSchema)
-  const load = (): Promise<void> => controller.load()
-  const select = (preset: string): Promise<void> => controller.select(preset)
-  const injected = (): PermissionRowInjected => ({
-    hooks: { permission: controller.store },
-    load,
-    select,
-  })
 
   ctx.effect(() => () => { controller.dispose() }, 'ui-permission: settings row directory')
-
-  ctx.slots.inject('settings.general.item', () => ctx.slots.register({
-    name: 'settings.general.item',
-    id: 'permission',
-    order: -20,
-    locale: 'settings.permission',
-    inject: injected,
-  }, PermissionRow))
 
   ctx.effect(() => command.decorate({
     name: 'permission',

@@ -16,9 +16,7 @@ import { TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply as settingsApply, inject as settingsInject } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { CommandDecoration } from '@deepseek-ai/dsh-client-ui-commands/client'
 import type { PermissionSelect } from '@deepseek-ai/dsh-permission-presets/client'
-import {
-  PermissionRow, type PermissionRowInjected,
-} from '../src/client/PermissionRow.tsx'
+import { PermissionRow } from '../src/client/PermissionRow.tsx'
 import { apply, inject } from '../src/client/index.ts'
 import { accessEn } from '../src/client/locales.ts'
 
@@ -104,14 +102,8 @@ describe('ui-permission browser plugin', () => {
     const c = b.decoration()!
     expect(c.name).toBe('permission')
     expect(c.ui.kind).toBe('popupSelect')
-    const row = b.permissionRow()!
-    expect(row.options).toEqual({ id: 'permission', order: -20 })
-    const injected = row.inject?.() as PermissionRowInjected | undefined
-    expect(injected?.hooks.permission).toBeDefined()
-    expect(typeof injected?.load).toBe('function')
-    expect(typeof injected?.select).toBe('function')
-    await injected!.load()
-    await injected!.select('read-only')
+    // The command remains available without restoring the retired Settings row.
+    expect(b.permissionRow()).toBeUndefined()
   })
 
   it('availability follows the projection key; options mark the current value active and exclude custom', async () => {

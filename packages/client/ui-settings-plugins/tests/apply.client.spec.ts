@@ -9,12 +9,12 @@ import { TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply as settingsApply, inject as settingsInject } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { apply, inject } from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
 import type {
-  ConfigurablePluginsTabFace, PluginsSettingsSectionInjected,
+  ConfigurablePluginsTabFace,
 } from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
 
-// These specs assert the shipped Chinese copy. The lane has no jsdom `window`,
+// These specs assert the shipped English copy. The lane has no jsdom `window`,
 // so browser-language detection never runs and a fresh LocaleRuntime opens on
-// FALLBACK_LOCALE (en); bench stages zh explicitly on the locale instead.
+// FALLBACK_LOCALE (en) — the single shipped locale the bench reads.
 
 /**
  * @param served - namespaces the Host describes; omitted answers a failed read,
@@ -24,7 +24,6 @@ async function bench(served?: string[]) {
   const ctx = new Context()
   await ctx.plugin(SlotRegistry).await()
   const locale = new LocaleRuntime(ctx)
-  locale.setLocale('zh')
   ctx.provide('locale', locale)
   const describeCredentials = vi.fn(() => Promise.resolve({ rpcId: 'c', result: { ok: false, error: {} } }))
   const describeSettings = vi.fn(() => Promise.resolve(served === undefined
@@ -64,26 +63,28 @@ function declareRoot(slots: SlotRegistry): () => void {
   } as never, () => null)
 }
 
+/** An optional external surface can still activate the retained tab/cards. */
+function declareTabs(slots: SlotRegistry): () => void {
+  return slots.register({
+    name: 'root',
+    id: 'test-plugin-surface',
+    priority: 1,
+    children: { 'settings.plugins.tab': { kind: 'list', scope: 'root' } },
+  } as never, () => null)
+}
+
 describe('ui-settings-plugins apply', () => {
   it('declares the services it uses', () => {
     expect(inject).toEqual(['slots', 'locale', 'connection', 'remote', 'settingsScope'])
   })
 
-  it('registers one Plugins section and declares the tab and card slots', async () => {
+  it('leaves the retired Plugins section and its descendants absent', async () => {
     const { ctx, slots } = await bench()
     declareRoot(slots)
-
     await ctx.plugin({ inject: [...inject], apply }).await()
-
-    const section = slots.entries('settings.section')[0]!
-    expect(section.options).toMatchObject({ id: 'plugins', order: 15 })
-    // The nav label is a locale-following thunk; owners resolve it at read time.
-    expect(resolveSlotLabel(section.options.label)).toBe('插件')
-    expect(slots.spec('settings.plugins.tab')).toMatchObject({ kind: 'list', scope: 'root' })
-    const tab = slots.entries('settings.plugins.tab')[0]!
-    expect(tab.options).toMatchObject({ id: 'configurable', order: 0 })
-    expect(resolveSlotLabel(tab.options.label)).toBe('插件配置')
-    expect(slots.spec('settings.plugin.item')).toMatchObject({ kind: 'keyed', scope: 'root' })
+    expect(slots.entries('settings.section')).toEqual([])
+    expect(slots.spec('settings.plugins.tab')).toBeUndefined()
+    expect(slots.entries('settings.plugin.item')).toEqual([])
   })
 
 
@@ -92,22 +93,10 @@ describe('ui-settings-plugins apply', () => {
     declareRoot(slots)
     await ctx.plugin({ inject: [...inject], apply }).await()
 
-    const section = slots.entries('settings.section')[0]!
-    const sectionFace = (section.inject as unknown as () => PluginsSettingsSectionInjected)()
-    const initialTabs = sectionFace.hooks.tabs.getSnapshot()
-    expect(initialTabs).toEqual([
-      { id: 'configurable', order: 0, label: '插件配置' },
-    ])
-    expect(sectionFace.hooks.tabs.getSnapshot()).toBe(initialTabs)
-
-    const listener = vi.fn()
-    const unsubscribe = sectionFace.hooks.tabs.subscribe(listener)
-    slots.register({ name: 'settings.plugins.tab', id: 'plain' } as never, () => null)
-    expect(sectionFace.hooks.tabs.getSnapshot()).toEqual([
-      { id: 'configurable', order: 0, label: '插件配置' },
-      { id: 'plain', order: 0, label: '' },
-    ])
-    unsubscribe()
+    declareTabs(slots)
+    expect(slots.entries('settings.section')).toEqual([])
+    expect(resolveSlotLabel(slots.entries('settings.plugins.tab')[0]!.options.label))
+      .toBe('Plugin configuration')
 
     const tab = slots.entries('settings.plugins.tab')[0]!
     const tabFace = (tab.inject as unknown as () => ConfigurablePluginsTabFace)()
@@ -125,6 +114,7 @@ describe('ui-settings-plugins apply', () => {
 
     await ctx.plugin({ inject: [...inject], apply }).await()
 
+    declareTabs(slots)
     expect(slots.entries('settings.plugin.item').map(entry => entry.options.key))
       .toEqual(['shell', 'agent-loop', 'web-search-deepseek'])
   })
@@ -136,6 +126,7 @@ describe('ui-settings-plugins apply', () => {
     declareRoot(slots)
     await ctx.plugin({ inject: [...inject], apply }).await()
 
+    declareTabs(slots)
     const tab = slots.entries('settings.plugins.tab')[0]!
     const face = (tab.inject as unknown as () => ConfigurablePluginsTabFace)()
     await vi.waitFor(() => {
@@ -202,14 +193,16 @@ describe('ui-settings-plugins apply', () => {
     const { ctx, slots } = await bench()
     await ctx.plugin({ inject: [...inject], apply }).await()
 
-    declareRoot(slots)
+    declareTabs(slots)
 
-    await vi.waitFor(() => { expect(slots.entries('settings.section')).toHaveLength(1) })
+    await vi.waitFor(() => { expect(slots.entries('settings.plugins.tab')).toHaveLength(1) })
+    expect(slots.entries('settings.section')).toEqual([])
   })
 
   it('collapses every contribution on teardown', async () => {
     const { ctx, slots } = await bench()
     declareRoot(slots)
+    const removeSurface = declareTabs(slots)
     const fiber = ctx.plugin({ inject: [...inject], apply })
     await fiber.await()
     expect(slots.entries('settings.plugin.item')).toHaveLength(3)
@@ -217,6 +210,8 @@ describe('ui-settings-plugins apply', () => {
     await fiber.dispose()
 
     expect(slots.entries('settings.section')).toHaveLength(0)
+    expect(slots.entries('settings.plugins.tab')).toEqual([])
+    removeSurface()
     expect(slots.spec('settings.plugins.tab')).toBeUndefined()
     expect(slots.spec('settings.plugin.item')).toBeUndefined()
   })
