@@ -2,10 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 import type { TrajectoryCellProps } from '../src/client/trajectory-record.ts'
-import {
-  groupTrajectoryVirtualRows, trajectoryVirtualRecordKey,
-  type VirtualizableTrajectoryRecord,
-} from '../src/client/trajectory-virtual-rows.ts'
+import { groupTrajectoryVirtualRows, trajectoryVirtualRecordKey, type VirtualizableTrajectoryRecord } from '../src/client/trajectory-virtual-rows.ts'
 
 function record(
   index: number,

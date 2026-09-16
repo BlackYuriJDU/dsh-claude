@@ -6,18 +6,18 @@ import type {
   SessionId, SessionListState, SessionSummary, WorkspaceId, WorkspaceListState, WorkspaceView,
 } from '@deepseek-ai/dsh-client-runtime/client'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
-import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
+import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
 import type { WorkspaceBrowserProps } from '../src/client/contract/slots.ts'
 import { createWorkspaceViewStore, FLAT_SESSION_ORDER_KEY } from '../src/client/stores.ts'
 import { WorkspaceBrowser } from '../src/client/WorkspaceBrowser.tsx'
-import { zh } from '../src/client/locales.ts'
+import { en } from '../src/client/locales.ts'
 
 afterEach(cleanup)
 beforeEach(() => { localStorage.clear(); createWorkspaceViewStore().create().actions.setOrderBy('manual') })
 
 // The seat's key domain is workspace ∪ common; the stub mirrors the real
 // lookup chain (namespace, then common vocabulary, then the key).
-const t: WorkspaceBrowserProps['t'] = makeTranslate(zh, commonZh)
+const t: WorkspaceBrowserProps['t'] = makeTranslate(en, commonEn)
 
 const sid = (id: string) => id as SessionId
 const wid = (id: string) => id as WorkspaceId
@@ -108,7 +108,7 @@ describe('WorkspaceBrowser projects section', () => {
       useWorkspaces: hook(workspaceState([workspace('alpha', []), workspace('beta', [])])),
       startSession,
     })
-    expect(screen.getByText('项目')).toBeTruthy()
+    expect(screen.getByText('Projects')).toBeTruthy()
     fireEvent.click(screen.getByText('alpha'))
     expect(startSession).toHaveBeenCalledWith(wid('alpha'))
     fireEvent.click(screen.getByText('beta'))
@@ -117,12 +117,12 @@ describe('WorkspaceBrowser projects section', () => {
 
   it('shows the pin hint when no workspace is listed', () => {
     mount()
-    expect(screen.getByText('固定项目以显示在这里')).toBeTruthy()
+    expect(screen.getByText('Pin projects to keep them here')).toBeTruthy()
   })
 
   it('raises the directory flow straight from the section ＋ (add is the only entry)', () => {
     mount({ useWorkspaces: hook(workspaceState([workspace('alpha', [])])) })
-    fireEvent.click(screen.getByRole('button', { name: '添加工作区' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add workspace' }))
     // addOnly flow: no disambiguating menu — the gesture IS the add action.
     expect(screen.queryByRole('menuitem')).toBeNull()
     expect(screen.getByTestId('directory-flow')).toBeTruthy()
@@ -132,7 +132,7 @@ describe('WorkspaceBrowser projects section', () => {
     mount({
       useDirectoryFlow: bindSnapshotSelector({ getSnapshot: () => false, subscribe: () => () => {} }),
     })
-    expect(screen.queryByRole('button', { name: '添加工作区' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Add workspace' })).toBeNull()
   })
 })
 
@@ -141,7 +141,7 @@ describe('WorkspaceBrowser conversations section', () => {
     const b = mount({
       useSessions: hook(sessionState([summary('one', 3), summary('two', 2), summary('three', 1)])),
     })
-    expect(screen.getByText('会话与任务')).toBeTruthy()
+    expect(screen.getByText('Conversations and tasks')).toBeTruthy()
     expect(screen.getAllByRole('treeitem').map(row => row.textContent)).toEqual([
       expect.stringContaining('one'),
       expect.stringContaining('two'),
@@ -155,9 +155,9 @@ describe('WorkspaceBrowser conversations section', () => {
       useSessions: hook(sessionState([summary('one', 3), summary('two', 2)])),
     })
     expect(b.store.getSnapshot().orderBy).toBe('manual')
-    fireEvent.click(screen.getByRole('button', { name: '视图选项' }))
+    fireEvent.click(screen.getByRole('button', { name: 'View options' }))
     expect(b.store.getSnapshot().orderBy).toBe('updated')
-    fireEvent.click(screen.getByRole('button', { name: '视图选项' }))
+    fireEvent.click(screen.getByRole('button', { name: 'View options' }))
     expect(b.store.getSnapshot().orderBy).toBe('manual')
   })
 
@@ -177,14 +177,14 @@ describe('WorkspaceBrowser conversations section', () => {
       .toEqual(['two', 'three', 'one'])
 
     // Entering Last updated performs one complete recency sort of the account.
-    fireEvent.click(screen.getByRole('button', { name: '视图选项' }))
+    fireEvent.click(screen.getByRole('button', { name: 'View options' }))
     await waitFor(() => {
       expect(b.store.getSnapshot().sessionOrderByAccount[FLAT_SESSION_ORDER_KEY])
         .toEqual(['one', 'two', 'three'])
     })
 
     // Back to Manual, drag again, remount: the stored order survives.
-    fireEvent.click(screen.getByRole('button', { name: '视图选项' }))
+    fireEvent.click(screen.getByRole('button', { name: 'View options' }))
     fireEvent.dragStart(one, { dataTransfer: dragData() })
     fireDrag(three, 'drop', 180)
     b.view.unmount()
@@ -210,7 +210,7 @@ describe('WorkspaceBrowser conversations section', () => {
     expect(b.store.getSnapshot().sessionOrderByAccount[FLAT_SESSION_ORDER_KEY]).toEqual(['one', 'two'])
 
     // Entering Last updated sorts by recency once.
-    fireEvent.click(screen.getByRole('button', { name: '视图选项' }))
+    fireEvent.click(screen.getByRole('button', { name: 'View options' }))
     await waitFor(() => {
       expect(screen.getAllByRole('treeitem')[0]?.textContent).toContain('one')
     })
@@ -262,8 +262,8 @@ describe('WorkspaceBrowser session rows', () => {
       useWorkspaces: hook(workspaceState([workspace('alpha', ['kept-s', 'gone-s'])])),
       archiveSession,
     })
-    fireEvent.click(screen.getByRole('button', { name: '会话“gone-s”的操作' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: '归档会话' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Session actions for gone-s' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Archive session' }))
     expect(archiveSession).toHaveBeenCalledWith(sid('gone-s'))
 
     rerender(b, { useWorkspaces: hook(workspaceState([workspace('alpha', ['kept-s', 'gone-s'])], [sid('gone-s')])) })
@@ -279,8 +279,8 @@ describe('WorkspaceBrowser session rows', () => {
         useSessions: hook(sessionState([summary('gone-s', 1)])),
         archiveSession,
       })
-      fireEvent.click(screen.getByRole('button', { name: '会话“gone-s”的操作' }))
-      fireEvent.click(screen.getByRole('menuitem', { name: '归档会话' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Session actions for gone-s' }))
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Archive session' }))
       await waitFor(() => {
         expect(warn).toHaveBeenCalledWith('session archive rejected:', expect.any(Error))
       })
@@ -296,12 +296,12 @@ describe('WorkspaceBrowser session rows', () => {
       useSessions: hook(sessionState([summary('alpha-s', 2)])),
       renameSession,
     })
-    fireEvent.click(screen.getByRole('button', { name: '会话“alpha-s”的操作' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: '重命名' }))
-    const input = screen.getByLabelText<HTMLInputElement>('会话名称')
+    fireEvent.click(screen.getByRole('button', { name: 'Session actions for alpha-s' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Rename' }))
+    const input = screen.getByLabelText<HTMLInputElement>('Session name')
     expect(input.value).toBe('alpha-s')
     fireEvent.change(input, { target: { value: 'Renamed' } })
-    fireEvent.click(screen.getByRole('button', { name: '重命名' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Rename' }))
     expect(renameSession).toHaveBeenCalledWith(sid('alpha-s'), 'Renamed')
   })
 
@@ -311,8 +311,8 @@ describe('WorkspaceBrowser session rows', () => {
       useSessions: hook(sessionState([summary('alpha-s', 2)])),
       forkSession,
     })
-    fireEvent.click(screen.getByRole('button', { name: '会话“alpha-s”的操作' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: '分叉会话' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Session actions for alpha-s' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Fork session' }))
     expect(forkSession).toHaveBeenCalledWith(sid('alpha-s'))
   })
 
@@ -329,19 +329,19 @@ describe('WorkspaceBrowser session rows', () => {
         workspace('alpha', ['alpha-blank']), workspace('beta', ['beta-blank']),
       ])),
     })
-    expect(screen.getByText('新会话')).toBeTruthy()
+    expect(screen.getByText('New Session')).toBeTruthy()
     expect(screen.queryByText('alpha-blank')).toBeNull()
     expect(screen.queryByText('beta-blank')).toBeNull()
 
     rerender(b, { useSessions: hook({ ...sessions, current: staleBlank.id }) })
-    expect(screen.getAllByText('新会话')).toHaveLength(1)
+    expect(screen.getAllByText('New Session')).toHaveLength(1)
     // Search excludes blank rows entirely — neither the canonical stored
     // title nor the localized display label participates in matching.
-    fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-    fireEvent.change(screen.getByPlaceholderText('搜索会话…'), { target: { value: 'new session' } })
-    expect(screen.queryByText('新会话')).toBeNull()
-    fireEvent.change(screen.getByPlaceholderText('搜索会话…'), { target: { value: '新会话' } })
-    expect(screen.queryByText('新会话')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+    fireEvent.change(screen.getByPlaceholderText('Search sessions...'), { target: { value: 'new session' } })
+    expect(screen.queryByText('New Session')).toBeNull()
+    fireEvent.change(screen.getByPlaceholderText('Search sessions...'), { target: { value: 'New Session' } })
+    expect(screen.queryByText('New Session')).toBeNull()
   })
 
   it('promotes the current blank session in its workspace account and the flat account', async () => {
@@ -372,7 +372,7 @@ describe('WorkspaceBrowser session rows', () => {
     await waitFor(() => {
       expect(b.store.getSnapshot().sessionOrderByAccount[FLAT_SESSION_ORDER_KEY]).toEqual(['blank', 'mid', 'old'])
     })
-    const blank = screen.getByText('新会话').closest('[role="treeitem"]') as HTMLElement
+    const blank = screen.getByText('New Session').closest('[role="treeitem"]') as HTMLElement
     const mid = screen.getByText('mid').closest('[role="treeitem"]') as HTMLElement
     pinBottomHalf(mid)
     fireEvent.dragStart(blank, { dataTransfer: dragData() })
@@ -390,7 +390,7 @@ describe('WorkspaceBrowser session rows', () => {
     await waitFor(() => {
       expect(screen.getAllByRole('treeitem').map(row => row.textContent)).toEqual([
         expect.stringContaining('mid'),
-        expect.stringContaining('新会话'),
+        expect.stringContaining('New Session'),
         expect.stringContaining('old'),
       ])
     })
@@ -409,22 +409,22 @@ describe('WorkspaceBrowser search', () => {
         useSessions: hook(sessions),
         useWorkspaces: hook(workspaceState([workspace('alpha', ['needle-row', 'other-row'])])),
       })
-      fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-      const input = screen.getByPlaceholderText<HTMLInputElement>('搜索会话…')
+      fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+      const input = screen.getByPlaceholderText<HTMLInputElement>('Search sessions...')
       fireEvent.change(input, { target: { value: 'needle' } })
-      const resultTree = screen.getByRole('tree', { name: '搜索结果' })
+      const resultTree = screen.getByRole('tree', { name: 'Search results' })
       expect(screen.getByText('Needle row')).toBeTruthy()
       expect(screen.queryByText('Other row')).toBeNull()
       const status = screen.getByRole('status')
-      expect(status.textContent).toBe('正在搜索会话历史…')
+      expect(status.textContent).toBe('Searching session history…')
       expect(resultTree.contains(status)).toBe(false)
 
       fireEvent.change(input, { target: { value: 'zzz' } })
       await act(async () => { await vi.advanceTimersByTimeAsync(250) })
-      expect(screen.getByText('无匹配会话')).toBeTruthy()
-      fireEvent.click(screen.getByRole('button', { name: '清除搜索' }))
+      expect(screen.getByText('No matching sessions')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Clear search' }))
       expect(input.value).toBe('')
-      expect(screen.getByRole('tree', { name: '会话' })).toBeTruthy()
+      expect(screen.getByRole('tree', { name: 'Sessions' })).toBeTruthy()
       // Clicking the field row focuses the input (wide mode).
       fireEvent.click(input.parentElement as HTMLElement)
       expect(document.activeElement).toBe(input)
@@ -435,14 +435,14 @@ describe('WorkspaceBrowser search', () => {
 
   it('collapses an empty search on outside click but keeps a non-empty query expanded', () => {
     mount()
-    const search = screen.getByRole('button', { name: '搜索会话' })
+    const search = screen.getByRole('button', { name: 'Search sessions' })
     fireEvent.click(search)
     expect(search.getAttribute('aria-expanded')).toBe('true')
     fireEvent.click(document.body)
     expect(search.getAttribute('aria-expanded')).toBe('false')
 
     fireEvent.click(search)
-    const input = screen.getByPlaceholderText<HTMLInputElement>('搜索会话…')
+    const input = screen.getByPlaceholderText<HTMLInputElement>('Search sessions...')
     fireEvent.change(input, { target: { value: '   ' } })
     fireEvent.click(document.body)
     expect(search.getAttribute('aria-expanded')).toBe('false')
@@ -472,10 +472,10 @@ describe('WorkspaceBrowser search', () => {
         open,
         searchSessions,
       })
-      fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-      const input = screen.getByPlaceholderText<HTMLInputElement>('搜索会话…')
+      fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+      const input = screen.getByPlaceholderText<HTMLInputElement>('Search sessions...')
       fireEvent.change(input, { target: { value: 'waterfall token' } })
-      expect(screen.getByText('正在搜索会话历史…')).toBeTruthy()
+      expect(screen.getByText('Searching session history…')).toBeTruthy()
       expect(screen.queryByText('Research notes')).toBeNull()
 
       await act(async () => { await vi.advanceTimersByTimeAsync(250) })
@@ -486,7 +486,7 @@ describe('WorkspaceBrowser search', () => {
       // the result row's context line.
       expect(screen.getAllByText('Research Workspace')).toHaveLength(2)
       expect(screen.getByText('…the waterfall token appears here…')).toBeTruthy()
-      expect(screen.getByText('仅显示前 20 条结果，请缩小搜索范围。')).toBeTruthy()
+      expect(screen.getByText('Showing the first 20 results. Narrow your search.')).toBeTruthy()
       fireEvent.click(screen.getByRole('treeitem'))
       expect(open).toHaveBeenCalledWith(sid('body-hit'))
       expect(input.value).toBe('waterfall token')
@@ -500,8 +500,8 @@ describe('WorkspaceBrowser search', () => {
     try {
       const searchSessions = vi.fn(async () => ({ items: [], hasMore: false }))
       mount({ searchSessions })
-      fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-      const input = screen.getByPlaceholderText<HTMLInputElement>('搜索会话…')
+      fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+      const input = screen.getByPlaceholderText<HTMLInputElement>('Search sessions...')
       expect(input.maxLength).toBe(500)
       fireEvent.change(input, { target: { value: 'y'.repeat(501) } })
       expect(input.value).toBe('y'.repeat(500))
@@ -529,11 +529,11 @@ describe('WorkspaceBrowser search', () => {
         useSessions: hook(sessionState([summary('local-hit', 2)])),
         searchSessions,
       })
-      fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-      fireEvent.change(screen.getByPlaceholderText('搜索会话…'), { target: { value: 'local' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+      fireEvent.change(screen.getByPlaceholderText('Search sessions...'), { target: { value: 'local' } })
       await act(async () => { await vi.advanceTimersByTimeAsync(250) })
       expect(screen.getByText('local-hit')).toBeTruthy()
-      expect(screen.getByText('内容搜索暂不可用，仅显示名称匹配。')).toBeTruthy()
+      expect(screen.getByText('Content search is temporarily unavailable. Showing name matches.')).toBeTruthy()
     } finally {
       vi.useRealTimers()
     }
@@ -547,8 +547,8 @@ describe('WorkspaceBrowser search', () => {
         return { items: [], hasMore: false }
       })
       mount({ searchSessions })
-      fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-      const input = screen.getByPlaceholderText<HTMLInputElement>('搜索会话…')
+      fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+      const input = screen.getByPlaceholderText<HTMLInputElement>('Search sessions...')
       fireEvent.change(input, { target: { value: 'first' } })
       await act(async () => { await vi.advanceTimersByTimeAsync(250) })
       fireEvent.change(input, { target: { value: 'second' } })
@@ -561,7 +561,7 @@ describe('WorkspaceBrowser search', () => {
       const [secondQuery, secondSignal] = searchSessions.mock.calls[1] as [string, AbortSignal]
       expect(secondQuery).toBe('second')
       expect(secondSignal.aborted).toBe(true)
-      expect(screen.getByRole('tree', { name: '搜索结果' })).toBeTruthy()
+      expect(screen.getByRole('tree', { name: 'Search results' })).toBeTruthy()
     } finally {
       vi.useRealTimers()
     }
@@ -571,12 +571,12 @@ describe('WorkspaceBrowser search', () => {
     vi.useFakeTimers()
     try {
       const b = mount()
-      expect(screen.getByText('暂无会话')).toBeTruthy()
-      fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-      fireEvent.change(screen.getByPlaceholderText('搜索会话…'), { target: { value: 'x' } })
-      expect(screen.getByText('正在搜索会话历史…')).toBeTruthy()
+      expect(screen.getByText('No sessions yet')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+      fireEvent.change(screen.getByPlaceholderText('Search sessions...'), { target: { value: 'x' } })
+      expect(screen.getByText('Searching session history…')).toBeTruthy()
       await act(async () => { await vi.advanceTimersByTimeAsync(250) })
-      expect(screen.getByText('无匹配会话')).toBeTruthy()
+      expect(screen.getByText('No matching sessions')).toBeTruthy()
     } finally {
       vi.useRealTimers()
     }
@@ -589,8 +589,8 @@ describe('WorkspaceBrowser search', () => {
       useWorkspaces: hook(workspaceState([workspace('alpha', ['one', 'two'])])),
     })
     expect(screen.getByText('one').closest('[role="treeitem"]')).toHaveProperty('draggable', true)
-    fireEvent.click(screen.getByRole('button', { name: '搜索会话' }))
-    fireEvent.change(screen.getByPlaceholderText('搜索会话…'), { target: { value: 'one' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
+    fireEvent.change(screen.getByPlaceholderText('Search sessions...'), { target: { value: 'one' } })
     const hit = screen.getByText('one').closest('[role="treeitem"]') as HTMLElement
     expect(hit.getAttribute('draggable')).toBeNull()
   })
