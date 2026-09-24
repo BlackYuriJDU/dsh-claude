@@ -17,26 +17,7 @@ exports[`sidebar shell snapshots > renders the collapsed rail after the crossfad
         class="iconButton toggle"
         type="button"
       >
-        <span
-          aria-hidden="true"
-          class="railMark"
-        >
-          <div
-            data-slot="sidebar.brand.mark"
-            style="display: contents;"
-          >
-            <svg
-              aria-hidden="true"
-              data-content="965fe321"
-              fill="none"
-              height="17.6580310880829"
-              viewBox="0 0 23.16 17.04"
-              width="24"
-            />
-          </div>
-        </span>
         <svg
-          class="panelIcon"
           data-content="35f95b0c"
           fill="none"
           height="18"
@@ -45,48 +26,6 @@ exports[`sidebar shell snapshots > renders the collapsed rail after the crossfad
           xmlns="http://www.w3.org/2000/svg"
         />
       </button>
-    </div>
-    <button
-      aria-label="New session"
-      class="newSession"
-      type="button"
-    >
-      <svg
-        data-content="c0ce4dcc"
-        fill="none"
-        height="18"
-        viewBox="0 0 16 16"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
-      />
-    </button>
-    <div
-      class="regionArea"
-    >
-      <div
-        data-slot="sidebar.workspaces"
-        style="display: contents;"
-      />
-    </div>
-    <div
-      class="footArea"
-    >
-      <div
-        class="footerActions"
-      >
-        <div
-          data-slot="sidebar.footer.action"
-          style="display: contents;"
-        />
-      </div>
-      <div
-        class="settingsArea"
-      >
-        <div
-          data-slot="sidebar.settings"
-          style="display: contents;"
-        />
-      </div>
     </div>
   </div>
 </div>
@@ -104,68 +43,25 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
     <div
       class="logoRow"
     >
-      <button
-        aria-label="New session"
-        class="brand wide"
-        type="button"
+      <span
+        aria-hidden="true"
+        class="brandIdentity"
       >
         <span
-          aria-hidden="true"
-          class="brandIdentity"
+          class="brandName"
         >
-          <span
-            class="brandMark"
+          <div
+            data-slot="sidebar.brand.name"
+            style="display: contents;"
           >
-            <div
-              data-slot="sidebar.brand.mark"
-              style="display: contents;"
+            <span
+              class="fallbackBrandName"
             >
-              <svg
-                aria-hidden="true"
-                data-content="965fe321"
-                fill="none"
-                height="17.6580310880829"
-                viewBox="0 0 23.16 17.04"
-                width="24"
-              />
-            </div>
-          </span>
-          <span
-            class="brandName"
-          >
-            <div
-              data-slot="sidebar.brand.name"
-              style="display: contents;"
-            >
-              <span
-                class="fallbackBrandName"
-              >
-                DSH Local Build
-              </span>
-              <span
-                class="buildRevision"
-              >
-                abc1234
-              </span>
-            </div>
-          </span>
+              DeepSeek Harness Claude
+            </span>
+          </div>
         </span>
-      </button>
-      <button
-        aria-label="Collapse sidebar"
-        class="iconButton toggle"
-        type="button"
-      >
-        <svg
-          class="panelIcon"
-          data-content="35f95b0c"
-          fill="none"
-          height="16"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
-        />
-      </button>
+      </span>
     </div>
     <button
       aria-label="New session"
@@ -173,19 +69,89 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
       type="button"
     >
       <svg
-        data-content="c0ce4dcc"
+        data-content="31127fcc"
         fill="none"
-        height="14"
+        height="16"
         viewBox="0 0 16 16"
-        width="14"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       />
       <span
         class="newSessionLabel wide"
       >
-        New Session
+        New
       </span>
     </button>
+    <nav
+      aria-label="Navigation"
+      class="navRows"
+    >
+      <button
+        class="navRow"
+        type="button"
+      >
+        <span
+          class="navIcon"
+        >
+          <svg
+            aria-hidden="true"
+            data-content="33eeb1a9"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          />
+        </span>
+        <span
+          class="navLabel"
+        >
+          Projects
+        </span>
+      </button>
+      <button
+        class="navRow"
+        type="button"
+      >
+        <span
+          class="navIcon"
+        >
+          <svg
+            aria-hidden="true"
+            data-content="a1407788"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          />
+        </span>
+        <span
+          class="navLabel"
+        >
+          Artifacts
+        </span>
+      </button>
+      <button
+        class="navRow"
+        disabled=""
+        title="Coming soon"
+        type="button"
+      >
+        <span
+          class="navIcon"
+        >
+          <svg
+            aria-hidden="true"
+            data-content="0b9abeaf"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          />
+        </span>
+        <span
+          class="navLabel"
+        >
+          Personalize
+        </span>
+      </button>
+    </nav>
     <div
       class="regionArea"
     >
@@ -198,27 +164,115 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
       class="footArea"
     >
       <div
+        aria-hidden="true"
+        class="hiddenSettings"
+      >
+        <div
+          class="settingsArea"
+        >
+          <div
+            data-slot="sidebar.settings"
+            style="display: contents;"
+          />
+        </div>
+      </div>
+      <div
         class="footerActions"
       >
         <div
           data-slot="sidebar.footer.action"
           style="display: contents;"
-        />
+        >
+          <button
+            class="navRow"
+            type="button"
+          >
+            <span
+              class="navIcon"
+            >
+              <svg
+                aria-hidden="true"
+                data-content="f05efdfd"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              />
+            </span>
+            <span
+              class="navLabel"
+            >
+              Design
+            </span>
+          </button>
+        </div>
       </div>
       <div
-        class="settingsArea"
+        class="footRow"
       >
+        <span
+          class="root menuStretch"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="profileRow"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="avatar"
+              style="background: var(--dsc-coral-500, #cc785c);"
+            />
+            <span
+              class="profileName"
+            />
+            <span
+              aria-hidden="true"
+              class="profileChevron"
+            >
+              ⌄
+            </span>
+          </button>
+        </span>
         <div
-          data-slot="sidebar.settings"
-          style="display: contents;"
-        />
+          class="footCluster"
+        >
+          <button
+            aria-label="Settings"
+            class="iconButton"
+            type="button"
+          >
+            <svg
+              data-content="6d8cd466"
+              fill="none"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </button>
+          <button
+            aria-label="Collapse sidebar"
+            class="iconButton"
+            type="button"
+          >
+            <svg
+              data-content="35f95b0c"
+              fill="none"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 `;
 
-exports[`sidebar shell snapshots > renders the expanded column in the default locale (zh, no setLocale) 1`] = `
+exports[`sidebar shell snapshots > renders the expanded column in the default locale (en, no setLocale) 1`] = `
 <div
   data-slot="sidebar"
   style="display: contents;"
@@ -230,88 +284,115 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
     <div
       class="logoRow"
     >
-      <button
-        aria-label="新建会话"
-        class="brand wide"
-        type="button"
+      <span
+        aria-hidden="true"
+        class="brandIdentity"
       >
         <span
-          aria-hidden="true"
-          class="brandIdentity"
+          class="brandName"
         >
-          <span
-            class="brandMark"
+          <div
+            data-slot="sidebar.brand.name"
+            style="display: contents;"
           >
-            <div
-              data-slot="sidebar.brand.mark"
-              style="display: contents;"
+            <span
+              class="fallbackBrandName"
             >
-              <svg
-                aria-hidden="true"
-                data-content="965fe321"
-                fill="none"
-                height="17.6580310880829"
-                viewBox="0 0 23.16 17.04"
-                width="24"
-              />
-            </div>
-          </span>
-          <span
-            class="brandName"
-          >
-            <div
-              data-slot="sidebar.brand.name"
-              style="display: contents;"
-            >
-              <span
-                class="fallbackBrandName"
-              >
-                DSH Local Build
-              </span>
-              <span
-                class="buildRevision"
-              >
-                abc1234
-              </span>
-            </div>
-          </span>
+              DeepSeek Harness Claude
+            </span>
+          </div>
         </span>
-      </button>
-      <button
-        aria-label="收起侧边栏"
-        class="iconButton toggle"
-        type="button"
-      >
-        <svg
-          class="panelIcon"
-          data-content="35f95b0c"
-          fill="none"
-          height="16"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
-        />
-      </button>
+      </span>
     </div>
     <button
-      aria-label="新建会话"
+      aria-label="New session"
       class="newSession"
       type="button"
     >
       <svg
-        data-content="c0ce4dcc"
+        data-content="31127fcc"
         fill="none"
-        height="14"
+        height="16"
         viewBox="0 0 16 16"
-        width="14"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       />
       <span
         class="newSessionLabel wide"
       >
-        新会话
+        New
       </span>
     </button>
+    <nav
+      aria-label="Navigation"
+      class="navRows"
+    >
+      <button
+        class="navRow"
+        type="button"
+      >
+        <span
+          class="navIcon"
+        >
+          <svg
+            aria-hidden="true"
+            data-content="33eeb1a9"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          />
+        </span>
+        <span
+          class="navLabel"
+        >
+          Projects
+        </span>
+      </button>
+      <button
+        class="navRow"
+        type="button"
+      >
+        <span
+          class="navIcon"
+        >
+          <svg
+            aria-hidden="true"
+            data-content="a1407788"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          />
+        </span>
+        <span
+          class="navLabel"
+        >
+          Artifacts
+        </span>
+      </button>
+      <button
+        class="navRow"
+        disabled=""
+        title="Coming soon"
+        type="button"
+      >
+        <span
+          class="navIcon"
+        >
+          <svg
+            aria-hidden="true"
+            data-content="0b9abeaf"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+          />
+        </span>
+        <span
+          class="navLabel"
+        >
+          Personalize
+        </span>
+      </button>
+    </nav>
     <div
       class="regionArea"
     >
@@ -324,20 +405,108 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
       class="footArea"
     >
       <div
+        aria-hidden="true"
+        class="hiddenSettings"
+      >
+        <div
+          class="settingsArea"
+        >
+          <div
+            data-slot="sidebar.settings"
+            style="display: contents;"
+          />
+        </div>
+      </div>
+      <div
         class="footerActions"
       >
         <div
           data-slot="sidebar.footer.action"
           style="display: contents;"
-        />
+        >
+          <button
+            class="navRow"
+            type="button"
+          >
+            <span
+              class="navIcon"
+            >
+              <svg
+                aria-hidden="true"
+                data-content="f05efdfd"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              />
+            </span>
+            <span
+              class="navLabel"
+            >
+              Design
+            </span>
+          </button>
+        </div>
       </div>
       <div
-        class="settingsArea"
+        class="footRow"
       >
+        <span
+          class="root menuStretch"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="profileRow"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="avatar"
+              style="background: var(--dsc-coral-500, #cc785c);"
+            />
+            <span
+              class="profileName"
+            />
+            <span
+              aria-hidden="true"
+              class="profileChevron"
+            >
+              ⌄
+            </span>
+          </button>
+        </span>
         <div
-          data-slot="sidebar.settings"
-          style="display: contents;"
-        />
+          class="footCluster"
+        >
+          <button
+            aria-label="Settings"
+            class="iconButton"
+            type="button"
+          >
+            <svg
+              data-content="6d8cd466"
+              fill="none"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </button>
+          <button
+            aria-label="Collapse sidebar"
+            class="iconButton"
+            type="button"
+          >
+            <svg
+              data-content="35f95b0c"
+              fill="none"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </button>
+        </div>
       </div>
     </div>
   </div>

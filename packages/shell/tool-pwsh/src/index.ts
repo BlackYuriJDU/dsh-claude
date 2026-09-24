@@ -31,7 +31,7 @@ import type {} from '@deepseek-ai/dsh-jobs'
 import type {} from '@deepseek-ai/dsh-shell-env'
 import type {} from '@deepseek-ai/dsh-user-approval'
 import type { SandboxExecutionPolicy, SandboxMode } from '@deepseek-ai/dsh-sandbox'
-import { ESCALATION_TARGETS, approveEscalation, validateEscalationArgs } from '@deepseek-ai/dsh-sandbox'
+import { ESCALATION_TARGETS, approveDangerousOperation, approveEscalation, classifyDangerousCommand, validateEscalationArgs } from '@deepseek-ai/dsh-sandbox'
 import type { SandboxPolicyService } from '@deepseek-ai/dsh-sandbox-policy'
 import type { ShellRunResult } from '@deepseek-ai/dsh-shell'
 import { parseExitStatus } from '@deepseek-ai/dsh-shell'
@@ -110,6 +110,7 @@ function pwshDescription(backgroundEnabled: boolean, escalationModes: readonly S
     + 'variables with `$env:NAME`. Non-zero exits are reported as `[exit code: N]`. '
     + 'Current harness environment facts are exposed through managed `$env:DSH_*` variables; inspect them when needed. '
     + 'Commands may run under a file sandbox; a blocked file operation is reported as `[sandbox: file access denied under <mode> mode]` — a policy denial, not a bug in the command; do not retry another way. '
+    + 'Destructive commands (recursive deletes, force pushes, history discards, disk or power control, process sweeps, piped remote scripts) prompt the user for approval before running; a rejected or unavailable prompt is final for that command — stop and explain, never work around it. '
     + 'Long output is truncated to its tail; the full output is saved to a file whose path is reported when available. '
     + 'On Windows a force-killed command settles as `[exit code: 1]` without a signal marker — treat it as an interruption, not a command failure. '
     + background
@@ -349,6 +350,19 @@ export function apply(ctx: Context, config: Config = {}): void {
       validatePwshArgs(args)
       // Description is display metadata; workdir defaults to the caller's session.
       const standingPolicy = resolveSandboxPolicy(exec)
+      // The destructive-command gate runs BEFORE anything else: a matched
+      // shape asks the approval channel first, and every non-grant outcome
+      // throws the verbatim denial with nothing spawned.
+      const danger = classifyDangerousCommand(args.command, 'pwsh')
+      if (danger !== undefined) {
+        await approveDangerousOperation(danger, {
+          approver: ctx.get('approval', false),
+          agent: exec.agent,
+          callId: exec.callId,
+          toolName: 'pwsh',
+          signal: exec.signal,
+        }, 'command')
+      }
       const approvedMode = args.sandbox_permissions !== undefined && args.justification !== undefined
         ? await approvePwshEscalation(args.sandbox_permissions, args.justification, exec, standingPolicy)
         : undefined

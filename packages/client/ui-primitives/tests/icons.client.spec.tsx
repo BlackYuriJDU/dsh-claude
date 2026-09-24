@@ -2,9 +2,7 @@
 import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import * as primitives from '@deepseek-ai/dsh-client-ui-primitives'
-import {
-  IconApiOutline14, IconArchiveOutline20, IconFolderClose16, IconGoalOutline16, IconSendOutline16,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconApiOutline14, IconArchiveOutline20, IconFolderClose16, IconGoalOutline16, IconSendOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 
 afterEach(cleanup)
 
@@ -68,11 +66,11 @@ describe('CoralBurst', () => {
 describe('BrandWordmark', () => {
   it('can render the name with or without its leading mark', () => {
     const view = render(<primitives.BrandWordmark />)
-    expect(view.container.textContent).toContain('DSH Claude')
+    expect(view.container.textContent).toContain('Claude')
     expect(view.container.querySelectorAll('svg')).toHaveLength(1)
 
     view.rerender(<primitives.BrandWordmark includeMark={false} />)
     expect(view.container.querySelectorAll('svg')).toHaveLength(0)
-    expect(view.container.textContent).toContain('DSH Claude')
+    expect(view.container.textContent).toContain('Claude')
   })
 })

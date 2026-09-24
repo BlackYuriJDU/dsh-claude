@@ -20,7 +20,7 @@ import type {
 import type { createChatStore } from '../stores.ts'
 import type { ComposerSubmitGesture, InputSubmitMode } from './composer-submission.ts'
 import type { ChatNode, ChatNodeKind } from './chat-nodes.ts'
-import type { CallId, SelectionTarget, ViewTab } from './views.ts'
+import type { CallId, ViewTab } from './views.ts'
 
 /** Browser-owned image that has not crossed the durable host boundary. */
 export interface ComposerAttachment {
@@ -752,8 +752,6 @@ export interface ChatScrollPosition {
  * outside the view (layout orchestration; the session object layer).
  */
 export interface ChatViewInjected {
-  /** Selection write + details panel opening in one gesture (store action + layout orchestration). */
-  openDetails: (target: SelectionTarget) => void
   /**
    * Open a tool-arg filesystem path with the host OS default application
    * (relative paths resolve against the session cwd). Always returns a
@@ -802,17 +800,30 @@ export type ComposerAttachmentsProps =
 export type MessageImagesProps = PropsRuntime<'conversation.message.images'> & PropsLocale<'conversation'>
 
 /**
- * Injected share of the details slot: the panel is otherwise a pure reader of
- * the shared chat store, but its close button is a layout orchestration call.
+ * Injected share of the details panel: its close button is a layout
+ * orchestration call. The details column was removed from the shell (P0
+ * two-column); the panel survives as the shared Tool-output presenter the
+ * ui-tool card suites render directly, so its props are a standalone shape
+ * rather than a slot-runtime composition.
  */
 export interface DetailsInjected {
   /** Close the details panel (layout geometry stays with ctx.layout). */
   closeDetails: () => void
 }
 
-/** Full details-slot props: selection store, Tool output seat, injected close callback, and locale. */
-export type DetailsSlotProps = PropsRuntime<'details'> & PropsRenderSlots<'conversation.details.tool'>
-  & PropsStore<ChatStore> & DetailsInjected & PropsLocale<'conversation'>
+/**
+ * Standalone details-panel props: the session-scope standard kit (via the
+ * conversation.session runtime share), the Tool output render share, the
+ * shared chat store, the injected close callback, and the locale seat. NOT a
+ * slot-runtime composition — the 'details' slot no longer exists; this is the
+ * shape the ui-tool card suites pass directly.
+ */
+export type DetailsSlotProps =
+  & PropsRuntime<'conversation.session'>
+  & PropsRenderSlots<'conversation.details.tool'>
+  & PropsStore<ChatStore>
+  & DetailsInjected
+  & PropsLocale<'conversation'>
 
 /** Owner share common to the hero / New-Session Workspace pickers. */
 export interface EmptyWorkspaceOwnerProps {

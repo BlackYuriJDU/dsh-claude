@@ -205,13 +205,6 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-.time {
-  flex: none;
-  font-size: 12px;
-  line-height: 20px;
-  color: var(--dsw-alias-label-tertiary);
-}
-
 .dot {
   flex: none;
 }
@@ -230,11 +223,6 @@
 .projectRow.menuOpen .rowActions,
 .sessionRow.menuOpen .rowActions {
   display: inline-flex;
-}
-
-.sessionRow:hover .time,
-.sessionRow.menuOpen .time {
-  display: none;
 }
 
 /* An open row menu pins the hover affordances (figma: the row keeps its

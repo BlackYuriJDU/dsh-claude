@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-/** AppearanceRow behavior: three cubes, selection follows the persisted
- * preference, clicks drive setTheme. */
+/** AppearanceRow behavior: the single dark-only cube, selection follows the
+ * persisted preference, clicks drive setTheme. */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { createSnapshotStore, type SessionListState, type WorkspaceListState } from '@deepseek-ai/dsh-client-runtime/client'
@@ -14,9 +14,7 @@ afterEach(cleanup)
 
 const COPY: Record<string, string> = {
   'appearance.title': 'Appearance',
-  'appearance.light': 'Light',
   'appearance.dark': 'Dark',
-  'appearance.system': 'System',
 }
 
 /** Empty global standard-kit hooks (the row reads neither). */
@@ -33,7 +31,7 @@ function emptyWorkspaces() {
   return bindSnapshotSelector(store)
 }
 
-function mount(preference: ThemePreference = 'system') {
+function mount(preference: ThemePreference = 'dark') {
   // Real store instance — the sanctioned zero-machinery path for tests.
   const store = createAppearanceRowStore().create()
   store.actions.sync(preference, 0)
@@ -54,22 +52,20 @@ const pressed = (name: RegExp): string | null =>
   screen.getByRole('button', { name }).getAttribute('aria-pressed')
 
 describe('AppearanceRow', () => {
-  it('renders the title and three cubes with the preference cube selected', () => {
+  it('renders the title and the single dark cube selected', () => {
     mount('dark')
     expect(screen.getByText('Appearance')).toBeDefined()
     expect(pressed(/Dark/)).toBe('true')
-    expect(pressed(/Light/)).toBe('false')
-    expect(pressed(/System/)).toBe('false')
+    expect(screen.getAllByRole('button')).toHaveLength(1)
   })
 
   it('click drives setTheme; selection follows the store mirror, not the click echo', () => {
     const b = mount('dark')
-    fireEvent.click(screen.getByRole('button', { name: /Light/ }))
-    expect(b.setTheme).toHaveBeenCalledWith('light')
-    // No store write yet: selection is unchanged.
+    fireEvent.click(screen.getByRole('button', { name: /Dark/ }))
+    expect(b.setTheme).toHaveBeenCalledWith('dark')
+    // Selection mirrors the store, independent of the click echo.
     expect(pressed(/Dark/)).toBe('true')
-    act(() => { b.store.actions.sync('light', 1) })
-    expect(pressed(/Light/)).toBe('true')
-    expect(pressed(/Dark/)).toBe('false')
+    act(() => { b.store.actions.sync('dark', 1) })
+    expect(pressed(/Dark/)).toBe('true')
   })
 })

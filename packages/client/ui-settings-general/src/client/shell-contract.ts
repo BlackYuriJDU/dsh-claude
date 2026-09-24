@@ -18,6 +18,12 @@ export interface SettingsSectionRow {
   id: string
   order: number
   label: string
+  /** Nav rail group the row renders under (group headers read the shell dictionary). */
+  group?: 'config' | 'personalize'
+  /** Disabled placeholder row ("em breve"): never selectable, renders no content. */
+  soon?: true
+  /** The localized "soon" badge text (projection-filled for soon rows). */
+  soonLabel?: string
 }
 
 /** One ordered onboarding step projected from a slot registration. */
@@ -38,6 +44,8 @@ export type SettingsRootInjected = {
     /** settings.onboarding ledger projected into coordinator order. */
     onboardingSteps: HostObservable<readonly SettingsOnboardingStep[]>
   }
+  /** Nav group headers, resolved per render (the shell re-renders on locale change). */
+  groupLabels: () => { config: string; personalize: string }
 }
 
 /**

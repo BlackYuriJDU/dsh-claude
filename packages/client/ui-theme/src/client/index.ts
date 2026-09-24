@@ -17,18 +17,24 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type { AppearanceRowInjected } from './AppearanceRow.tsx'
 import { AppearanceRow } from './AppearanceRow.tsx'
+import { ChatFontRow } from './ChatFontRow.tsx'
+import type { ChatFontRowInjected } from './ChatFontRow.tsx'
 import { createAppearanceRowStore } from './settings-store.ts'
+import { createChatFontRowStore } from './chat-font-store.ts'
 import { installThemeStyles } from './styles.ts'
-import { en, zh, type ThemeKey } from './locales.ts'
+import { en, pt, type ThemeKey } from './locales.ts'
 import {
-  DEFAULT_PREFERENCE, isThemePreference, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
-  type ThemePreference, type ThemeSettings,
+  CHAT_FONT_FIELD, DEFAULT_CHAT_FONT, DEFAULT_PREFERENCE, isChatFont, isThemePreference,
+  THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
+  type ChatFont, type ThemePreference, type ThemeSettings,
 } from '../theme-settings.ts'
 
 export type { AppearanceRowComponentProps, AppearanceRowInjected } from './AppearanceRow.tsx'
+export type { ChatFontRowComponentProps, ChatFontRowInjected } from './ChatFontRow.tsx'
 export type { AppearanceRowState } from './settings-store.ts'
+export type { ChatFontRowState } from './chat-font-store.ts'
 export type { ThemeKey } from './locales.ts'
-export type { ThemePreference, ThemeSettings } from '../theme-settings.ts'
+export type { ChatFont, ThemePreference, ThemeSettings } from '../theme-settings.ts'
 
 /** Namespace owning this feature's settings-row copy. */
 export const SETTINGS_NS = 'settings.theme'
@@ -75,6 +81,8 @@ export interface ThemeDefinition {
 export interface ThemeSnapshot {
   /** The persisted preference (may be `system`). */
   preference: ThemePreference
+  /** The persisted chat font. */
+  chatFont: ChatFont
   /**
    * The resolved active theme (`system` resolved via prefers-color-scheme)
    * with override layers folded into its tokens (seq order, later layers win
@@ -144,45 +152,30 @@ const BUILTIN_INSPECT_TOKENS: readonly ThemeTokenInspection[] = Object.freeze([
  * through {@link setTheme}; continuous sync only through the `theme/change`
  * event. {@link overrideTokens} stacks partial token layers over the active
  * theme without touching the registry.
- * The service holds the `prefers-color-scheme` media query (environment
- * sensing, not presentation) and re-emits when the OS scheme flips while the
- * preference is `system`.
  */
 export class ThemeRuntime {
   private readonly ctx: Context
   private readonly host: SettingsScope<ThemeSettings>
   private themes: ThemeDefinition[] = [...BUILTIN_THEMES]
   private preference: ThemePreference
+  private chatFont: ChatFont
   private revision = 0
   private snapshot: ThemeSnapshot
-  private readonly media: MediaQueryList | undefined
   /** Override layers by source; seq (monotonic) is the stacking order. */
   private readonly overrides = new Map<string, { seq: number; tokens: ThemeTokenOverrides }>()
   private overrideSeq = 0
 
   /**
    * @param ctx - owning context (change events are emitted on it; the
-   * media-query and scope listeners are released through ctx.effect on dispose).
+   * scope listener is released through ctx.effect on dispose).
    * @param host - durable preference scope owned by the same plugin.
    */
   constructor(ctx: Context, host: SettingsScope<ThemeSettings>) {
     this.ctx = ctx
     this.host = host
     this.preference = DEFAULT_PREFERENCE
-    // Non-browser runs (node e2e booting the client tree) have no matchMedia.
-    this.media = typeof matchMedia === 'undefined' ? undefined : matchMedia('(prefers-color-scheme: dark)')
+    this.chatFont = DEFAULT_CHAT_FONT
     this.snapshot = this.buildSnapshot()
-    if (this.media !== undefined) {
-      const media = this.media
-      const onChange = (): void => {
-        if (this.preference !== 'system') return
-        this.publish()
-      }
-      ctx.effect(() => {
-        media.addEventListener('change', onChange)
-        return () => { media.removeEventListener('change', onChange) }
-      }, 'ui-theme: prefers-color-scheme listener')
-    }
     ctx.effect(() => host.subscribe(() => { this.adopt() }), 'ui-theme: settings scope adoption')
     this.adopt()
   }
@@ -230,12 +223,34 @@ export class ThemeRuntime {
     this.publish()
   }
 
+  /**
+   * Switch the chat font (the Chat-font row's only write entry). Persisted
+   * beside the theme preference and applied as a document-level CSS variable
+   * the conversation text consumes.
+   * @param id - a built-in chat font id; unknown ids throw.
+   */
+  setChatFont(id: string): void {
+    if (!isChatFont(id)) throw new Error(`chat font "${id}" is not registered`)
+    if (this.chatFont === id) return
+    this.chatFont = id
+    void this.host.set(CHAT_FONT_FIELD, id)
+    this.publish()
+  }
+
   /** Adopt the scope's accepted durable preference without writing it back. */
   private adopt(): void {
     const section = this.host.getSnapshot().value
-    if (section === undefined || this.preference === section.preference) return
-    this.preference = section.preference
-    this.publish()
+    if (section === undefined) return
+    let moved = false
+    if (this.preference !== section.preference) {
+      this.preference = section.preference
+      moved = true
+    }
+    if (section.chatFont !== undefined && section.chatFont !== this.chatFont) {
+      this.chatFont = section.chatFont
+      moved = true
+    }
+    if (moved) this.publish()
   }
 
   /**
@@ -291,9 +306,8 @@ export class ThemeRuntime {
   }
 
   private buildSnapshot(): ThemeSnapshot {
-    const resolvedId = this.preference === 'system'
-      ? (this.media?.matches === true ? 'dark' : 'light')
-      : this.preference
+    // Dark-only product: the preference is the resolved id by construction.
+    const resolvedId = this.preference
     // Both built-ins always exist; a registered preference id resolves or has
     // been reset by its disposer, so the lookup cannot miss.
     const active = this.themes.find(t => t.id === resolvedId)
@@ -301,6 +315,7 @@ export class ThemeRuntime {
     if (active === undefined) throw new Error(`theme registry lost "${resolvedId}"`)
     return Object.freeze({
       preference: this.preference,
+      chatFont: this.chatFont,
       active: this.composeActive(active),
       themes: Object.freeze([...this.themes]),
       revision: this.revision,
@@ -327,8 +342,28 @@ export class ThemeRuntime {
   private publish(): void {
     this.revision += 1
     this.snapshot = this.buildSnapshot()
+    applyChatFontStyle(this.chatFont)
     this.ctx.emit('theme/change', this.snapshot)
   }
+}
+
+/** The document-level variable the conversation text consumes per chat font. */
+const CHAT_FONT_STACKS: Record<ChatFont, string> = {
+  inter: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif',
+  system: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif',
+  serif: '"Cormorant Garamond", Georgia, "Times New Roman", serif',
+  mono: '"JetBrains Mono", "SF Mono", "Fira Code", Consolas, monospace',
+}
+
+/**
+ * Point `--dsh-chat-font-family` at the selected stack (document root; the
+ * conversation's message styles consume it with the UI stack as fallback).
+ * Non-browser runs (node boots) have no document.
+ * @param font - the selected chat font.
+ */
+function applyChatFontStyle(font: ChatFont): void {
+  if (typeof document === 'undefined') return
+  document.documentElement.style.setProperty('--dsh-chat-font-family', CHAT_FONT_STACKS[font])
 }
 
 /**
@@ -388,13 +423,16 @@ export function apply(ctx: ClientContext): void {
   const theme = new ThemeRuntime(ctx, host)
   ctx.provide('theme', theme)
 
-  ctx.effect(() => ctx.locale.register(SETTINGS_NS, { zh, en }), 'ui-theme: settings row dictionaries')
+  ctx.effect(() => ctx.locale.register(SETTINGS_NS, { en, pt }), 'ui-theme: settings row dictionaries')
 
   const store = createAppearanceRowStore()
   let bound: BoundActions<typeof store> | undefined
   const sync = (snapshot: ThemeSnapshot): void => {
     bound?.sync(snapshot.preference, snapshot.revision)
+    fontBound?.sync(snapshot.chatFont, snapshot.revision)
   }
+  const fontStore = createChatFontRowStore()
+  let fontBound: BoundActions<typeof fontStore> | undefined
   ctx.on('theme/change', sync)
   const injected = (actions: BoundActions<typeof store>): AppearanceRowInjected => {
     bound = actions
@@ -405,6 +443,13 @@ export function apply(ctx: ClientContext): void {
       setTheme: (id) => { theme.setTheme(id) },
     }
   }
+  const fontInjected = (actions: BoundActions<typeof fontStore>): ChatFontRowInjected => {
+    fontBound = actions
+    sync(theme.getTheme())
+    return {
+      setChatFont: (id) => { theme.setChatFont(id) },
+    }
+  }
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({
     name: 'settings.general.item',
     id: 'appearance',
@@ -413,4 +458,12 @@ export function apply(ctx: ClientContext): void {
     locale: SETTINGS_NS,
     inject: injected,
   }, AppearanceRow))
+  ctx.slots.inject('settings.general.item', () => ctx.slots.register({
+    name: 'settings.general.item',
+    id: 'chat-font',
+    order: 11,
+    store: fontStore,
+    locale: SETTINGS_NS,
+    inject: fontInjected,
+  }, ChatFontRow))
 }

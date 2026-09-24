@@ -67,9 +67,27 @@ describe('SidebarRoot.module.css', () => {
   it('keeps the slotted brand row at the full artwork height', () => {
     expect(declarations('.brandIdentity')?.get('height')).toBe('24px')
     expect(declarations('.brandName')?.get('height')).toBe('24px')
-    expect(declarations('.brandName')?.get('line-height')).toBe('24px')
-    expect(declarations('.brandName')?.get('font-size')).toBe('18px')
-    expect(declarations('.fallbackBrandName')?.get('font-size')).toBe('17px')
+    // The serif wordmark rides the display face at the reference measurement.
+    expect(declarations('.fallbackBrandName')?.get('font-size')).toBe('21px')
     expect(declarations('.fallbackBrandName')?.get('white-space')).toBe('nowrap')
+  })
+
+  it('renders the Novo pill left-aligned without a border (reference geometry)', () => {
+    const pill = declarations('.newSession')
+    expect(pill?.get('height')).toBe('36px')
+    expect(pill?.get('justify-content')).toBe('flex-start')
+    expect(pill?.get('border')).toBe('none')
+    expect(pill?.get('border-radius')).toBe('var(--dsc-radius-md, 8px)')
+    expect(pill?.get('padding')).toBe('0 12px')
+  })
+
+  it('draws the profile foot as a hairline pill with its control cluster', () => {
+    expect(declarations('.profileRow')?.get('border')).toBe('1px solid var(--dsw-alias-border-l2)')
+    expect(declarations('.profileRow')?.get('border-radius')).toBe('var(--dsc-radius-md, 8px)')
+    expect(declarations('.footRow')?.get('display')).toBe('flex')
+    expect(declarations('.footCluster')?.get('display')).toBe('flex')
+    // The avatar is the neutral dark circle with a hairline ring.
+    expect(declarations('.avatar')?.get('background')).toBe('var(--dsw-alias-interactive-bg-hover)')
+    expect(declarations('.avatar')?.get('border')).toBe('1px solid var(--dsw-alias-border-l2)')
   })
 })

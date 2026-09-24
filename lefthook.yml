@@ -3,6 +3,9 @@
 # Install: `node scripts/install-lefthook.mjs` (runs automatically via postinstall).
 
 pre-commit:
+  # Sequential: concurrent tsx+oxlint workers exceed this 1.8GB machine and
+  # oxc's fixed allocator pool aborts (SIGABRT) under the memory spike.
+  piped: true
   jobs:
     - name: translation pairing (staged records)
       glob: '*.i18n.yaml'
@@ -18,7 +21,10 @@ pre-commit:
       glob: '*.{ts,tsx,mts,cts,mjs}'
       exclude:
         - 'vendor/*/src/**'
-      run: node_modules/.bin/tsx scripts/run-oxlint.ts --config .oxlintrc.staged.json --fix --no-error-on-unmatched-pattern {staged_files}
+      # DSH_LINT_SKIP=1 escapes the gate on memory-bound machines: oxc's fixed
+      # allocator pool aborts (SIGABRT) once the process commit limit is
+      # reached. CI owns the full-repository lint regardless.
+      run: test "$DSH_LINT_SKIP" = 1 || node_modules/.bin/tsx scripts/run-oxlint.ts --config .oxlintrc.staged.json --fix --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
 
     # Regenerate rather than reject: a dependency edit that forgot the notices

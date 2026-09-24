@@ -277,8 +277,9 @@
 .badge {
   padding: 0 4px;
   border-radius: 6px;
-  background: var(--dsw-specific-sidebar-nav-item-active-accent);
-  color: var(--dsw-alias-button-info-fill);
+  /* Use a tinted surface and readable label in both light and dark themes. */
+  background: var(--dsw-alias-interactive-bg-hover-accent);
+  color: var(--dsw-alias-label-primary);
   font-size: 11px;
   line-height: 18px;
   font-weight: 600;

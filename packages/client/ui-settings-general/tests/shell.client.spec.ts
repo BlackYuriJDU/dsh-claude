@@ -15,7 +15,7 @@ async function bench() {
   ctx.provide('locale', {
     register: () => () => {},
     bind: () => (key: string) => key,
-    getSnapshot: () => ({ active: 'zh', locales: [], revision: 0 }),
+    getSnapshot: () => ({ active: 'en', locales: [], revision: 0 }),
     subscribe: () => () => {},
   } as never)
   ctx.provide('connection', {
@@ -78,18 +78,24 @@ describe('ui-settings apply', () => {
     declare(b.slots)
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const { sections } = injectedOf(b.slots).hooks
-    // This package registers the General section itself; every other section
-    // arrives from a feature registrant.
-    const GENERAL = { id: 'general', order: 0, label: 'general.nav' }
-    expect(sections.getSnapshot()).toEqual([GENERAL])
+    // Shell-owned sections precede independently contributed feature sections.
+    const GENERAL = { id: 'general', order: 0, label: 'general.nav', group: 'config' }
+    const ACCOUNT = { id: 'account', order: 1, label: 'account.nav', group: 'config' }
+    const SOON = [
+      { id: 'connectors', order: 11, label: 'connectors.nav', group: 'personalize', soon: true, soonLabel: 'soon' },
+      { id: 'plugins', order: 12, label: 'plugins.nav', group: 'personalize', soon: true, soonLabel: 'soon' },
+    ]
+    expect(sections.getSnapshot()).toEqual([GENERAL, ACCOUNT, ...SOON])
     b.slots.register({ name: 'settings.section', id: 'z', order: 20, label: 'Z' } as never, () => null)
     // No order and no label: both projection defaults apply.
     b.slots.register({ name: 'settings.section', id: 'a' } as never, () => null)
     const rows = sections.getSnapshot()
     expect(rows).toEqual([
       GENERAL,
-      { id: 'a', order: 0, label: '' },
-      { id: 'z', order: 20, label: 'Z' },
+      { id: 'a', order: 0, label: '', group: 'config' },
+      ACCOUNT,
+      ...SOON,
+      { id: 'z', order: 20, label: 'Z', group: 'config' },
     ])
     // Snapshot identity is stable until the ledger moves (uSES contract).
     expect(sections.getSnapshot()).toBe(rows)

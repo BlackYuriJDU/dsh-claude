@@ -10,7 +10,14 @@ async function bench(declare = true) {
   const ctx = new Context()
   await ctx.plugin(SlotRegistry).await()
   const layout = { toggleSidebar: vi.fn() }
-  const workspaces = { startSession: vi.fn() }
+  const workspaces = {
+    startSession: vi.fn(),
+    list: { getSnapshot: () => ({ items: [] }), subscribe: () => () => {} },
+    connectWorkspace: vi.fn(() => Promise.resolve('s-1' as never)),
+    create: vi.fn(() => Promise.resolve({ workspaceId: 'ws-1' })),
+    pickDirectory: vi.fn(() => Promise.resolve('/home/user/novo')),
+    openPath: vi.fn(() => Promise.resolve()),
+  }
   const sessions = { open: vi.fn(), clear: vi.fn() }
   ctx.provide('layout', layout)
   ctx.provide('sessions', sessions as never)
@@ -43,7 +50,9 @@ describe('ui-sidebar apply', () => {
     // Copy rides the standard locale seat, not the inject face.
     expect(b.slots.entries('sidebar')[0]!.locale).toBe('sidebar')
     const injected = (b.slots.entries('sidebar')[0]!.inject as () => SidebarRootInjected)()
-    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar'])
+    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar', 'locale', 'workspaces'])
+    // The Projetos modal's reactive list source rides the runtime's standard
+    // useWorkspaces hook — only the write face crosses the inject.
     // Both arms delegate to the runtime's shared New Session action.
     injected.startSession('workspace' as never)
     expect(b.workspaces.startSession).toHaveBeenCalledWith('workspace')
@@ -51,6 +60,20 @@ describe('ui-sidebar apply', () => {
     expect(b.workspaces.startSession).toHaveBeenLastCalledWith(undefined)
     injected.toggleSidebar()
     expect(b.layout.toggleSidebar).toHaveBeenCalledOnce()
+    // The Idioma face reads the runtime's locale service and writes through it.
+    expect(injected.locale.active()).toBe('en')
+    expect(injected.locale.options().map(option => option.id)).toEqual(['en', 'pt'])
+    injected.locale.set('pt')
+    expect(injected.locale.active()).toBe('pt')
+    // The Projetos modal's write face delegates to the workspaces domain.
+    void injected.workspaces.connect('ws-1' as never)
+    void injected.workspaces.create({ path: '/p' })
+    void injected.workspaces.pickDirectory()
+    void injected.workspaces.openPath('/p')
+    expect(b.workspaces.connectWorkspace).toHaveBeenCalledWith('ws-1')
+    expect(b.workspaces.create).toHaveBeenCalledWith({ path: '/p' })
+    expect(b.workspaces.pickDirectory).toHaveBeenCalledOnce()
+    expect(b.workspaces.openPath).toHaveBeenCalledWith('/p')
   })
 
   it('fails when no live owner declared the sidebar slot', async () => {
