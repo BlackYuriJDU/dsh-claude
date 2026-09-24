@@ -197,7 +197,9 @@ describe('LocaleRuntime', () => {
     const host = stubSettingsScope<LocaleSettings>()
     const { svc } = make(host)
     expect(svc.getLocale().active).toBe('en')
-    host.publish({ status: 'ready', value: { preference: 'zh' }, revision: 1, writable: true })
+    // A home shared with an older build may carry a stale preference ('zh');
+    // the cast expresses that out-of-shipped-set value the type forbids today.
+    host.publish({ status: 'ready', value: { preference: 'zh' as LocaleSettings['preference'] }, revision: 1, writable: true })
     expect(svc.getLocale().active).toBe('en')
   })
 

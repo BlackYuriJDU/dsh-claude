@@ -28,8 +28,9 @@ describe('ui-agent-preset apply (single-agent posture)', () => {
   it('registers the namespace dictionaries and no preset surface', async () => {
     const b = await bench()
     await b.ctx.plugin({ inject: [...inject], apply }).await()
-    // The dictionary survives (straggler keys stay resolvable).
-    expect(b.locale.translate('settings.agentPreset', 'nav')).not.toBe('settings.agentPreset/nav')
+    // The dictionary survives (straggler keys stay resolvable): the public
+    // bind face resolves the straggler key through the registered namespace.
+    expect(b.locale.bind('settings.agentPreset' as never)('nav' as never)).not.toBe('settings.agentPreset/nav')
     // The four removed surfaces must not register again.
     expect(b.slots.entries('settings.general.item')).toHaveLength(0)
     expect(b.slots.entries('settings.section')).toHaveLength(0)
