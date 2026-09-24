@@ -214,6 +214,11 @@
     - id: ui-memory
       name: '@deepseek-ai/dsh-client-ui-memory'
 
+    # Per-project (workspace) instructions + knowledge files: durable store +
+    # per-session system-prompt context + the Projects settings section.
+    - id: ui-projects
+      name: '@deepseek-ai/dsh-client-ui-projects'
+
     # Official occupants for the generic sidebar and conversation brand slots.
     - id: ui-brand-official
       name: '@deepseek-ai/dsh-client-ui-brand-official'
