@@ -22,17 +22,15 @@ async function bench() {
     'conversation': { kind: 'single', scope: 'session-maybe' },
     'conversation.session': { kind: 'single', scope: 'session' },
     'conversation.session.header': { kind: 'single', scope: 'session' },
-    'details': { kind: 'single', scope: 'session' },
   }, (_p: { renderSlot?: unknown }) => null)
   runtime.slots.register({ name: 'conversation.session', store: chat }, () => null)
   runtime.slots.register({ name: 'conversation.session.header', store: chat }, () => null)
-  runtime.slots.register({ name: 'details', store: chat }, () => null)
   runtime.renderRoot() // materializes the host face storeOf resolves through
   return { runtime, chat }
 }
 
 /** Resolve the store instance the renderer would hand a slot's component for a session. */
-function storeFor(b: Awaited<ReturnType<typeof bench>>, slot: 'conversation.session' | 'details', sessionId: SessionId) {
+function storeFor(b: Awaited<ReturnType<typeof bench>>, slot: 'conversation.session' | 'conversation.session.header', sessionId: SessionId) {
   return b.runtime.storeOf(slot, sessionId) as ChatInstance
 }
 
@@ -41,15 +39,15 @@ beforeEach(() => {
 })
 
 describe('selection survives on the store seat', () => {
-  it('one session, two slots: conversation writes, details reads the SAME instance', async () => {
+  it('one session, two slots: conversation writes, the header reads the SAME instance', async () => {
     const b = await bench()
 
     const conv = storeFor(b, 'conversation.session', sid('s1'))
-    const details = storeFor(b, 'details', sid('s1'))
+    const header = storeFor(b, 'conversation.session.header', sid('s1'))
     conv.actions.select({ turnSeq: 3, callId: 'c1' })
-    expect(details.store.getSnapshot().selection).toEqual({ turnSeq: 3, callId: 'c1' })
+    expect(header.store.getSnapshot().selection).toEqual({ turnSeq: 3, callId: 'c1' })
     // Identity, not just value: the shared handle resolves one instance per scope key.
-    expect(details).toBe(conv)
+    expect(header).toBe(conv)
     await b.runtime.dispose()
   })
 
