@@ -36,6 +36,8 @@ export type {
   ConvViewProps, DetailsInjected, DetailsSlotProps, DetailsToolOwnerProps, EmptyWorkspaceOwnerProps, HeroBrandMarkOwnerProps,
   MessageImagesOwnerProps, MessageImagesProps, RenderMessageImages, TurnTailOwnerProps, UseChatNodeTurnData,
 } from './contract/slots.ts'
+export { DetailsPanel } from './skeleton/DetailsPanel.tsx'
+export type { DetailsPanelProps } from './skeleton/DetailsPanel.tsx'
 // Export discipline: packages/client/AGENTS.md.
 
 declare module '@deepseek-ai/cordis' {
