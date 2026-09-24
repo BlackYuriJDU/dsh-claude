@@ -151,7 +151,7 @@ describe('SidebarRoot shell', () => {
     expect(container.querySelector('svg')).not.toBeNull()
   })
 
-  it('opens Projetos and Artefatos modals and leaves Personalizar disabled', () => {
+  it('opens the Projetos modal, dispatches the Artifacts seam, and leaves Personalizar disabled', () => {
     const b = mountShell({ items: [project] })
     const rows = screen.getAllByRole('button', { name: new RegExp(`${en['nav.projects']}|${en['nav.artifacts']}|${en['nav.customize']}`) })
     expect(rows).toHaveLength(3)
@@ -164,11 +164,14 @@ describe('SidebarRoot shell', () => {
     expect(b.connect).toHaveBeenCalledWith('ws-1')
     expect(screen.queryByRole('dialog', { name: en['projects.modal.title'] })).toBeNull()
 
+    // The Artifacts row only dispatches the design seam — the modal is the
+    // ui-handoff shell.overlay occupant, not part of this shell.
+    const listener = vi.fn()
+    window.addEventListener(SIDEBAR_DESIGN_EVENT, listener)
     fireEvent.click(screen.getByRole('button', { name: en['nav.artifacts'] }))
-    expect(screen.getByRole('dialog', { name: en['artifacts.modal.title'] })).toBeTruthy()
-    expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: en.close }))
+    expect(listener).toHaveBeenCalledOnce()
     expect(screen.queryByRole('dialog', { name: en['artifacts.modal.title'] })).toBeNull()
+    window.removeEventListener(SIDEBAR_DESIGN_EVENT, listener)
   })
 
   it('creates a project from the directory picker and connects it', async () => {
@@ -247,20 +250,14 @@ describe('SidebarRoot shell', () => {
     window.removeEventListener(SIDEBAR_SEARCH_EVENT, listener)
   })
 
-  it('the Design footer row opens the shell Artefatos modal through the event seam', () => {
+  it('the shell renders no Artifacts modal — the seam is owned by the ui-handoff overlay', () => {
     mountShell()
-    const artifactDialog = () => screen.queryByRole('dialog', { name: en['artifacts.modal.title'] })
-    expect(artifactDialog()).toBeNull()
-    // The seam is the documented export: the seat occupant (DesignRow) and
-    // any other registrant dispatch it, the shell owns the modal state.
+    // The shell keeps only the dispatch seam: dispatching the design event
+    // must not open any dialog inside the shell (the ui-handoff shell.overlay
+    // occupant owns the modal).
+    expect(screen.queryByRole('dialog', { name: en['artifacts.modal.title'] })).toBeNull()
     act(() => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) })
-    expect(artifactDialog()).not.toBeNull()
-    expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: en.close }))
-    expect(artifactDialog()).toBeNull()
-    // Repeatable: the listener lives for the column's lifetime.
-    act(() => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) })
-    expect(artifactDialog()).not.toBeNull()
+    expect(screen.queryByRole('dialog', { name: en['artifacts.modal.title'] })).toBeNull()
   })
 
   it('the Design row occupant dispatches the seam on click and mirrors the nav geometry', () => {
