@@ -110,7 +110,7 @@ export function apply(ctx: ClientContext): void {
   const GROUP_BY_ID: Record<string, SettingsSectionRow['group']> = {
     general: 'config', account: 'config', models: 'config',
     skills: 'personalize', connectors: 'personalize', plugins: 'personalize', memory: 'personalize',
-    projects: 'personalize',
+    projects: 'personalize', routines: 'personalize',
   }
   const SOON_IDS = new Set(['connectors', 'plugins'])
   const shellInjected = (): SettingsRootInjected => ({

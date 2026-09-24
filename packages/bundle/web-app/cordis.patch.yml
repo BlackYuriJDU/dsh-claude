@@ -219,6 +219,11 @@
     - id: ui-projects
       name: '@deepseek-ai/dsh-client-ui-projects'
 
+    # Scheduled recurring tasks (routines): Host scheduler firing a fresh
+    # Agent on an interval + the Settings Routines section.
+    - id: ui-routines
+      name: '@deepseek-ai/dsh-client-ui-routines'
+
     # Official occupants for the generic sidebar and conversation brand slots.
     - id: ui-brand-official
       name: '@deepseek-ai/dsh-client-ui-brand-official'

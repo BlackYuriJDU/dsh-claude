@@ -1,0 +1,52 @@
+{
+  "extends": "../../../tsconfig.base.client.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "types": ["node", "client-build-environment"]
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../../vendor/cordis"
+    },
+    {
+      "path": "../ui-slots"
+    },
+    {
+      "path": "../ui-primitives"
+    },
+    {
+      "path": "../runtime"
+    },
+    {
+      "path": "../ui-settings"
+    },
+    {
+      "path": "../locale"
+    },
+    {
+      "path": "../../settings/settings"
+    },
+    {
+      "path": "../../runtime-diagnostics/invariants"
+    },
+    {
+      "path": "../../api/remotes/tsconfig.client.json"
+    },
+    {
+      "path": "../../core/agent"
+    },
+    {
+      "path": "../../core/agent-default-model"
+    },
+    {
+      "path": "../../core/session"
+    },
+    {
+      "path": "../../core/system-prompt"
+    }
+  ]
+}
