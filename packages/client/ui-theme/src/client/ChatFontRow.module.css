@@ -1,0 +1,35 @@
+/* Chat-font row: title left, the font selector right (Language-row shape). */
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.title {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.chevron {
+  color: var(--dsw-alias-label-tertiary);
+}

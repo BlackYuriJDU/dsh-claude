@@ -11,7 +11,7 @@ import type { PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/d
 // Type-only: pulls ui-layout's SlotMap merge (the 'sidebar' entry) into every
 // program that sees this contract, so PropsRuntime<'sidebar'> resolves.
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
-import type { WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SessionId, WorkspaceId, WorkspaceView } from '@deepseek-ai/dsh-client-runtime/client'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
@@ -40,8 +40,9 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
      */
     'sidebar.settings': { kind: 'single'; scope: 'root'; owner: SidebarSettingsOwnerProps }
     /**
-     * Optional actions beside Settings at the sidebar foot. Declared by this
-     * package's 'sidebar' entry; each action receives only the column state.
+     * Optional full-width action rows above the profile pill at the sidebar
+     * foot. Declared by this package's 'sidebar' entry; each action receives
+     * only the column state.
      */
     'sidebar.footer.action': { kind: 'list'; scope: 'root'; owner: SidebarFooterActionOwnerProps }
   }
@@ -87,8 +88,11 @@ export interface SidebarFooterActionOwnerProps {
 
 /**
  * Registrant-private injected share (arrives via the register inject
- * factory). The shell keeps only its own controls: starting a Session from
- * the New Session button and toggling the column.
+ * factory). The shell keeps only its own controls — starting a Session from
+ * the New Session button, toggling the column — plus the workspaces write
+ * actions the Projetos modal wires. The modal's reactive list source is the
+ * runtime's standard `useWorkspaces` selector hook (GlobalStandardProps), so
+ * no data source crosses the inject here.
  */
 export type SidebarRootInjected = {
   /**
@@ -99,6 +103,34 @@ export type SidebarRootInjected = {
   startSession: (workspaceId?: WorkspaceId) => void
   /** Toggle the sidebar column through the layout service. */
   toggleSidebar: () => void
+  /** The locale face the profile popover's Idioma submenu rides. */
+  locale: SidebarLocaleInjected
+  /** Write actions the shell's Projetos modal wires. */
+  workspaces: {
+    /** Connect a Workspace to its reusable-or-fresh blank session and open it. */
+    connect: (workspaceId: WorkspaceId) => Promise<SessionId>
+    /** Register an existing directory path as a Workspace. */
+    create: (input: { path: string }) => Promise<WorkspaceView>
+    /** Open the Host's native directory picker; null = cancelled. */
+    pickDirectory: () => Promise<string | null>
+    /** Open a filesystem path with the Host OS default application. */
+    openPath: (path: string) => Promise<void>
+  }
+}
+
+/**
+ * The popover's locale face: snapshot reads evaluated at render time (a
+ * popover opening re-renders, so getter reads are fresh enough for a menu)
+ * plus the durable preference write. Read through the runtime's locale
+ * service, never a value import (bundle purity).
+ */
+export type SidebarLocaleInjected = {
+  /** Active locale id at call time. */
+  active: () => string
+  /** Selectable locales (id + self-described label) at call time. */
+  options: () => readonly { id: string; label: string }[]
+  /** Switch the active locale (durable preference). */
+  set: (id: string) => void
 }
 
 /**

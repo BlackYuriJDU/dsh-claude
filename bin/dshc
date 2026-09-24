@@ -1,21 +1,28 @@
 #!/usr/bin/env bash
 # dshc — DSH Claude launcher (DeepSeek Harness fork)
 #
-# Isolamento total da instância do senhor (dsh na 3080):
-#   DSH_HOME      → ~/.dshc   (settings, credenciais, skills, perfis, sessões)
-#   DSHC_WORKSPACE→ ~/dsh-claude-work (cwd do app: escopo dos projetos/sessões)
-# Porta padrão 3090. Tudo sobrescrevível por env: DSHC_DSH_HOME, DSHC_WORKSPACE,
-# DSHC_PORT. Rodar `dshc web` de qualquer lugar nunca toca a instância 3080.
+# Isolated from a stock dsh install (default port 3080):
+#   DSH_HOME      → ~/.dshc   (settings, credentials, skills, profiles, sessions)
+#   DSHC_WORKSPACE→ ~/dsh-claude-work (app cwd: project/session scope)
+# Default port 3090. Everything is overridable via env: DSHC_DSH_HOME,
+# DSHC_WORKSPACE, DSHC_PORT, DSHC_HOME. Running `dshc web` from anywhere never
+# touches the 3080 instance.
 set -euo pipefail
 export DSH_HOME="${DSHC_DSH_HOME:-$HOME/.dshc}"
 DSHC_WORKSPACE="${DSHC_WORKSPACE:-$HOME/dsh-claude-work}"
 DSHC_PORT="${DSHC_PORT:-3090}"
-DSHC_HOME="${DSHC_HOME:-/home/arthur/jarvis/dsh-claude}"
+# DSHC_HOME points at the built checkout; default to this script's repo root.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DSHC_HOME="${DSHC_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 mkdir -p "$DSHC_WORKSPACE" "$DSH_HOME/profiles"
 cd "$DSHC_WORKSPACE"
-CLI_DIST="$DSHC_HOME/apps/cli/lib/bin.js"
-BIN="$CLI_DIST"
-[ -f "$BIN" ] || BIN=/home/arthur/.local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js
+BIN="$DSHC_HOME/apps/cli/lib/bin.js"
+if [ ! -f "$BIN" ]; then
+  echo "dshc: built CLI not found at $BIN" >&2
+  echo "dshc: run 'pnpm install && pnpm run build' in $DSHC_HOME first," >&2
+  echo "dshc: or point DSHC_HOME at a built checkout." >&2
+  exit 1
+fi
 if [ "${1:-}" = "web" ] && ! printf '%s\n' "$@" | grep -q -- '--port'; then
   exec node "$BIN" web --port "$DSHC_PORT" "${@:2}"
 fi

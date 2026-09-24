@@ -1,5 +1,5 @@
 .frame {
-  position: relative; /* anchors the drag handles, which straddle column borders */
+  position: relative; /* anchors the drag handle, which straddles the column border */
   display: grid;
   grid-template-rows: 100%;
   height: 100%;
@@ -26,7 +26,6 @@
   min-width: 0;
   overflow: hidden;
   background: var(--dsw-specific-sidebar-fill);
-  border-right: 1px solid var(--dsw-alias-border-l1);
 }
 
 .centerCol {
@@ -36,21 +35,8 @@
   overflow: hidden;
 }
 
-.detailsCol {
-  min-width: 0;
-  overflow: hidden;
-  border-left: 1px solid var(--dsw-alias-border-l2);
-}
-
-/* The details subtree stays mounted at zero width, so its border must not paint
-   a 1px seam. The collapsed sidebar instead retains a bordered compact rail. */
-.frame[data-details-collapsed] .detailsCol {
-  border-left: none;
-}
-
-/* Drag handles are frame children (columns clip overflow): an 8px hit strip
-   centered on the column border via inline left, above column content. Details
-   adds a visible 12x32 pill at vertical center; sidebar keeps only the hit strip. */
+/* The drag handle is a frame child (columns clip overflow): an 8px hit strip
+   centered on the column border via inline left, above column content. */
 .handle {
   position: absolute;
   top: 0;
@@ -60,7 +46,7 @@
   cursor: col-resize;
   z-index: 2;
   touch-action: none;
-  /* Rides the same curve as the tracks so the pill stays on the moving
+  /* Rides the same curve as the tracks so the handle stays on the moving
      border during collapse/expand; paused while dragging (frame rule). */
   transition: left var(--ds-transition-duration-slow) var(--ds-ease-in-out);
 }
@@ -75,36 +61,25 @@
   }
 }
 
-.handle[data-side='details']::after {
-  content: '';
+/* Explicit tracks keep the conversation in column two when the single
+   sidebar becomes absolutely positioned above the unchanged rail track. */
+.sidebarCol { grid-column: 1; grid-row: 1; }
+.centerCol { grid-column: 2; grid-row: 1; }
+
+.drawerScrim {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 12px;
-  height: 32px;
-  border-radius: 10px;
-  box-sizing: border-box;
-  background: var(--dsw-alias-button-floating-fill);
-  border: 1px solid var(--dsw-alias-border-l2-darkmode-thin);
-  /* Hover affordance: the details pill hides until the pointer is over its
-     column, the strip itself, or a drag. */
-  opacity: 0;
-  transition:
-    opacity var(--ds-transition-duration-slow) var(--ds-ease-in-out),
-    background var(--ds-transition-duration-slow) var(--ds-ease-in-out);
+  inset: 0;
+  z-index: 10;
+  background: var(--dsw-alias-bg-overlay);
 }
 
-.detailsCol:hover ~ .handle[data-side='details']::after,
-.handle[data-side='details']:hover::after,
-.handle[data-side='details'][data-dragging='true']::after {
-  opacity: 1;
-}
-
-.handle[data-side='details']:hover::after,
-.handle[data-side='details'][data-dragging='true']::after {
-  background: var(--dsw-alias-button-floating-hover);
-  border-color: var(--dsw-alias-border-l3);
+.sidebarCol[data-drawer-open] {
+  position: absolute;
+  inset: 0 auto 0 0;
+  max-width: 100%;
+  z-index: 11;
+  border-right: 1px solid var(--dsw-alias-border-l2);
+  box-shadow: var(--dsw-shadow-lv3);
 }
 
 .overlayLayer {

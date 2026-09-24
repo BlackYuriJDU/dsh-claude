@@ -35,7 +35,6 @@ async function bench() {
   // These specs assert the shipped Chinese copy. There is no jsdom `window`
   // in this lane, so browser-language detection never runs and the locale
   // comes from FALLBACK_LOCALE (en): state the asserted locale explicitly.
-  locale.setLocale('zh')
   ctx.provide('locale', locale)
   return { ctx, slots, locale }
 }
@@ -49,7 +48,7 @@ describe('apply', () => {
     const { ctx, locale } = await bench()
     await ctx.plugin({ inject: [...inject], apply }).await()
     const t = locale.bind('slash.menu')
-    expect(t('command')).toBe('命令')
+    expect(t('command')).toBe('Commands')
     locale.setLocale('en')
     expect(t('skill')).toBe('Skills')
     expect(t('subagent')).toBe('Subagents')

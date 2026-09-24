@@ -1,0 +1,161 @@
+/* The Projects section: one card per project with its instructions textarea
+ * and knowledge-file list. */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 4px 8px;
+}
+
+.groupTitle {
+  padding: 14px 0 6px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.empty {
+  padding: 12px 0;
+  font-size: 13px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.projectList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.project {
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.projectHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.projectTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.projectPath {
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+  word-break: break-all;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  resize: vertical;
+  min-height: 72px;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--dsw-alias-border-l3);
+}
+
+.fileList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fileRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.fileRow:last-child {
+  border-bottom: none;
+}
+
+.fileName {
+  font-size: 13px;
+  color: var(--dsw-alias-label-primary);
+  word-break: break-all;
+}
+
+.rowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.linkButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
+.primaryButton {
+  padding: 7px 14px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-button-floating-fill);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.savedFlag {
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+}

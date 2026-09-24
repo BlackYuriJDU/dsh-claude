@@ -2,9 +2,8 @@ import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
 import type { IndexInjection } from '@deepseek-ai/dsh-host-webserver'
 import { SettingsProvider, settingsNamespace, type SettingsNamespace } from '@deepseek-ai/dsh-settings'
-import {
-  DEFAULT_PREFERENCE, THEME_SETTINGS_NAMESPACE, apply,
-} from '@deepseek-ai/dsh-client-ui-theme'
+import { DEFAULT_PREFERENCE, THEME_SETTINGS_NAMESPACE, apply } from '@deepseek-ai/dsh-client-ui-theme'
+import { DEFAULT_CHAT_FONT } from '../src/theme-settings.ts'
 
 class MemorySettings extends SettingsProvider {
   readonly writable = true
@@ -34,10 +33,11 @@ describe('ui-theme host', () => {
     const fiber = ctx.plugin({ apply })
     await fiber.await()
     const ns = settingsNamespace(THEME_SETTINGS_NAMESPACE)
-    expect(ctx.settings.get(ns)).toEqual({ preference: DEFAULT_PREFERENCE })
-    await ctx.settings.update(ns, { preference: 'dark' })
-    expect(ctx.settings.get(ns)).toEqual({ preference: 'dark' })
+    expect(ctx.settings.get(ns)).toEqual({ preference: DEFAULT_PREFERENCE, chatFont: DEFAULT_CHAT_FONT })
+    await ctx.settings.update(ns, { preference: 'dark', chatFont: 'mono' })
+    expect(ctx.settings.get(ns)).toEqual({ preference: 'dark', chatFont: 'mono' })
     await expect(ctx.settings.update(ns, { preference: 'sepia' })).rejects.toThrow()
+    await expect(ctx.settings.update(ns, { preference: 'dark', chatFont: 'comic-sans' })).rejects.toThrow()
     await fiber.dispose()
     expect(ctx.settings.describe().map(row => row.ns)).not.toContain(ns)
   })
@@ -50,17 +50,17 @@ describe('ui-theme host', () => {
     const rows = collect(ctx)
     expect(rows).toHaveLength(1)
     expect(rows[0]).toMatchObject({ kind: 'script', placement: 'body' })
-    expect(scriptText(rows[0])).toContain('const preference = "system"')
+    expect(scriptText(rows[0])).toContain('const preference = "dark"')
     await ctx.settings.update(settingsNamespace(THEME_SETTINGS_NAMESPACE), { preference: 'dark' })
     expect(scriptText(collect(ctx)[0])).toContain('const preference = "dark"')
     await fiber.dispose()
     expect(collect(ctx)).toEqual([])
   })
 
-  it('uses the system preference without a settings provider', async () => {
+  it('uses the dark-only preference without a settings provider', async () => {
     const ctx = new Context()
     await ctx.plugin({ apply }).await()
-    expect(scriptText(collect(ctx)[0])).toContain('const preference = "system"')
+    expect(scriptText(collect(ctx)[0])).toContain('const preference = "dark"')
   })
 
   it('falls back to the schema default while the theme namespace holds no section', async () => {
@@ -69,6 +69,6 @@ describe('ui-theme host', () => {
     const ctx = new Context()
     ctx.provide('settings', { register: () => () => {}, get: () => undefined } as never)
     await ctx.plugin({ apply }).await()
-    expect(scriptText(collect(ctx)[0])).toContain('const preference = "system"')
+    expect(scriptText(collect(ctx)[0])).toContain('const preference = "dark"')
   })
 })

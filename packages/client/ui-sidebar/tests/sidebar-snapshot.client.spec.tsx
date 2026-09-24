@@ -13,10 +13,11 @@ import { act, cleanup, waitFor } from '@testing-library/react'
 import { SlotTestRuntime, usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { apply, inject } from '@deepseek-ai/dsh-client-ui-sidebar/client'
+import { en, pt } from '../src/client/locales.ts'
 
 // The service reads its initial locale from the browser; these specs assert
 // the shipped Chinese copy, so they state the browser they assume.
-usePinnedBrowserLanguages('zh-CN')
+usePinnedBrowserLanguages('en-US')
 
 beforeEach(() => { vi.stubEnv('DSH_CLIENT_COMMIT_HASH', 'abc1234') })
 
@@ -26,10 +27,9 @@ afterEach(() => {
 })
 
 /**
- * Boot the package over the slot test runtime. The default bench stays on
- * the service's default locale (zh — the fallback chain's base), pinning
- * what an untouched client shows; `locale: 'en'` pins the en copy instead.
- * The installed face backs the entry's standard `t` seat either way.
+ * Boot the package over the slot test runtime on the single shipped locale
+ * (en), pinning what an untouched client shows. The installed face backs the
+ * entry's standard `t` seat.
  */
 async function bench(options: { locale?: 'en' } = {}) {
   const runtime = await SlotTestRuntime.create()
@@ -44,11 +44,11 @@ async function bench(options: { locale?: 'en' } = {}) {
 }
 
 describe('sidebar shell snapshots', () => {
-  it('renders the expanded column in the default locale (zh, no setLocale)', async () => {
+  it('renders the expanded column in the default locale (en, no setLocale)', async () => {
     const { runtime } = await bench()
     const slot = runtime.renderSlot('sidebar', { collapsed: false, width: 300 })
-    // Wordmark + capsule both start a session in the expanded state.
-    expect(slot.view.getAllByRole('button', { name: '新建会话' })).toHaveLength(2)
+    // The Novo pill is the expanded state's session starter.
+    expect(slot.view.getAllByRole('button', { name: en['session.new.label'] })).toHaveLength(1)
     expect(slot.container).toMatchSnapshot()
     await runtime.dispose()
   })
@@ -56,8 +56,8 @@ describe('sidebar shell snapshots', () => {
   it('renders the expanded column (wordmark, capsule, empty holes)', async () => {
     const { runtime } = await bench({ locale: 'en' })
     const slot = runtime.renderSlot('sidebar', { collapsed: false, width: 300 })
-    // Wordmark + capsule both start a session in the expanded state.
-    expect(slot.view.getAllByRole('button', { name: 'New session' })).toHaveLength(2)
+    // The Novo pill is the expanded state's session starter.
+    expect(slot.view.getAllByRole('button', { name: en['session.new.label'] })).toHaveLength(1)
     expect(slot.container).toMatchSnapshot()
     await runtime.dispose()
   })
@@ -67,10 +67,11 @@ describe('sidebar shell snapshots', () => {
     const slot = runtime.renderSlot('sidebar', { collapsed: false, width: 300 })
     const shell = slot.container.firstElementChild
     slot.update({ collapsed: true, width: 56 })
-    // The wide content (wordmark shortcut) unmounts at the 150ms settle;
-    // only the rail's capsule remains a New-session button.
+    // The wide content unmounts at the 150ms settle; the rail carries the
+    // reopen toggle alone.
     await waitFor(() => {
-      expect(slot.view.getAllByRole('button', { name: 'New session' })).toHaveLength(1)
+      expect(slot.view.queryByRole('button', { name: en['session.new.label'] })).toBeNull()
+      expect(slot.view.getByRole('button', { name: en['toggle.open'] })).toBeTruthy()
     })
     expect(slot.container).toMatchSnapshot()
     // Same tree position: the owner flip re-rendered the shell in place.
@@ -81,11 +82,11 @@ describe('sidebar shell snapshots', () => {
   it('a locale switch refreshes mounted copy without re-registration', async () => {
     const { runtime, locale } = await bench()
     const slot = runtime.renderSlot('sidebar', { collapsed: false, width: 300 })
-    expect(slot.view.getAllByRole('button', { name: '新建会话' })).toHaveLength(2)
+    expect(slot.view.getAllByRole('button', { name: en['session.new.label'] })).toHaveLength(1)
     // Same fiber, same registration: setLocale alone re-renders the outlet.
-    act(() => { locale.setLocale('en') })
-    expect(slot.view.getAllByRole('button', { name: 'New session' })).toHaveLength(2)
-    expect(slot.view.queryByRole('button', { name: '新建会话' })).toBeNull()
+    act(() => { locale.setLocale('pt') })
+    expect(slot.view.getAllByRole('button', { name: pt['session.new.label'] })).toHaveLength(1)
+    expect(slot.view.queryByRole('button', { name: en['session.new'] })).toBeNull()
     await runtime.dispose()
   })
 })

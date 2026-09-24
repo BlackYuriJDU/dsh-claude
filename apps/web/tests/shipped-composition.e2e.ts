@@ -164,9 +164,13 @@ it('assembles the shipped Web catalog, file-reference guidance, retry policy, an
   expect(writableRoots(scaffold.ctx.sandboxPolicy.resolve({ mode: 'workspace-write' }))).toEqual(
     expect.arrayContaining([canonicalPath('/tmp'), canonicalPath(tmpdir())]),
   )
-  expect(scaffold.ctx.sandboxPolicy.defaultMode).toBe('workspace-write')
+  // This fork's shipped posture: ALWAYS full access (no sandbox walls, no
+  // preset ladder) with the approval channel armed — destructive commands ask
+  // before running through the shell tools' danger gate.
+  expect(scaffold.ctx.sandboxPolicy.defaultMode).toBe('danger-full-access')
   expect(scaffold.ctx.approval.config.policy).toBe('ask')
-  expect(scaffold.ctx.permissionPresets.defaultPreset).toBe('workspace-write')
+  expect(scaffold.ctx.permissionPresets.defaultPreset).toBe('danger-full-access')
+  expect(scaffold.ctx.permissionPresets.names).toEqual(['danger-full-access'])
 
   const commandHandle = await scaffold.ctx.agents.create({
     sessionId: SessionId('shipped-command-catalog'),

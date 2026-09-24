@@ -27,12 +27,6 @@ function displayTitle(node: SessionNode, t: RowTranslate): string {
   return node.blank ? t('session.new') : node.title
 }
 
-/** Localized compact relative time ("刚刚"/"5分钟" in zh, "now"/"5min" in en). */
-function timeLabel(updatedAt: number, now: number, t: RowTranslate): string {
-  const { unit, n } = relativeTime(updatedAt, now)
-  return unit === 'now' ? t('time.now') : t(`time.${unit}`, { n })
-}
-
 /** Hover-card variant: distances wrap in the ago template; the now bucket stays bare (no "now ago"). */
 function hoverTimeLabel(updatedAt: number, now: number, t: RowTranslate): string {
   const { unit, n } = relativeTime(updatedAt, now)
@@ -437,11 +431,10 @@ export function SessionNodeItem({ node, currentId, now, onOpen, onRename, onFork
         </span>
       )}
       <span className={css.title}>{title}</span>
-      {/* A blank New Session row is a provisional placeholder: nothing has
-          happened in it yet, so a "now" timestamp and the row verbs
-          (rename/fork/archive) would all act on content that does not
-          exist — both trailing cells stay off until the first prompt. */}
-      {!row.blank && <span className={css.time}>{timeLabel(row.updatedAt, now, t)}</span>}
+      {/* dshc: the visible timestamp left the row (the reference list carries
+          none); updatedAt stays in the store — the recency sort and the
+          hover-card read it. A blank New Session row keeps its verbs off
+          until the first prompt. */}
       {!row.blank && (
         <span className={css.rowActions}>
           <Menu

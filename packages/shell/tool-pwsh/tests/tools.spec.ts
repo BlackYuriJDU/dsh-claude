@@ -696,6 +696,52 @@ describe('sandbox escalation through ctx.approval', () => {
   })
 })
 
+describe('destructive-command gate', () => {
+  const destructive = {
+    command: 'Remove-Item -Recurse -Force C:\\gate-target',
+    description: 'test destructive gate',
+  }
+
+  it('denies a destructive command when no approval service is composed', async () => {
+    const { ctx } = await setupSandboxed()
+    const result = await call(ctx, 'pwsh', destructive, sandboxAgent())
+    expect(result.isError).toBe(true)
+    expect(text(result)).toContain('requires approval, but no approval service is composed')
+  })
+
+  it('asks before running and lets a grant execute', async () => {
+    const { ctx, bash } = await setupSandboxed(true)
+    const reasons: Array<string | undefined> = []
+    ctx.on('approval/request', (req) => {
+      reasons.push(req.reason)
+      return Promise.resolve<ApprovalOutcome>('allowed-once')
+    })
+    const result = await call(ctx, 'pwsh', destructive, sandboxAgent())
+    expect(result.isError).toBe(false)
+    expect(bash.modes.length).toBe(1)
+    expect(reasons).toEqual(['destructive command: recursive delete (Remove-Item -Recurse / rd /s)'])
+  })
+
+  it('denies on rejection with nothing executed', async () => {
+    const { ctx, bash } = await setupSandboxed(true)
+    ctx.on('approval/request', () => Promise.resolve<ApprovalOutcome>('rejected'))
+    const result = await call(ctx, 'pwsh', destructive, sandboxAgent())
+    expect(result.isError).toBe(true)
+    expect(text(result)).toContain('the user rejected this destructive command')
+    expect(bash.modes).toEqual([])
+  })
+
+  it('leaves routine commands ungated', async () => {
+    const { ctx } = await setupSandboxed(true)
+    const prompted = vi.fn()
+    ctx.on('approval/request', () => { prompted(); return Promise.resolve<ApprovalOutcome>('allowed-once') })
+    for (const command of ['Write-Output ok', 'Remove-Item temp.txt', 'Get-ChildItem -Recurse']) {
+      await call(ctx, 'pwsh', { command, description: 'ungated probe' }, sandboxAgent())
+    }
+    expect(prompted).not.toHaveBeenCalled()
+  })
+})
+
 describe('background execution through the job runtime', () => {
   it('run_in_background acks with the job id, readable through the REAL job_output tool', async () => {
     const { ctx } = await setupWithTasks()

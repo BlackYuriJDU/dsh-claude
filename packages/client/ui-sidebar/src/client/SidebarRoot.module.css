@@ -84,14 +84,14 @@
   from { opacity: 0; }
 }
 
-/* Logo row (figma pad (4,8,4,8)): expanded keeps the panel toggle at the
-   right edge; the rail gives every control the same base left anchor before
-   the shared entry translation is applied. */
+/* Logo row: expanded carries the serif wordmark alone (the reference has no
+   toggle beside it — the collapse control lives in the profile foot's
+   cluster); the rail keeps its toggle. */
 .logoRow {
   flex: none;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
   height: 60px;
   padding: 8px 0 8px 4px;
@@ -107,10 +107,9 @@
   justify-content: flex-start;
 }
 
-/* Brand group (figma I133:7632): the full wordmark rides the text ink
-   (figma flows: the main-screen instance is black; blue is brand
-   emphasis only). A button only in behavior (New Session shortcut): the
-   pointer cursor is the sole affordance — no hover chrome on the mark. */
+/* Brand group: the serif wordmark rides the text ink. A button only in
+   behavior (New Session shortcut): the pointer cursor is the sole
+   affordance — no hover chrome on the mark. */
 .brand {
   flex: 1;
   min-width: 0;
@@ -147,15 +146,13 @@
   gap: 6px;
   min-width: 0;
   height: 24px;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 24px;
-  letter-spacing: 0.04em;
 }
 
 .fallbackBrandName {
-  font-size: 17px;
-  letter-spacing: 0px;
+  font-family: var(--dsc-font-display, Georgia, 'Times New Roman', serif);
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
@@ -183,30 +180,10 @@
   height: 36px;
 }
 
-/* Rail logo swap: collapsed, the toggle rests as the whale mark (brand ink,
-   no hover circle) and hovering reveals the panel icon — the expand
-   affordance (figma sidebar-hover flow). Expanded it is a plain panel icon. */
-.collapsed .toggle .panelIcon {
-  display: none;
-}
-
-.collapsed .toggle:hover .panelIcon {
-  display: inline;
-}
-
-.collapsed .toggle:hover .railMark {
-  display: none;
-}
-
-.railMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Rail icons ride the primary ink (figma rail spec); expanded keeps the
-   secondary icon-button ink. */
+/* Collapsed: the toggle is the rail's only occupant. */
 .collapsed .iconButton {
+  width: 36px;
+  height: 36px;
   color: var(--dsw-alias-label-primary);
 }
 
@@ -224,20 +201,21 @@
   line-height: 16px;
 }
 
-/* New Session: 38px bar, 12px radius (figma 133:7634 geometry, squared-off
-   corners); collapsed it renders as the rail's plain icon control. */
+/* New Session: 36px bar, left-aligned content, subtle fill only (reference:
+   no border, 8px radius, 12px side padding); collapsed it renders as the
+   rail's plain icon control. */
 .newSession {
   flex: none;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 38px;
-  padding: 8px 16px;
+  justify-content: flex-start;
+  gap: 10px;
+  height: 36px;
+  padding: 0 12px;
   margin: 0 2px 8px;
   box-sizing: border-box;
-  border: 1px solid var(--dsw-alias-border-l2);
-  border-radius: 12px;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
   background: var(--dsw-alias-button-elevated-fill);
   color: var(--dsw-alias-label-primary);
   font-size: 14px;
@@ -296,8 +274,10 @@
   padding-left: 0;
 }
 
-/* Footer seats: additive actions stack above Settings. Each occupant owns its
-   button geometry and hover chrome. */
+/* Footer seats: additive actions stack above the profile pill as full-width
+   rows (the reference's Design row). The unoccupied seat renders no boxes —
+   the seat wrapper is zero-height — so the pill and its cluster keep the row.
+   Each occupant owns its button geometry and hover chrome. */
 .footArea {
   flex: none;
   display: flex;
@@ -313,6 +293,7 @@
 
 .footerActions {
   display: flex;
+  flex-direction: column;
 }
 
 .collapsed .footArea {
@@ -324,6 +305,270 @@
   display: flex;
   justify-content: center;
   width: auto;
+}
+
+/* ===== dshc: Claude sidebar layout ===== */
+
+/* Feature nav rows (Projetos / Artefatos / Código / Personalizar). */
+.navRows {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 6px;
+}
+
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13.5px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.navRow:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* Disabled rows read as "coming soon": tertiary ink, no hover seat. */
+.navRow:disabled {
+  cursor: default;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.navRow:disabled .navIcon {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.navIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.navRow:hover:not(:disabled) .navIcon {
+  color: var(--dsw-alias-label-primary);
+}
+
+.navLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Profile foot: a hairline pill (avatar + name + chevron) with the search and
+   collapse controls clustered to its right, like the reference foot. */
+.footRow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 2px 2px;
+}
+
+/* The Menu's anchor wrapper is the row's flex item: stretch it so the pill
+   (flex: 1 inside the wrapper) fills the row left of the control cluster. */
+.menuStretch {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.profileRow {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsc-radius-md, 8px);
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+}
+
+.profileRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.footCluster {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.profileChevron {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
+
+/* The real settings trigger stays mounted but invisible; the popover's
+   Configurações row clicks it through (keeps ui-settings wiring intact). */
+.hiddenSettings {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  pointer-events: none;
+}
+
+/* ===== Projetos / Artefatos modals (ui-primitives Modal bodies) ===== */
+
+.projectList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.projectItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--dsc-radius-md, 8px);
+}
+
+.projectItem:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.projectMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.projectTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectPath {
+  font-size: 11.5px;
+  color: var(--dsw-alias-label-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modalBody {
+  margin: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13.5px;
+  line-height: 20px;
+}
+
+.modalEmpty {
+  margin: 0;
+  padding: 16px 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13.5px;
+}
+
+.modalError {
+  margin: 8px 0 0;
+  color: var(--dsw-alias-status-error, #e5484d);
+  font-size: 12.5px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.modalPrimary {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--dsc-radius-md, 8px);
+  background: var(--dsw-alias-button-primary-fill, #d97757);
+  color: var(--dsw-alias-label-primary-inverted, #fff);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.modalPrimary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.modalFooterNote {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 @media (prefers-reduced-motion: reduce) {

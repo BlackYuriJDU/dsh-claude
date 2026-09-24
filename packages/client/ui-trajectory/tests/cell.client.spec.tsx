@@ -5,11 +5,7 @@
  */
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
-import {
-  formatElapsedSeconds,
-  TrajectoryCell,
-  type TrajectoryCellKind,
-} from '../src/client/TrajectoryCell.tsx'
+import { formatElapsedSeconds, TrajectoryCell, type TrajectoryCellKind } from '../src/client/TrajectoryCell.tsx'
 import { formatDurationMillis } from '../src/client/trajectory-record.ts'
 
 afterEach(cleanup)

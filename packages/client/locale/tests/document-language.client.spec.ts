@@ -54,9 +54,9 @@ describe('document language', () => {
   beforeEach(() => {
     // The served markup declares the product default; the plugin must not
     // depend on that value already being correct.
-    document.documentElement.lang = 'en'
-    Object.defineProperty(navigator, 'languages', { value: ['zh-CN'], configurable: true })
-    Object.defineProperty(navigator, 'language', { value: 'zh-CN', configurable: true })
+    document.documentElement.lang = 'zh-CN'
+    Object.defineProperty(navigator, 'languages', { value: ['pt-BR'], configurable: true })
+    Object.defineProperty(navigator, 'language', { value: 'pt-BR', configurable: true })
   })
 
   afterEach(() => {
@@ -68,27 +68,34 @@ describe('document language', () => {
   })
 
   it('states the resolved locale at activation, not the value the markup shipped', async () => {
-    // A Chinese browser resolves zh even though the markup said en.
+    // A Portuguese browser resolves the shipped pt locale even though the
+    // markup declared something else.
     const { locale } = await bench()
-    expect(locale.getLocale().active).toBe('zh')
-    expect(langOf()).toBe('zh-CN')
+    expect(locale.getLocale().active).toBe('pt')
+    expect(langOf()).toBe('pt-BR')
   })
 
-  it('follows a locale switch in both directions with BCP 47 tags', async () => {
+  it('follows a locale switch with BCP 47 tags', async () => {
     const { locale } = await bench()
-    expect(langOf()).toBe('zh-CN')
+    expect(langOf()).toBe('pt-BR')
     locale.setLocale('en')
-    // `en` needs no region; `zh` names its script variant, which bare `zh`
+    // `en` needs no region; `pt` names its regional variant, which bare `pt`
     // leaves ambiguous for pronunciation and font selection.
     expect(langOf()).toBe('en')
-    locale.setLocale('zh')
-    expect(langOf()).toBe('zh-CN')
+    locale.setLocale('pt')
+    expect(langOf()).toBe('pt-BR')
   })
 
   it('follows an explicit Host preference that overrides browser detection', async () => {
-    // Stored preference wins over the zh browser pinned above.
+    // Stored preference wins over the pt-BR browser pinned above.
     const { locale } = await bench('en')
     await vi.waitFor(() => { expect(locale.getLocale().active).toBe('en') })
     await vi.waitFor(() => { expect(langOf()).toBe('en') })
+  })
+
+  it('a stale stored locale falls back to the browser-derived one', async () => {
+    const { locale } = await bench('zh')
+    await vi.waitFor(() => { expect(locale.getLocale().active).toBe('pt') })
+    await vi.waitFor(() => { expect(langOf()).toBe('pt-BR') })
   })
 })

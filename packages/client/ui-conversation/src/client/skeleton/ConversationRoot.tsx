@@ -151,7 +151,9 @@ export function ConversationRoot({
       : {}),
     // Stats band under the card, inside the bar's width column so both
     // share one constraint (composer.dock = stats-line family).
-    footer: !hero && zone !== undefined ? renderSlot('conversation.composer.dock', zone) : null,
+    // dshc: the stats dock (turns/steps/LLM/TTFT) is removed — the composer
+    // ends at its toolbar row, like the reference interface.
+    footer: null,
   })
 
   const composerBar = (

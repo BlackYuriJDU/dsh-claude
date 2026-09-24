@@ -11,24 +11,33 @@
  * to the step, so a mounted-but-deciding step paints nothing here.
  */
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import {
   IconAgentPresetOutline16, IconCloseOutline16, IconDataOutline16,
-  IconPersonalizationOutline16, IconSettingsOutline16,
+  IconGoalOutline16, IconPersonalizationOutline16, IconSettingsOutline16,
+  IconSkillOutline16, IconUserOutline16,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { SettingsRootComponentProps, SettingsSectionRow } from './shell-contract.ts'
 import css from './SettingsRoot.module.css'
 
 /** Nav glyph by section id; unknown ids fall back to the settings gear. */
 function navIcon(id: string) {
+  if (id === 'account') return <IconUserOutline16 className={css.navIcon} size={16} />
   if (id === 'models') return <IconDataOutline16 className={css.navIcon} size={16} />
-  if (id === 'agent-presets') return <IconAgentPresetOutline16 className={css.navIcon} size={16} />
+  if (id === 'skills') return <IconSkillOutline16 className={css.navIcon} size={16} />
+  if (id === 'connectors') return <IconGoalOutline16 className={css.navIcon} size={16} />
   if (id === 'plugins') return <IconPersonalizationOutline16 className={css.navIcon} size={16} />
+  if (id === 'memory' || id === 'agent-presets') return <IconAgentPresetOutline16 className={css.navIcon} size={16} />
   return <IconSettingsOutline16 className={css.navIcon} size={16} />
 }
 
+/** Nav group order: the two reference groups, unknown groups fall to config. */
+const GROUP_ORDER = ['config', 'personalize'] as const
+
 type PanelProps = {
   rows: readonly SettingsSectionRow[]
+  groupLabels: SettingsRootComponentProps['groupLabels']
   renderSlot: SettingsRootComponentProps['renderSlot']
   activeId: string | undefined
   onSelect: (id: string) => void
@@ -40,10 +49,12 @@ type PanelProps = {
  * header button, a mask click, and document-level Escape (mounted only while
  * open, so the listener lifetime is the panel's).
  */
-function SettingsPanel({ rows, renderSlot, activeId, onSelect, onClose }: PanelProps) {
+function SettingsPanel({ rows, groupLabels, renderSlot, activeId, onSelect, onClose }: PanelProps) {
   // Entries can unmount underneath the requested id, so the render-time
-  // projection falls back to the first row when the id is gone.
-  const active = rows.find(r => r.id === activeId)?.id ?? rows[0]?.id
+  // projection falls back to the first selectable row when the id is gone.
+  const selectable = rows.filter(row => !row.soon)
+  const active = selectable.find(row => row.id === activeId)?.id ?? selectable[0]?.id
+  const labels = groupLabels()
   const titleId = useId()
 
   useEffect(() => {
@@ -64,20 +75,31 @@ function SettingsPanel({ rows, renderSlot, activeId, onSelect, onClose }: PanelP
       <div className={css.panel} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <nav className={css.nav}>
           <div className={css.navTitle} id={titleId}>{renderSlot('settings.header', {})}</div>
-          <div className={css.navList}>
-            {rows.map(row => (
-              <button
-                key={row.id}
-                type="button"
-                className={clsx(css.navCell, row.id === active && css.active)}
-                aria-current={row.id === active ? 'true' : undefined}
-                onClick={() => { onSelect(row.id) }}
-              >
-                {navIcon(row.id)}
-                <span className={css.navLabel}>{row.label}</span>
-              </button>
-            ))}
-          </div>
+          {GROUP_ORDER.map(group => {
+            const groupRows = rows.filter(row => (row.group ?? 'config') === group)
+            if (groupRows.length === 0) return null
+            return (
+              <div key={group} className={css.navGroup}>
+                <div className={css.navGroupLabel}>{group === 'config' ? labels.config : labels.personalize}</div>
+                <div className={css.navList}>
+                  {groupRows.map(row => (
+                    <button
+                      key={row.id}
+                      type="button"
+                      className={clsx(css.navCell, row.id === active && css.active)}
+                      disabled={row.soon || undefined}
+                      aria-current={row.id === active ? 'true' : undefined}
+                      onClick={() => { if (!row.soon) onSelect(row.id) }}
+                    >
+                      {navIcon(row.id)}
+                      <span className={css.navLabel}>{row.label}</span>
+                      {row.soon === true && <span className={css.navSoon}>{row.soonLabel ?? 'Em breve'}</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </nav>
         <div className={css.content}>
           <div className={css.header}>
@@ -102,7 +124,7 @@ function SettingsPanel({ rows, renderSlot, activeId, onSelect, onClose }: PanelP
  * @returns the settings shell element tree.
  */
 export function SettingsRoot(props: SettingsRootComponentProps) {
-  const { wide, useSections, useOnboardingSteps, useSessions, renderSlot } = props
+  const { wide, useSections, useOnboardingSteps, useSessions, renderSlot, groupLabels } = props
   const [open, setOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | undefined>(undefined)
   const [completedOnboarding, setCompletedOnboarding] = useState<ReadonlySet<string>>(() => new Set())
@@ -150,14 +172,16 @@ export function SettingsRoot(props: SettingsRootComponentProps) {
       >
         {renderSlot('settings.trigger', { wide })}
       </button>
-      {open && (
+      {open && createPortal(
         <SettingsPanel
           rows={rows}
+          groupLabels={groupLabels}
           renderSlot={renderSlot}
           activeId={activeId}
           onSelect={setActiveId}
           onClose={close}
-        />
+        />,
+        document.body,
       )}
       {/* Dialog chrome and `#root` inert ownership live inside each step's
           visible branch. A step still deciding (private facts loading)

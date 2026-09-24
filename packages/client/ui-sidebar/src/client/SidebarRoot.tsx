@@ -1,25 +1,26 @@
 /**
- * Sidebar shell: column geometry only. Collapse is a slide plus crossfade:
- * content freezes at its expanded width (inline style) and fades out in place
- * while the sliding column (AppFrame grid tracks) clips it — nothing reflows
- * mid-slide. At settle the wide-only content unmounts and the four upper
- * controls enter the 56px rail from the same horizontal offset (one icon each,
- * same top-down order) on one fade that ends with the slide. The bottom-pinned
- * settings control only fades. The workspace/session browsing region between
- * the New Session button and the foot is the `sidebar.workspaces` registrant's,
- * and the foot holds `sidebar.settings` plus `sidebar.footer.action`; the shell
- * hands them the wide flag (plus an expand request callback for the browser).
+ * Sidebar shell (Claude layout): serif wordmark, the "Novo" pill, the four
+ * feature nav rows (Projetos and Artefatos open their own modals; Código and
+ * Personalizar stay disabled), the browsing region (Projetos + Conversas e
+ * tarefas), and the profile foot — a hairline pill whose
+ * popover carries the email heading plus Configurações (gear) / Idioma /
+ * Receber ajuda, with search and collapse controls to its right. Collapse
+ * reduces the column to a single panel toggle — nothing else rides the rail.
  *
- * The column also owns whether the scroll regions nested in it draw a
- * scrollbar at all: the shell tracks the pointer and rebinds ui-theme's
- * scrollbar indirection away while it is elsewhere, so a list the user is not
- * pointing at carries no bar.
+ * Collapse is a slide plus crossfade: content freezes at its expanded width
+ * (inline style) and fades out in place while the sliding column (AppFrame
+ * grid tracks) clips it — nothing reflows mid-slide. The column also owns
+ * whether nested scroll regions draw a scrollbar: rebinding ui-theme's
+ * scrollbar indirection away while the pointer is elsewhere.
  */
 import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import clsx from 'clsx'
 import {
-  CoralBurst, IconNewChatOutline16, IconPanelLeftOutline16, Tooltip,
+  IconPanelLeftOutline16, IconPlusOutline16, IconSearchOutline16,
+  IconSettingsOutline16, Menu, Modal, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SidebarRootComponentProps } from './contract/slots.ts'
 import css from './SidebarRoot.module.css'
 
@@ -28,11 +29,118 @@ const COLLAPSE_SETTLE_MS = 150
 
 /**
  * How long the column's scrollbars stay drawn after the pointer leaves it.
- * The bar is a pointer affordance here, and hiding it on the leave event
- * itself makes it blink out while the pointer is only crossing the column's
- * edge — on the way to the conversation, or around a portalled menu.
  */
 const SCROLLBAR_LINGER_MS = 2000
+
+/** Window event the browser region listens to: expand + focus its search. */
+export const SIDEBAR_SEARCH_EVENT = 'dshc:sidebar-search'
+
+/** Window event the Design footer row dispatches: open the shell's Artefatos modal. */
+export const SIDEBAR_DESIGN_EVENT = 'dshc:sidebar-design'
+
+/** The help destination (this fork's repository). */
+const HELP_URL = 'https://github.com/BlackYuriJDU/dsh-claude'
+
+/** Line icons for the feature nav rows and the profile popover (16px grid). */
+const stroke = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.4,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const
+
+const IconProjects = (
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+    <rect {...stroke} x="2" y="2.5" width="12" height="3.4" rx="0.9" />
+    <path {...stroke} d="M3.2 5.9v6.6A1.5 1.5 0 0 0 4.7 14h6.6a1.5 1.5 0 0 0 1.5-1.5V5.9" />
+    <path {...stroke} d="M6.3 8.6h3.4" />
+  </svg>
+)
+
+/* Filled twin four-point stars (the reference draws them solid). */
+const fill = { fill: 'currentColor', stroke: 'none' } as const
+
+const IconArtifacts = (
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+    <path {...fill} d="M8 2.2 9.6 6 13.4 7.6 9.6 9.2 8 13 6.4 9.2 2.6 7.6 6.4 6 8 2.2Z" />
+    <path {...fill} d="M12.6 11.2l.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7.7-1.7Z" />
+  </svg>
+)
+
+const IconCustomize = (
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+    <circle {...stroke} cx="8" cy="5.2" r="2.6" />
+    <path {...stroke} d="M2.8 13.6c.6-2.6 2.7-4 5.2-4s4.6 1.4 5.2 4" />
+  </svg>
+)
+
+const IconLanguage = (
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+    <circle {...stroke} cx="8" cy="8" r="6.2" />
+    <path {...stroke} d="M1.8 8h12.4M8 1.8c1.8 1.7 2.8 3.9 2.8 6.2S9.8 12.5 8 14.2C6.2 12.5 5.2 10.3 5.2 8S6.2 3.5 8 1.8Z" />
+  </svg>
+)
+
+const IconHelp = (
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+    <circle {...stroke} cx="8" cy="8" r="6.2" />
+    <path {...stroke} d="M6.2 6.2A1.9 1.9 0 0 1 8 4.8c1 0 1.9.7 1.9 1.7 0 1.1-1 1.4-1.6 1.9-.3.3-.3.6-.3 1" />
+    <path {...stroke} d="M8 11.4h.01" strokeWidth="1.7" />
+  </svg>
+)
+
+/** localStorage key holding the displayed owner name (shared with the hero). */
+const USER_NAME_STORE_KEY = 'dshc:user-name'
+/** localStorage key holding the displayed owner email (popover heading). */
+const USER_EMAIL_STORE_KEY = 'dshc:user-email'
+/** localStorage key holding the owner avatar (data URL; the settings Perfil row owns it). */
+const USER_AVATAR_STORE_KEY = 'dshc:avatar'
+/** Window event the settings' profile rows dispatch: profile facts changed. */
+const PROFILE_UPDATED_EVENT = 'dshc:profile-updated'
+
+/**
+ * The displayed owner name: the localStorage override when present, else
+ * empty — an unset name is the onboarding's signal to ask (light popup).
+ * @returns the profile row name.
+ */
+function ownerNameOf(): string {
+  try {
+    return window.localStorage.getItem(USER_NAME_STORE_KEY)?.trim() ?? ''
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * The displayed owner email: the localStorage override when present.
+ * @returns the popover heading email, or empty when none was given.
+ */
+function ownerEmailOf(): string {
+  try {
+    return window.localStorage.getItem(USER_EMAIL_STORE_KEY)?.trim() ?? ''
+  } catch {
+    return ''
+  }
+}
+
+/** Avatar fills the reference ships: warm, humanist, distinct per person. */
+const AVATAR_COLORS = [
+  'var(--dsc-coral-500, #cc785c)', '#8f7ce8', '#4f9bb6', '#b78a52',
+  '#7fa265', '#c46a8a', '#6a85c9', '#b08d5f',
+] as const
+
+/**
+ * Pick the avatar fill for a name: a hash across the palette, so the color
+ * is arbitrary (name-shuffled) yet stable across remounts and reloads.
+ * @param name - the displayed owner name.
+ * @returns a CSS color value.
+ */
+function avatarColorOf(name: string): string {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!
+}
 
 /**
  * Render the sidebar column shell.
@@ -44,6 +152,9 @@ export function SidebarRoot({
   width,
   startSession,
   toggleSidebar,
+  locale,
+  useWorkspaces,
+  workspaces,
   t,
   renderSlot,
 }: SidebarRootComponentProps) {
@@ -57,21 +168,18 @@ export function SidebarRoot({
   }, [collapsed])
   const wide = !collapsed || !settled
 
-  // Freeze the content at its expanded width while it fades out (collapsed
-  // && wide): the sliding column then clips it instead of reflowing it. The
-  // rail layout (.collapsed styles) only applies once the fade settles.
+  // Freeze the content at its expanded width while it fades out.
   const lastWideWidth = useRef(width)
   if (!collapsed) lastWideWidth.current = width
 
   // Rail-in only crossfades a live collapse: a refresh straight into the
-  // collapsed state renders the rail statically (no delay-hidden icons).
+  // collapsed state renders the rail statically.
   const everWide = useRef(!collapsed)
   if (!collapsed) everWide.current = true
 
   // Scrollbars in the column follow the pointer (.quietBars rebinds them
   // away): drawn while it is inside, and for SCROLLBAR_LINGER_MS after it
-  // leaves. A pointer that returns within that window cancels the pending
-  // hide rather than restarting from a hidden bar.
+  // leaves.
   const column = useRef<HTMLDivElement>(null)
   const [pointerInside, setPointerInside] = useState(false)
   const lingerTimer = useRef<number | undefined>(undefined)
@@ -86,13 +194,6 @@ export function SidebarRoot({
     window.clearTimeout(lingerTimer.current)
     lingerTimer.current = undefined
   }
-  // Leaving is decided by the column's BOX, not by DOM containment, and only
-  // while the bars are drawn. ui-settings renders its full-viewport panel as a
-  // fixed-position DESCENDANT of this column, so a pointer moved onto that
-  // panel — or onto the conversation once it closes — fires no `pointerleave`
-  // here, and the bars would stay drawn over a column nobody is pointing at.
-  // The element's own leave stays as the one signal geometry cannot give: a
-  // pointer that leaves the window emits no further moves.
   useEffect(() => {
     if (!pointerInside) return
     const onMove = (event: PointerEvent): void => {
@@ -111,6 +212,51 @@ export function SidebarRoot({
     }
   }, [pointerInside])
 
+  // Profile foot popover.
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLButtonElement | null>(null)
+  const hiddenSettings = useRef<HTMLDivElement | null>(null)
+  const openSettings = (): void => {
+    hiddenSettings.current?.querySelector('button')?.click()
+  }
+  // The foot search control rides the browser region's own search affordance
+  // through a window event (decoupled: no ui-workspace dependency here).
+  const requestSearch = (): void => {
+    window.dispatchEvent(new CustomEvent(SIDEBAR_SEARCH_EVENT))
+  }
+
+  // Projetos modal (the Artifacts modal is the ui-handoff shell.overlay
+  // occupant, opened by dispatching SIDEBAR_DESIGN_EVENT — no shell state).
+  const [projectsOpen, setProjectsOpen] = useState(false)
+
+  // dshc: the owner avatar (a data URL the settings Perfil row owns) — the
+  // letter fallback stays for an unset avatar, and the settings surface
+  // announces changes through the profile event.
+  const [avatar, setAvatar] = useState<string>(() => {
+    try {
+      return window.localStorage.getItem(USER_AVATAR_STORE_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  useEffect(() => {
+    const syncAvatar = (): void => {
+      try {
+        setAvatar(window.localStorage.getItem(USER_AVATAR_STORE_KEY) ?? '')
+      } catch {
+        // Storage denied: the letter fallback stands.
+      }
+    }
+    window.addEventListener(PROFILE_UPDATED_EVENT, syncAvatar)
+    return () => { window.removeEventListener(PROFILE_UPDATED_EVENT, syncAvatar) }
+  }, [])
+
+  const navRows: readonly { id: string; label: string; icon: ReactNode; open: (() => void) | undefined }[] = [
+    { id: 'projects', label: t('nav.projects'), icon: IconProjects, open: () => { setProjectsOpen(true) } },
+    { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts, open: () => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) } },
+    { id: 'customize', label: t('nav.customize'), icon: IconCustomize, open: undefined },
+  ]
+
   return (
     <div
       ref={column}
@@ -125,86 +271,258 @@ export function SidebarRoot({
       }}
       onPointerLeave={() => { armLinger() }}
     >
-      <div className={css.logoRow}>
-        {/* Expanded, the brand doubles as a New Session shortcut; the
-            collapsed rail's logo is the expand toggle below instead. */}
-        {wide && (
-          <button
-            type="button"
-            className={clsx(css.brand, css.wide)}
-            aria-label={t('session.new.label')}
-            onClick={() => { startSession() }}
-          >
-            <span className={css.brandIdentity} aria-hidden="true">
-              <span className={css.brandMark}>
-                {renderSlot('sidebar.brand.mark', { size: 24 }, { fallback: <CoralBurst size={24} /> })}
-              </span>
-              <span className={css.brandName}>
-                {renderSlot('sidebar.brand.name', {}, {
-                  fallback: (
-                    <>
-                      <span className={css.fallbackBrandName}>DSH Claude</span>
-                      {process.env.DSH_CLIENT_COMMIT_HASH
-                        ? <span className={css.buildRevision}>{process.env.DSH_CLIENT_COMMIT_HASH}</span>
-                        : null}
-                    </>
-                  ),
-                })}
-              </span>
+      {wide && (
+        <div className={css.logoRow}>
+          <span className={css.brandIdentity} aria-hidden="true">
+            <span className={css.brandName}>
+              {renderSlot('sidebar.brand.name', {}, {
+                fallback: <span className={css.fallbackBrandName}>DeepSeek Harness Claude</span>,
+              })}
             </span>
-          </button>
-        )}
-        {/* Rail resting state is the whale mark; hovering swaps in the panel
-            icon (the expand affordance, figma sidebar-hover flow). */}
-        <Tooltip label={collapsed ? t('toggle.open') : t('toggle.collapse')} delayMs={500}>
-          <button
-            type="button"
-            className={clsx(css.iconButton, css.toggle)}
-            aria-label={collapsed ? t('toggle.open') : t('toggle.collapse')}
-            onClick={() => { toggleSidebar() }}
-          >
-            {!wide && (
-              <span className={css.railMark} aria-hidden="true">
-                {renderSlot('sidebar.brand.mark', { size: 24 }, { fallback: <CoralBurst size={24} /> })}
-              </span>
-            )}
-            {/* Rail icons render at 18 (figma rail spec); expanded keeps the glyph-native sizes. */}
-            <IconPanelLeftOutline16 className={css.panelIcon} size={wide ? 16 : 18} />
-          </button>
-        </Tooltip>
-      </div>
+          </span>
+        </div>
+      )}
+      {/* Collapsed rail: the panel toggle alone (reference behavior). */}
+      {!wide && (
+        <div className={css.logoRow}>
+          <Tooltip label={t('toggle.open')} delayMs={500}>
+            <button
+              type="button"
+              className={clsx(css.iconButton, css.toggle)}
+              aria-label={t('toggle.open')}
+              onClick={() => { toggleSidebar() }}
+            >
+              <IconPanelLeftOutline16 size={18} />
+            </button>
+          </Tooltip>
+        </div>
+      )}
 
-      {/* Expanded, the button carries its own label — tooltip only on the rail. */}
-      <Tooltip label={t('session.new.label')} delayMs={500} disabled={wide}>
+      {wide && (
         <button
           type="button"
           className={css.newSession}
           aria-label={t('session.new.label')}
           onClick={() => { startSession() }}
         >
-          <IconNewChatOutline16 size={wide ? 14 : 18} />
-          {wide && <span className={clsx(css.newSessionLabel, css.wide)}>{t('session.new')}</span>}
+          <IconPlusOutline16 size={16} />
+          <span className={clsx(css.newSessionLabel, css.wide)}>{t('session.new')}</span>
         </button>
-      </Tooltip>
+      )}
+
+      {wide && (
+        <nav className={css.navRows} aria-label={t('nav.label')}>
+          {navRows.map(row => (
+            row.open === undefined
+              ? (
+                <button key={row.id} type="button" className={css.navRow} disabled title={t('nav.soon')}>
+                  <span className={css.navIcon}>{row.icon}</span>
+                  <span className={css.navLabel}>{row.label}</span>
+                </button>
+              )
+              : (
+                <button key={row.id} type="button" className={css.navRow} onClick={row.open}>
+                  <span className={css.navIcon}>{row.icon}</span>
+                  <span className={css.navLabel}>{row.label}</span>
+                </button>
+              )
+          ))}
+        </nav>
+      )}
 
       {/* The browsing region fills the column between the controls and the
-          foot in both states; its rail icon column rides the same slot. */}
-      <div className={css.regionArea}>
-        {renderSlot('sidebar.workspaces', {
-          wide,
-          expandSidebar: () => { if (collapsed) toggleSidebar() },
-        })}
-      </div>
+          foot in the wide state; the rail carries nothing but the toggle. */}
+      {wide && (
+        <div className={css.regionArea}>
+          {renderSlot('sidebar.workspaces', { wide, expandSidebar: () => { if (collapsed) toggleSidebar() } })}
+        </div>
+      )}
 
-      {/* Footer actions stack above Settings in both sidebar widths. */}
-      <div className={css.footArea}>
-        <div className={css.footerActions}>
-          {renderSlot('sidebar.footer.action', { wide })}
+      {wide && (
+        <div className={css.footArea}>
+          {/* The real settings trigger stays mounted, visually hidden: the
+              profile popover's Configurações row clicks it through. */}
+          <div ref={hiddenSettings} className={css.hiddenSettings} aria-hidden="true">
+            <div className={css.settingsArea}>
+              {renderSlot('sidebar.settings', { wide })}
+            </div>
+          </div>
+          {/* Additive action rows sit above the profile pill as full-width
+              rows (the reference's Design row); the unoccupied seat renders
+              no boxes, so the pill and its cluster keep their seat. */}
+          <div className={css.footerActions}>
+            {renderSlot('sidebar.footer.action', { wide })}
+          </div>
+          <div className={css.footRow}>
+            <Menu
+              open={profileOpen}
+              anchor={(
+                <button
+                  ref={profileRef}
+                  type="button"
+                  className={css.profileRow}
+                  aria-haspopup="menu"
+                  aria-expanded={profileOpen}
+                  onClick={() => { setProfileOpen(open => !open) }}
+                >
+                  <span
+                    className={css.avatar}
+                    aria-hidden="true"
+                    style={avatar === '' ? { background: avatarColorOf(ownerNameOf()) } : undefined}
+                  >
+                    {avatar === ''
+                      ? ownerNameOf().charAt(0).toUpperCase()
+                      : <img className={css.avatarImage} src={avatar} alt="" />}
+                  </span>
+                  <span className={css.profileName}>{ownerNameOf()}</span>
+                  <span className={css.profileChevron} aria-hidden>⌄</span>
+                </button>
+              )}
+              items={[
+                ...(ownerEmailOf() === '' ? [] : [{ type: 'label' as const, id: 'email', text: ownerEmailOf() }]),
+                { id: 'search', label: t('profile.search'), icon: <IconSearchOutline16 size={16} /> },
+                {
+                  id: 'language',
+                  label: t('profile.language'),
+                  icon: IconLanguage,
+                  submenu: locale.options().map(option => ({ id: option.id, label: option.label })),
+                },
+                { id: 'help', label: t('profile.help'), icon: IconHelp },
+              ]}
+              onSelect={(id) => {
+                setProfileOpen(false)
+                if (id === 'search') requestSearch()
+                else if (id === 'pt' || id === 'en') locale.set(id)
+                else if (id === 'help') window.open(HELP_URL, '_blank', 'noopener,noreferrer')
+              }}
+              onClose={() => { setProfileOpen(false) }}
+              align="start"
+              side="top"
+              className={clsx(css.menuStretch)}
+            />
+            <div className={css.footCluster}>
+              <Tooltip label={t('profile.settings')} delayMs={500}>
+                <button
+                  type="button"
+                  className={css.iconButton}
+                  aria-label={t('profile.settings')}
+                  onClick={openSettings}
+                >
+                  <IconSettingsOutline16 size={16} />
+                </button>
+              </Tooltip>
+              <Tooltip label={t('toggle.collapse')} delayMs={500}>
+                <button
+                  type="button"
+                  className={css.iconButton}
+                  aria-label={t('toggle.collapse')}
+                  onClick={() => { toggleSidebar() }}
+                >
+                  <IconPanelLeftOutline16 size={16} />
+                </button>
+              </Tooltip>
+            </div>
+          </div>
         </div>
-        <div className={css.settingsArea}>
-          {renderSlot('sidebar.settings', { wide })}
-        </div>
-      </div>
+      )}
+
+      {/* Modals mount only while open: the ProjectsModal's reactive source
+          rides the runtime's standard hook, so a closed modal reads nothing. */}
+      {projectsOpen && (
+        <ProjectsModal
+          onClose={() => { setProjectsOpen(false) }}
+          useWorkspaces={useWorkspaces}
+          workspaces={workspaces}
+          t={t}
+        />
+      )}
+      {/* The Artifacts modal is the ui-handoff shell.overlay occupant (the
+          Hand off surface): it opens on the same design event this row
+          dispatches and lists the files each delegated turn produced. The
+          shell keeps only the dispatch — no placeholder body here. */}
     </div>
+  )
+}
+
+/**
+ * The Projetos modal: the workspace registry with connect-on-click, directory
+ * creation, per-project open-folder, and a one-line footer explaining the v1
+ * context story (folder files + root AGENTS.md reach the agent).
+ * @param props - open state, close callback, reactive list source, injected
+ *   workspaces actions, and the locale seat.
+ * @returns the modal element tree.
+ */
+function ProjectsModal(props: {
+  onClose: () => void
+  useWorkspaces: SidebarRootComponentProps['useWorkspaces']
+  workspaces: SidebarRootComponentProps['workspaces']
+  t: SidebarRootComponentProps['t']
+}) {
+  const { onClose, useWorkspaces, workspaces, t } = props
+  const list = useWorkspaces(state => state.items)
+  const [creating, setCreating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const connect = (workspaceId: WorkspaceId): void => {
+    onClose()
+    void workspaces.connect(workspaceId).catch(() => {})
+  }
+  const createProject = async (): Promise<void> => {
+    setError(null)
+    setCreating(true)
+    try {
+      const path = await workspaces.pickDirectory()
+      if (path === null) return
+      const created = await workspaces.create({ path })
+      onClose()
+      await workspaces.connect(created.workspaceId)
+    } catch {
+      setError(t('projects.error'))
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      closeLabel={t('close')}
+      title={t('projects.modal.title')}
+      footer={<p className={css.modalFooterNote}>{t('projects.footer')}</p>}
+    >
+      {list.length === 0
+        ? <p className={css.modalEmpty}>{t('projects.empty')}</p>
+        : (
+            <ul className={css.projectList}>
+              {list.map(project => (
+                <li key={project.workspaceId} className={css.projectItem}>
+                  <button type="button" className={css.projectMain} onClick={() => { connect(project.workspaceId) }}>
+                    <span className={css.projectTitle}>{project.title}</span>
+                    <span className={css.projectPath}>{project.path}</span>
+                  </button>
+                  <Tooltip label={t('projects.openFolder')} delayMs={500}>
+                    <button
+                      type="button"
+                      className={css.iconButton}
+                      aria-label={t('projects.openFolder')}
+                      onClick={() => { void workspaces.openPath(project.path).catch(() => {}) }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+                        <path {...stroke} d="M2 5.2A1.2 1.2 0 0 1 3.2 4h3l1.4 1.6h5.2A1.2 1.2 0 0 1 14 6.8v4A1.2 1.2 0 0 1 12.8 12H3.2A1.2 1.2 0 0 1 2 10.8V5.2Z" />
+                      </svg>
+                    </button>
+                  </Tooltip>
+                </li>
+              ))}
+            </ul>
+          )}
+      {error === null ? null : <p className={css.modalError} role="alert">{error}</p>}
+      <div className={css.modalActions}>
+        <button type="button" className={css.modalPrimary} disabled={creating} onClick={() => { void createProject() }}>
+          {creating ? t('projects.creating') : t('projects.new')}
+        </button>
+      </div>
+    </Modal>
   )
 }

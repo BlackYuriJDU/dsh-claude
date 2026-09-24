@@ -10,6 +10,10 @@
   min-width: 0;
   background: var(--dsw-alias-bg-base);
 
+  /* dshc: the Chat-font preference (ui-theme) points this variable at the
+     selected stack; headings override with the display face. */
+  font-family: var(--dsh-chat-font-family, var(--dsw-font-family));
+
   /* Shared width axis for the whole column: one content width W
      (--dsh-chat-content-width) for the transcript, the dock cards
      (todo/goal/queue: card minus four insets, 4 x 8 = 32), and the takeover
@@ -19,7 +23,7 @@
      the input card clears the bare clearance, so the input card stays exactly
      content + 32px at every width. Declared on the root because the
      transcript and the composer seat are sibling subtrees. */
-  --dsh-chat-content-width: 748px;
+  --dsh-chat-content-width: 760px;
   --dsh-composer-card-max-width: calc(var(--dsh-chat-content-width) + 32px);
   --dsh-composer-side-clearance: 16px;
   --dsh-composer-dock-inset: 8px;

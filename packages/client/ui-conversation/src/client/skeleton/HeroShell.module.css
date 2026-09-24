@@ -23,16 +23,17 @@
   overflow: visible;
 }
 
-/* dshc hero: coral mark + serif greeting, gap 12, centered. The serif face,
-   size, and tracking live in the claude-design theme sheet ([class*='_headline']). */
+/* dshc hero: coral mark + serif greeting, gap 12, centered. Size and tracking
+   match the claude.ai reference (~44px serif); the serif face itself lives in
+   the claude-design theme sheet ([class*='_headline']). */
 .headline {
   display: grid;
-  grid-template-columns: 34px auto;
+  grid-template-columns: 50px auto;
   column-gap: 12px;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  line-height: 32px;
+  font-size: 44px;
+  line-height: 52px;
   font-weight: 500;
   color: var(--dsw-alias-label-primary);
 }

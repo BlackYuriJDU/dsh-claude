@@ -21,12 +21,9 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import {
   LOCALE_PREFERENCE_FIELD, LOCALE_SETTINGS_NAMESPACE, type LocaleId, type LocaleSettings,
 } from '../locale-settings.ts'
-import { en, zh, type CommonKey } from '../locales/index.ts'
-import {
-  en as settingsEn, zh as settingsZh, type SettingsLocaleKey,
-} from '../locales/settings.ts'
+import { en, type CommonKey } from '../locales/index.ts'
+import { en as settingsEn, type SettingsLocaleKey } from '../locales/settings.ts'
 import type { LanguageRowInjected } from './LanguageRow.tsx'
-import { LanguageRow } from './LanguageRow.tsx'
 import { createLanguageRowStore } from './settings-store.ts'
 
 export type { LanguageRowComponentProps, LanguageRowInjected } from './LanguageRow.tsx'
@@ -55,7 +52,7 @@ export type LocaleDict = Record<string, string>
 export interface LocaleDefinition {
   /** Locale id (persisted; the setLocale argument). */
   id: LocaleId
-  /** Display name in its own language (中文 / English). */
+  /** Display name in its own language (English). */
   label: string
 }
 
@@ -89,11 +86,8 @@ declare module '@deepseek-ai/cordis' {
 /**
  * English is both the locale the UI opens in when the browser names no shipped
  * language (and for non-browser runs), and the dictionary consulted after the
- * active locale misses a key. One constant serves both because the shipped
- * `zh`/`en` dictionaries carry identical key sets, so neither direction can
- * leave a key unresolved; the residual case points at English rather than
- * zh because a browser naming neither shipped language is the reader least
- * likely to read Chinese.
+ * active locale misses a key. The fork ships one locale, so the constant and
+ * the single shipped locale coincide by construction.
  */
 export const FALLBACK_LOCALE: LocaleId = 'en'
 
@@ -103,10 +97,10 @@ export const COMMON_NS = 'common'
 /** Namespace owning this feature's settings-row copy. */
 export const SETTINGS_NS = 'settings.locale'
 
-/** The two shipped locales. */
+/** The shipped locales. */
 const LOCALES: readonly LocaleDefinition[] = Object.freeze([
-  { id: 'zh', label: '中文' },
   { id: 'en', label: 'English' },
+  { id: 'pt', label: 'Português' },
 ])
 
 /**
@@ -114,10 +108,9 @@ const LOCALES: readonly LocaleDefinition[] = Object.freeze([
  * vocabulary (primary subtag); the document attribute wants a BCP 47 tag,
  * which assistive technology and browser features (pronunciation rules,
  * translation offers, font fallback, spell check) read to pick their own
- * behavior. `zh` alone leaves the script ambiguous, so the shipped Chinese
- * copy names the variant it actually is.
+ * behavior.
  */
-const DOCUMENT_LANGUAGE: Record<LocaleId, string> = { zh: 'zh-CN', en: 'en' }
+const DOCUMENT_LANGUAGE: Record<LocaleId, string> = { en: 'en', pt: 'pt-BR' }
 
 /**
  * Point `<html lang>` at the active locale. Called on every locale change,
@@ -218,13 +211,18 @@ export class LocaleRuntime {
 
   /**
    * Adopt the scope's accepted durable selection without writing it back; an
-   * absent selection returns to the browser-derived locale.
+   * absent (or no-longer-shipped) selection returns to the browser-derived
+   * locale — a stored id from before a locale was dropped must not activate
+   * a dictionary-less locale.
    * @param host - the constructor-narrowed scope driving this adoption.
    */
   private adopt(host: SettingsScope<LocaleSettings>): void {
     const section = host.getSnapshot().value
     if (section === undefined) return
-    const target = section.preference ?? this.provisional
+    const stored = section.preference
+    const target = stored !== undefined && this.snapshot.locales.some(l => l.id === stored)
+      ? stored
+      : this.provisional
     if (this.snapshot.active === target) return
     this.publish(target, true)
   }
@@ -233,15 +231,16 @@ export class LocaleRuntime {
    * Register a declared namespace's dictionaries, all locales in one call —
    * the typed form: each dictionary is checked against the namespace's
    * {@link LocaleNamespaceMap} key union (a missing or extra key is a
-   * compile error), and every shipped locale is required (bilingual balance
-   * enforced at registration). Duplicate (ns, locale) throws (single occupant; a
-   * namespace's texts have one owner). Registration bumps the revision so
-   * mounted outlets pick up late-arriving dictionaries.
+   * compile error); dictionaries ship per locale — namespaces still in
+   * translation register 'en' alone and keys miss into the en fallback.
+   * Duplicate (ns, locale) throws (single occupant; a namespace's texts have
+   * one owner). Registration bumps the revision so mounted outlets pick up
+   * late-arriving dictionaries.
    * @param ns - a namespace merged into LocaleNamespaceMap.
-   * @param dicts - complete dictionaries keyed by locale id.
+   * @param dictionaries keyed by locale id (partial shipments allowed).
    * @returns disposer removing every locale registered by this call (idempotent).
    */
-  register<N extends keyof LocaleNamespaceMap & string>(ns: N, dicts: Record<LocaleId, LocaleDictOf<N>>): () => void
+  register<N extends keyof LocaleNamespaceMap & string>(ns: N, dicts: Partial<Record<LocaleId, Partial<LocaleDictOf<N>>>>): () => void
   /**
    * Single-locale untyped form for namespaces outside the merge table
    * (dynamic composition, tests).
@@ -251,11 +250,11 @@ export class LocaleRuntime {
    * @returns disposer (idempotent).
    */
   register(ns: string, locale: string, dict: LocaleDict): () => void
-  register(ns: string, localeOrDicts: string | Record<string, LocaleDict>, dict?: LocaleDict): () => void {
+  register(ns: string, localeOrDicts: string | Record<string, Partial<LocaleDict>>, dict?: LocaleDict): () => void {
     const pairs: [string, LocaleDict][] = typeof localeOrDicts === 'string'
       // Overload guarantees dict on the single-locale arm.
       ? [[localeOrDicts, dict as LocaleDict]]
-      : Object.entries(localeOrDicts)
+      : (Object.entries(localeOrDicts) as [string, LocaleDict][])
     let locales = this.dicts.get(ns)
     if (!locales) {
       locales = new Map()
@@ -359,7 +358,7 @@ function resolveInitialLocale(): LocaleId {
 
 /**
  * The first shipped locale the browser asks for, matched on the primary
- * subtag so every regional variant lands on its language (`zh-Hans-CN` -> zh,
+ * subtag so every regional variant lands on its language (`en-GB` -> en,
  * `en-GB` -> en). `window` is the browser test, not `navigator`: Node exposes
  * a global `navigator` reporting the machine's own language, which would
  * otherwise decide the locale for non-browser runs (node e2e booting the
@@ -392,8 +391,8 @@ export const inject = ['slots', 'connection', 'remote', 'settingsScope']
 export function apply(ctx: ClientContext): void {
   const host = ctx.settingsScope.bind<LocaleSettings>({ namespace: LOCALE_SETTINGS_NAMESPACE })
   const locale = new LocaleRuntime(ctx, host)
-  locale.register(COMMON_NS, { zh, en })
-  locale.register(SETTINGS_NS, { zh: settingsZh, en: settingsEn })
+  locale.register(COMMON_NS, { en })
+  locale.register(SETTINGS_NS, { en: settingsEn })
   ctx.provide('locale', locale)
   // The service IS the LocaleFace (bind + getSnapshot/subscribe): install it
   // so the render machinery can synthesize the `t` standard seat.
@@ -414,6 +413,10 @@ export function apply(ctx: ClientContext): void {
   // (browser detection, or a stored preference adopted after activation), so
   // state it once at activation rather than waiting for the first change.
   syncDocumentLanguage(locale.getLocale().active)
+  // dshc: the General-section Language row left the reworked General block —
+  // the language switch lives in the profile popover's Idioma submenu (and
+  // the row component stays exported for its specs). The store keeps syncing
+  // so the exported row's reactive contract stays true if it ever returns.
   const injected = (actions: BoundActions<typeof store>): LanguageRowInjected => {
     bound = actions
     // Re-sync from the getter so no event is lost between registration and
@@ -423,12 +426,5 @@ export function apply(ctx: ClientContext): void {
       setLocale: (id) => { locale.setLocale(id) },
     }
   }
-  ctx.slots.inject('settings.general.item', () => ctx.slots.register({
-    name: 'settings.general.item',
-    id: 'language',
-    order: 0,
-    store,
-    locale: SETTINGS_NS,
-    inject: injected,
-  }, LanguageRow))
+  void injected
 }

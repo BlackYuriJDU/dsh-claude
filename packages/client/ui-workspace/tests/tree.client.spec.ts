@@ -2,10 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type {
   SessionId, SessionListState, SessionSummary, WorkspaceId, WorkspaceView,
 } from '@deepseek-ai/dsh-client-runtime/client'
-import {
-  deriveFlat, deriveGroups, deriveSearchResults, workspaceLabel, relativeTime,
-  UNGROUPED_KEY, UNGROUPED_LABEL,
-} from '../src/client/tree.ts'
+import { deriveFlat, deriveGroups, deriveSearchResults, workspaceLabel, relativeTime, UNGROUPED_KEY, UNGROUPED_LABEL } from '../src/client/tree.ts'
 import { createWorkspaceViewStore } from '../src/client/stores.ts'
 
 const sid = (id: string) => id as SessionId
@@ -394,9 +391,8 @@ describe('deriveSearchResults', () => {
 describe('createWorkspaceViewStore', () => {
   it('stores grouping, ordering, Workspace expansion, and recent-session view order', () => {
     const store = createWorkspaceViewStore().create()
-    expect(store.getSnapshot().groupBy).toBe('workspace')
+    expect(store.getSnapshot().groupBy).toBe('flat')
     expect(store.getSnapshot().orderBy).toBe('updated')
-    store.actions.setGroupBy('flat')
     store.actions.setOrderBy('updated')
     store.actions.setGroupExpanded('alpha', true)
     store.actions.syncSessionOrderAccount('alpha', ['two', 'one'], { one: 1, two: 2 })

@@ -5,14 +5,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import Schema from '@deepseek-ai/schemastery'
 import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
 import type { RpcResponse, SettingsNamespaceView } from '@deepseek-ai/dsh-api-remotes/client'
-import {
-  ModelsSection, needsSetup, providerCopy, providerTargetLabel, removeProviderProfile,
-} from '../src/client/ModelsSection.tsx'
+import { ModelsSection, needsSetup, providerCopy, providerTargetLabel, removeProviderProfile } from '../src/client/ModelsSection.tsx'
 import type { ModelsSectionInjected, ModelsSectionProps } from '../src/client/ModelsSection.tsx'
 import { pathOps } from '../src/client/ProviderEditor.tsx'
-import {
-  DeepSeekModelsEditor, formatCapacity, modelDrafts, parseCapacity, validateDeepSeekModels,
-} from '../src/client/DeepSeekModelsEditor.tsx'
+import { DeepSeekModelsEditor, formatCapacity, modelDrafts, parseCapacity, validateDeepSeekModels } from '../src/client/DeepSeekModelsEditor.tsx'
 import { apiKeyFailure } from '../src/client/apiKey.ts'
 import { SettingsDescribeMirror } from '@deepseek-ai/dsh-client-ui-settings/src/client/settings-mirror.ts'
 import { deriveKeyRef, ModelsSettingsStore } from '../src/client/store.ts'
@@ -385,18 +381,18 @@ describe('ModelsSection', () => {
       credentialOnly
       credentialRequired
       autoFocusCredential
-      cancelLabel="onboardingLater"
-      submitLabel="onboardingSave"
-      submitBusyLabel="onboardingSaving"
+      cancelLabel="cancel"
+      submitLabel="apply"
+      submitBusyLabel="applying"
       onClose={onClose}
     />)
 
     const key = screen.getByLabelText<HTMLInputElement>(en.keyInput)
-    const save = screen.getByText<HTMLButtonElement>(en.onboardingSave)
+    const save = screen.getByText<HTMLButtonElement>(en.apply)
     expect(document.activeElement).toBe(key)
     expect(key.required).toBe(true)
     expect(save.disabled).toBe(true)
-    expect(screen.getByText(en.onboardingLater)).toBeTruthy()
+    expect(screen.getByText(en.cancel)).toBeTruthy()
     expect(screen.queryByText(en.customized)).toBeNull()
     expect(screen.queryByLabelText(en.baseUrl)).toBeNull()
 
@@ -410,7 +406,7 @@ describe('ModelsSection', () => {
     expect(save.disabled).toBe(false)
     fireEvent.click(save)
 
-    expect(await screen.findByText(en.onboardingSaving)).toBeTruthy()
+    expect(await screen.findByText(en.applying)).toBeTruthy()
     expect(set).toHaveBeenCalledWith({ ref: 'DEEPSEEK_API_KEY', value: 'sk-onboarding' })
     expect(mutate).not.toHaveBeenCalled()
     expect(onClose).not.toHaveBeenCalled()
