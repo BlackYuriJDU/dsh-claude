@@ -224,6 +224,11 @@
     - id: ui-routines
       name: '@deepseek-ai/dsh-client-ui-routines'
 
+    # Hand off surface: the Artifacts modal aggregating the files each
+    # delegated turn produced (deliverables), opened via the shell.overlay seat.
+    - id: ui-handoff
+      name: '@deepseek-ai/dsh-client-ui-handoff'
+
     # Official occupants for the generic sidebar and conversation brand slots.
     - id: ui-brand-official
       name: '@deepseek-ai/dsh-client-ui-brand-official'

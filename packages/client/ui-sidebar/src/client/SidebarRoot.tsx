@@ -225,17 +225,9 @@ export function SidebarRoot({
     window.dispatchEvent(new CustomEvent(SIDEBAR_SEARCH_EVENT))
   }
 
-  // The Design footer row (an additive occupant of the footer-action seat)
-  // opens the shell's own Artefatos modal through the same window-event seam.
-  useEffect(() => {
-    const openDesign = (): void => { setArtifactsOpen(true) }
-    window.addEventListener(SIDEBAR_DESIGN_EVENT, openDesign)
-    return () => { window.removeEventListener(SIDEBAR_DESIGN_EVENT, openDesign) }
-  }, [])
-
-  // Projetos / Artefatos modals.
+  // Projetos modal (the Artifacts modal is the ui-handoff shell.overlay
+  // occupant, opened by dispatching SIDEBAR_DESIGN_EVENT — no shell state).
   const [projectsOpen, setProjectsOpen] = useState(false)
-  const [artifactsOpen, setArtifactsOpen] = useState(false)
 
   // dshc: the owner avatar (a data URL the settings Perfil row owns) — the
   // letter fallback stays for an unset avatar, and the settings surface
@@ -261,7 +253,7 @@ export function SidebarRoot({
 
   const navRows: readonly { id: string; label: string; icon: ReactNode; open: (() => void) | undefined }[] = [
     { id: 'projects', label: t('nav.projects'), icon: IconProjects, open: () => { setProjectsOpen(true) } },
-    { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts, open: () => { setArtifactsOpen(true) } },
+    { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts, open: () => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) } },
     { id: 'customize', label: t('nav.customize'), icon: IconCustomize, open: undefined },
   ]
 
@@ -444,16 +436,10 @@ export function SidebarRoot({
           t={t}
         />
       )}
-      {artifactsOpen && (
-        <Modal
-          open
-          onClose={() => { setArtifactsOpen(false) }}
-          closeLabel={t('close')}
-          title={t('artifacts.modal.title')}
-        >
-          <p className={css.modalBody}>{t('artifacts.empty')}</p>
-        </Modal>
-      )}
+      {/* The Artifacts modal is the ui-handoff shell.overlay occupant (the
+          Hand off surface): it opens on the same design event this row
+          dispatches and lists the files each delegated turn produced. The
+          shell keeps only the dispatch — no placeholder body here. */}
     </div>
   )
 }
