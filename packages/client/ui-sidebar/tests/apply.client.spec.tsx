@@ -15,7 +15,7 @@ async function bench(declare = true) {
     list: { getSnapshot: () => ({ items: [] }), subscribe: () => () => {} },
     connectWorkspace: vi.fn(() => Promise.resolve('s-1' as never)),
     create: vi.fn(() => Promise.resolve({ workspaceId: 'ws-1' })),
-    pickDirectory: vi.fn(() => Promise.resolve('/home/arthur/novo')),
+    pickDirectory: vi.fn(() => Promise.resolve('/home/user/novo')),
     openPath: vi.fn(() => Promise.resolve()),
   }
   const sessions = { open: vi.fn(), clear: vi.fn() }

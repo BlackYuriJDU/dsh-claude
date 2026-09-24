@@ -37,7 +37,7 @@ const neverHook = (() => { throw new Error('shell must not read global hooks') }
 /** One workspace row as the list snapshot would carry it. */
 const project = {
   workspaceId: 'ws-1' as never,
-  path: '/home/arthur/projeto',
+  path: '/home/user/projeto',
   title: 'projeto',
   sessionIds: [],
   createdAt: '',
@@ -60,7 +60,7 @@ function mountShell({ collapsed = false, width = 300, items = [] as readonly unk
   const locale = localeFace()
   const connect = vi.fn(() => Promise.resolve('s-1' as never))
   const create = vi.fn(() => Promise.resolve(project as never))
-  const pickDirectory = vi.fn(() => Promise.resolve('/home/arthur/novo'))
+  const pickDirectory = vi.fn(() => Promise.resolve('/home/user/novo'))
   const openPath = vi.fn(() => Promise.resolve())
   let regionOwner: SidebarSectionOwnerProps | undefined
   let settingsOwner: SidebarSettingsOwnerProps | undefined
@@ -178,7 +178,7 @@ describe('SidebarRoot shell', () => {
     fireEvent.click(screen.getByRole('button', { name: en['projects.new'] }))
     await vi.waitFor(() => {
       expect(b.pickDirectory).toHaveBeenCalledOnce()
-      expect(b.create).toHaveBeenCalledWith({ path: '/home/arthur/novo' })
+      expect(b.create).toHaveBeenCalledWith({ path: '/home/user/novo' })
       expect(b.connect).toHaveBeenCalledWith('ws-1')
     })
     expect(screen.queryByRole('dialog', { name: en['projects.modal.title'] })).toBeNull()
@@ -188,7 +188,7 @@ describe('SidebarRoot shell', () => {
     const b = mountShell({ items: [project] })
     fireEvent.click(screen.getByRole('button', { name: en['nav.projects'] }))
     fireEvent.click(screen.getByRole('button', { name: en['projects.openFolder'] }))
-    expect(b.openPath).toHaveBeenCalledWith('/home/arthur/projeto')
+    expect(b.openPath).toHaveBeenCalledWith('/home/user/projeto')
   })
 
   it('shows the stored email as the popover heading and moves the settings gear to the foot cluster', () => {
