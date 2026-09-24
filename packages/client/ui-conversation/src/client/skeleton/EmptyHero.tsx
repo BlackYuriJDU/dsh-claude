@@ -15,20 +15,16 @@ type HeroTranslate = ConversationSlotProps['t']
 /** localStorage key holding the displayed owner name (set: localStorage.setItem('dshc:user-name', 'Nome')). */
 const USER_NAME_STORE_KEY = 'dshc:user-name'
 
-/** Fallback displayed name when no override is stored. */
-const DEFAULT_USER_NAME = 'Arthur'
-
 /**
- * The displayed owner name: the localStorage override when present, else the
- * built-in default.
- * @returns the name rendered after the greeting period.
+ * The displayed owner name: the localStorage override when present, else
+ * empty — an unset name greets bare (the onboarding popup asks for it).
+ * @returns the name rendered after the greeting period, or '' for none.
  */
 function ownerNameOf(): string {
   try {
-    const stored = window.localStorage.getItem(USER_NAME_STORE_KEY)?.trim()
-    return stored !== undefined && stored !== '' ? stored : DEFAULT_USER_NAME
+    return window.localStorage.getItem(USER_NAME_STORE_KEY)?.trim() ?? ''
   } catch {
-    return DEFAULT_USER_NAME
+    return ''
   }
 }
 
