@@ -88,7 +88,8 @@ describe('DSHC palette', () => {
     expect(DSHC_TOKENS['--dsw-alias-label-primary']).toEqual({ light: '#141413', dark: '#faf9f5' })
     expect(DSHC_TOKENS['--dsw-alias-label-secondary']).toEqual({ light: '#3d3d3a', dark: '#c2c0b6' })
     expect(DSHC_TOKENS['--dsw-alias-label-tertiary']).toEqual({ light: '#73726c', dark: '#9c9a92' })
-    expect(DSHC_TOKENS['--dsw-alias-button-primary-fill']).toEqual({ light: DSHC_CLAY, dark: DSHC_CLAY })
+    expect(DSHC_TOKENS['--dsw-alias-button-primary-fill']).toEqual({ light: '#141413', dark: '#faf9f5' })
+    expect(DSHC_TOKENS['--dsw-alias-button-info-fill']).toEqual({ light: DSHC_CLAY, dark: DSHC_CLAY })
   })
 })
 

@@ -67,7 +67,7 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-label-tertiary': { light: '#73726c', dark: '#9c9a92' },
   '--dsw-alias-label-caption': { light: '#73726c', dark: '#9c9a92' },
   '--dsw-alias-label-dimmed': { light: 'rgba(115, 114, 108, 0.5)', dark: 'rgba(156, 154, 146, 0.5)' },
-  '--dsw-alias-label-primary-foreground': both('#ffffff'),
+  '--dsw-alias-label-primary-foreground': { light: '#ffffff', dark: '#141413' },
   '--dsw-alias-label-primary-inverted': { light: '#ffffff', dark: '#141413' },
   '--dsw-alias-label-document-preview': { light: '#3d3d3a', dark: '#c2c0b6' },
   '--dsw-alias-menu-icon': { light: '#3d3d3a', dark: '#c2c0b6' },
@@ -85,16 +85,18 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-border-l3': { light: 'rgba(31, 30, 29, 0.3)', dark: 'rgba(222, 220, 209, 0.3)' },
   '--dsw-alias-border-l4': { light: 'rgba(31, 30, 29, 0.4)', dark: 'rgba(222, 220, 209, 0.4)' },
 
-  // Brand and buttons: clay primary in both schemes, warm neutral secondaries.
+  // Brand and buttons. Generic primary buttons are ink (the guidelines' inverse
+  // background, as on the app's Create and Save buttons); the composer's send
+  // button reads the info fill, which carries the clay.
   '--dsw-alias-brand-primary': both(DSHC_CLAY),
   '--dsw-alias-brand-primary-new-colorprimary-new-color': both(DSHC_CLAY),
   '--dsw-alias-brand-primary-invert': { light: '#141413', dark: '#faf9f5' },
   '--dsw-alias-brand-text': { light: '#141413', dark: '#faf9f5' },
-  '--dsw-alias-button-primary-fill': both(DSHC_CLAY),
-  '--dsw-alias-button-primary-hover': both(DSHC_CLAY_HOVER),
-  '--dsw-alias-button-primary-dimmed': { light: 'rgba(198, 97, 63, 0.4)', dark: 'rgba(217, 119, 87, 0.4)' },
-  '--dsw-alias-button-info-fill': { light: DSHC_CLAY, dark: DSHC_CLAY_HOVER },
-  '--dsw-alias-button-info-hover': { light: DSHC_CLAY_HOVER, dark: DSHC_CLAY },
+  '--dsw-alias-button-primary-fill': { light: '#141413', dark: '#faf9f5' },
+  '--dsw-alias-button-primary-hover': { light: '#3d3d3a', dark: '#e8e6dc' },
+  '--dsw-alias-button-primary-dimmed': { light: 'rgba(20, 20, 19, 0.3)', dark: 'rgba(250, 249, 245, 0.3)' },
+  '--dsw-alias-button-info-fill': both(DSHC_CLAY),
+  '--dsw-alias-button-info-hover': both(DSHC_CLAY_HOVER),
   '--dsw-alias-button-contrast-fill': { light: '#141413', dark: '#faf9f5' },
   '--dsw-alias-button-elevated-fill': { light: '#ffffff', dark: '#3a3a37' },
   '--dsw-alias-button-floating-fill': { light: '#ffffff', dark: '#30302e' },
