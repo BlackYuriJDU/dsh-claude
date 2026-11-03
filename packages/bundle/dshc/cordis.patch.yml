@@ -16,3 +16,22 @@
     # selecting among the other usable providers.
     - id: web-search-searxng
       name: '@deepseek-ai/dsh-web-search-searxng'
+
+# The DSHC presets (presets/*.patch.yml, listed after this file in
+# package.json `dsh.bundle.patch`) replace the upstream standard preset: Code
+# keeps its tool set with the DSHC engineering persona. New sessions start in
+# Chat; the Settings choice still overrides this default.
+- id: preset-standard
+  disabled: true
+
+# PTC and Minimal describe themselves relative to the standard preset that
+# Code replaces; Creator stays after the three DSHC presets.
+- id: preset-ptc
+  disabled: true
+
+- id: preset-minimal
+  disabled: true
+
+- id: agent-preset-registry
+  config:
+    default: chat

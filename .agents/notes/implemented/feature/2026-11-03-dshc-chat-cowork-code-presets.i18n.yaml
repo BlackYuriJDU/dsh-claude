@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-03-dshc-chat-cowork-code-presets.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-11-03-dshc-chat-cowork-code-presets.md
+/agent-note-dshc-chat-cowork-and-code-presets:
+  en: c7fe963e05af8154
+  zh: bb39d611a154e0b7
+/agent-note-dshc-chat-cowork-and-code-presets/problem:
+  en: e587648e0d58dd47
+  zh: 085e6f2439e50e1d
+/agent-note-dshc-chat-cowork-and-code-presets/decision:
+  en: 3041be4c0d4f59ab
+  zh: 34989ce66f3dbc22
+/agent-note-dshc-chat-cowork-and-code-presets/alternatives-considered:
+  en: d71f2de969aad86d
+  zh: e78037b9ce946e75
+/agent-note-dshc-chat-cowork-and-code-presets/consequences:
+  en: dad1d1a717fecb91
+  zh: 6519597db67335dd

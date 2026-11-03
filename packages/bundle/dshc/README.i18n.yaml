@@ -9,32 +9,35 @@
   en: d70ad6fce8be8d65
   zh: f2751d41ac0c6fe3
 /deepseek-ai-dsh-dshc/summary:
-  en: 9a24319d10948b25
-  zh: 4428540bf04ea178
+  en: 579bac05ed959106
+  zh: ba1c643633d43093
 /deepseek-ai-dsh-dshc/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /deepseek-ai-dsh-dshc/use-this-package:
-  en: 298010603af42247
-  zh: a9534121c46ef9ba
+  en: b455028af83b7705
+  zh: c23f584187f56d9a
+/deepseek-ai-dsh-dshc/use-this-package/chat-cowork-and-code:
+  en: 180a761f8fe89a0d
+  zh: d1c4a306f8975a9b
 /deepseek-ai-dsh-dshc/understand-the-implementation:
-  en: c6c96137f8df79f7
-  zh: a489fedb4eec0dc7
+  en: c3cd85e528d61cee
+  zh: b0e6115b6a4aeedf
 /deepseek-ai-dsh-dshc/further-exploration:
   en: 1b12ecfe3457ece0
   zh: dcc84c13e8720d6e
 /deepseek-ai-dsh-dshc/model-experience:
-  en: 9029610659192a7e
-  zh: 6b7f947ed43a263c
+  en: 7612ba5fb0048665
+  zh: fb610ed434ecd1be
 /deepseek-ai-dsh-dshc/model-experience/kv-cache-effect:
-  en: 75ae0ce03481041e
-  zh: b1de634a7fd56295
+  en: 639fa4a2e5ba1f64
+  zh: 6d184a0737745da2
 /deepseek-ai-dsh-dshc/known-limitations-and-deferred-work:
-  en: 9d78a888752e45c9
-  zh: 6066c99851420ec4
+  en: 4ac6c1b6287bda2e
+  zh: 9112c3456839711c
 /deepseek-ai-dsh-dshc/known-limitations-and-deferred-work/dev-note:
   en: b5ebcb927b7959b5
   zh: 6d012ed00dbae35e
-/deepseek-ai-dsh-dshc/known-limitations-and-deferred-work/dev-note/future-dshc-surface-presets:
-  en: e19fb2e608046af5
-  zh: 17bab1efed965c55
+/deepseek-ai-dsh-dshc/known-limitations-and-deferred-work/dev-note/future-keyless-snapshots-for-the-personas:
+  en: dd7ebe1a434bd1f8
+  zh: c98fc76fc4c9428a
