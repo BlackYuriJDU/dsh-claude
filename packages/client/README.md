@@ -31,6 +31,8 @@ The kernel packages boot and serve the page; the UI feature packages present it.
 | [`connection/`](connection/README.md) | Maintains browser-host RPC communication and event delivery | `ctx.connection` |
 | [`file-upload/`](file-upload/README.md) | Sends raw Blob and byte-stream request bodies outside the page thread | `ctx.fileUpload` |
 | [`shortcuts/`](shortcuts/README.md) | Registers application keyboard commands | `ctx.shortcuts` |
+| [`ui-memory/`](ui-memory/README.md) | Saved memories: a Settings section and a runtime-context contribution for every session | — |
+| [`ui-projects/`](ui-projects/README.md) | Per-workspace projects: instructions and knowledge files for sessions in each workspace, edited in Settings | — |
 | [`ui-shortcuts/`](ui-shortcuts/README.md) | Presents the keyboard shortcut reference | — |
 | [`store/`](store/README.md) | Provides React-free observable and snapshot-store primitives | — |
 | [`hmr/`](hmr/README.md) | Refreshes client plugins during development | — |

@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/bundle/dshc/README.md
 /:
-  en: c4943cd489394a1e
-  zh: ac88de01221cbe1b
+  en: 1f03a045cdbda1ae
+  zh: d47f04de6acf2fef
 /deepseek-ai-dsh-dshc:
   en: d70ad6fce8be8d65
   zh: f2751d41ac0c6fe3
 /deepseek-ai-dsh-dshc/summary:
-  en: 579bac05ed959106
-  zh: ba1c643633d43093
+  en: 63bf95d04fea12c6
+  zh: 81a82ca95ac0eeae
 /deepseek-ai-dsh-dshc/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
@@ -21,14 +21,14 @@
   en: 180a761f8fe89a0d
   zh: d1c4a306f8975a9b
 /deepseek-ai-dsh-dshc/understand-the-implementation:
-  en: c3cd85e528d61cee
-  zh: b0e6115b6a4aeedf
+  en: 4b335e5fb0f43d16
+  zh: 0bffb05ab9be707b
 /deepseek-ai-dsh-dshc/further-exploration:
-  en: 1b12ecfe3457ece0
-  zh: dcc84c13e8720d6e
+  en: 4cbb0993eca8b09e
+  zh: 01df21aedb0117cb
 /deepseek-ai-dsh-dshc/model-experience:
-  en: 7612ba5fb0048665
-  zh: fb610ed434ecd1be
+  en: fd8137a2b1a0a56e
+  zh: 423e0ea5bbb8d0e5
 /deepseek-ai-dsh-dshc/model-experience/kv-cache-effect:
   en: 639fa4a2e5ba1f64
   zh: 6d184a0737745da2

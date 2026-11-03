@@ -17,6 +17,16 @@
     - id: web-search-searxng
       name: '@deepseek-ai/dsh-web-search-searxng'
 
+    # Saved memories: a Settings section and a runtime-context contribution
+    # that carries the list into every session.
+    - id: ui-memory
+      name: '@deepseek-ai/dsh-client-ui-memory'
+
+    # Per-workspace projects: instructions and knowledge files for sessions
+    # that run inside a workspace folder.
+    - id: ui-projects
+      name: '@deepseek-ai/dsh-client-ui-projects'
+
 # The DSHC presets (presets/*.patch.yml, listed after this file in
 # package.json `dsh.bundle.patch`) replace the upstream standard preset: Code
 # keeps its tool set with the DSHC engineering persona. New sessions start in

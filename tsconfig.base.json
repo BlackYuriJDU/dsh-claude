@@ -304,6 +304,8 @@
       "@deepseek-ai/dsh-client-ui-layout": ["./packages/client/ui-layout/src"],
       "@deepseek-ai/dsh-client-ui-sidebar": ["./packages/client/ui-sidebar/src"],
       "@deepseek-ai/dsh-client-ui-brand-dshc": ["./packages/client/ui-brand-dshc/src"],
+      "@deepseek-ai/dsh-client-ui-memory": ["./packages/client/ui-memory/src"],
+      "@deepseek-ai/dsh-client-ui-projects": ["./packages/client/ui-projects/src"],
       "@deepseek-ai/dsh-client-ui-brand-official": ["./packages/client/ui-brand-official/src"],
       "@deepseek-ai/dsh-client-ui-approval": ["./packages/client/ui-approval/src"],
       "@deepseek-ai/dsh-client-ui-approval/client": ["./packages/client/ui-approval/src/client/index.ts"],

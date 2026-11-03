@@ -1,0 +1,38 @@
+# Test-only patch over the shipped headless profile with two saved memories.
+- id: headless-startup
+  disabled: true
+
+- id: headless-runner
+  disabled: true
+
+- id: agent-loop
+  config:
+    agents:
+      - id: main
+        provider: ui-memory-mock
+        model: ui-memory-mock
+        cwd: !!js process.cwd()
+
+- id: session-persistence-jsonl
+  config:
+    root: './.sessions'
+    compression: none
+
+- insert:
+    - id: ui-memory-mock-llm
+      name: './mock-llm.host.ts'
+
+    - id: ui-memory
+      name: '@deepseek-ai/dsh-client-ui-memory'
+      config:
+        memories:
+          - id: m1
+            text: The person prefers metric units.
+          - id: m2
+            text: '   '
+
+- id: sandbox-policy
+  inject: []
+  config:
+    mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+    workspaceRoot: !!js process.cwd()

@@ -31,6 +31,8 @@ kind: "package-group"
 | [`connection/`](connection/README.zh.md) | 维护浏览器与宿主之间的 RPC 通信与事件投递 | `ctx.connection` |
 | [`file-upload/`](file-upload/README.zh.md) | 在页面线程之外发送原始 Blob 与字节流请求体 | `ctx.fileUpload` |
 | [`shortcuts/`](shortcuts/README.zh.md) | 注册应用键盘命令 | `ctx.shortcuts` |
+| [`ui-memory/`](ui-memory/README.zh.md) | 保存的记忆：一个设置分区，以及写入每个会话运行时上下文的内容 | — |
+| [`ui-projects/`](ui-projects/README.zh.md) | 按工作区的项目：为每个工作区中的会话提供指令与知识文件，在设置中编辑 | — |
 | [`ui-shortcuts/`](ui-shortcuts/README.zh.md) | 展示快捷键速查 | — |
 | [`store/`](store/README.zh.md) | 提供不依赖 React 的 observable 与快照存储原语 | — |
 | [`hmr/`](hmr/README.zh.md) | 在开发期间刷新客户端插件 | — |

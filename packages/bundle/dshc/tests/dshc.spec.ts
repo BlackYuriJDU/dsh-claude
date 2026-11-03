@@ -64,9 +64,9 @@ describe('dsh-dshc bundle identity layer', () => {
     expect(identityRows).toContainEqual({ id: 'ui-brand-official', disabled: true })
   })
 
-  it('inserts the DSHC brand and the SearXNG provider, each a declared dependency', () => {
+  it('inserts the DSHC brand, the SearXNG provider, saved memories, and projects, each a declared dependency', () => {
     const inserted = identityRows.flatMap(row => row.insert ?? [])
-    expect(inserted.map(row => row.id)).toEqual(['ui-brand-dshc', 'web-search-searxng'])
+    expect(inserted.map(row => row.id)).toEqual(['ui-brand-dshc', 'web-search-searxng', 'ui-memory', 'ui-projects'])
     for (const row of inserted) {
       expect(row.disabled).toBeUndefined()
       expect(manifest.dependencies).toHaveProperty(row.name!)

@@ -1,0 +1,52 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-memory/README.md
+/:
+  en: 86d72e644230b66b
+  zh: 808d664e01634513
+/deepseek-ai-dsh-client-ui-memory:
+  en: 99e686d0b5d18479
+  zh: a35c7d0d8042e25b
+/deepseek-ai-dsh-client-ui-memory/summary:
+  en: 10ca201501819da6
+  zh: 3acb47e98f831e6a
+/deepseek-ai-dsh-client-ui-memory/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-memory/use-this-package:
+  en: 9609e164227e2257
+  zh: 7f4737012300bcfa
+/deepseek-ai-dsh-client-ui-memory/understand-the-implementation:
+  en: 6d2a85e296ee76fe
+  zh: c8f29ec9a6483a35
+/deepseek-ai-dsh-client-ui-memory/further-exploration:
+  en: badc57dde9400184
+  zh: 67e1b6c6cb3ea253
+/deepseek-ai-dsh-client-ui-memory/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-client-ui-memory/model-experience/saved-memories:
+  en: 05dc04ef769a0301
+  zh: b2918a23cae241e3
+/deepseek-ai-dsh-client-ui-memory/model-experience/saved-memories/what-the-model-sees:
+  en: 5876ae810f4462b9
+  zh: ff12dc8a68074436
+/deepseek-ai-dsh-client-ui-memory/model-experience/saved-memories/what-the-model-sees/memory-saved-context:
+  en: f4fc22da91ec8553
+  zh: 68a6304ccca0823f
+/deepseek-ai-dsh-client-ui-memory/model-experience/saved-memories/token-effect:
+  en: 85c3b8de1b152a0a
+  zh: c47d706f671830ee
+/deepseek-ai-dsh-client-ui-memory/model-experience/saved-memories/kv-cache-effect:
+  en: de3b666d96aca6c3
+  zh: 732ecece77d19e07
+/deepseek-ai-dsh-client-ui-memory/known-limitations-and-deferred-work:
+  en: 4964241d27df616f
+  zh: bb1f721150d54111
+/deepseek-ai-dsh-client-ui-memory/known-limitations-and-deferred-work/dev-note:
+  en: b5ebcb927b7959b5
+  zh: 6d012ed00dbae35e
+/deepseek-ai-dsh-client-ui-memory/known-limitations-and-deferred-work/dev-note/future-agent-saved-memories-and-project-scope:
+  en: b4c84524f79bf17b
+  zh: fdadcfa86b78750f

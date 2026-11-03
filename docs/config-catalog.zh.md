@@ -556,6 +556,34 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-shortcuts -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-memory -->
+<a id="deepseek-aidsh-client-ui-memory"></a>
+
+## `@deepseek-ai/dsh-client-ui-memory`
+
+- `inject`: `settings` · `systemPrompt`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/client/ui-memory/src/index.ts:18`](../packages/client/ui-memory/src/index.ts)
+
+```ts config-catalog
+/** Plugin config. */
+export interface Config {
+  /** Ordered saved memories, edited from Settings. */
+  memories: Volatile<MemoryItem[]>
+  /** Bound on the complete memory context text, in characters. */
+  maxChars: number
+}
+
+/** One remembered fact, preference, or correction. */
+export interface MemoryItem {
+  /** Stable identity within the list. */
+  id: string
+  /** The memory in the person's words. */
+  text: string
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-memory -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-plugin-manager -->
 <a id="deepseek-aidsh-client-ui-plugin-manager"></a>
 
@@ -575,6 +603,44 @@ export interface Config {
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-plugin-manager -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-projects -->
+<a id="deepseek-aidsh-client-ui-projects"></a>
+
+## `@deepseek-ai/dsh-client-ui-projects`
+
+- `inject`: `settings` · `systemPrompt` · `workspaceRegistry` · `workingDirectory`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/client/ui-projects/src/index.ts:23`](../packages/client/ui-projects/src/index.ts)
+
+```ts config-catalog
+/** Plugin config. */
+export interface Config {
+  /** Project content keyed by workspace id, edited from Settings. */
+  projects: Volatile<Record<string, ProjectEntry>>
+  /** Characters kept from one knowledge file. */
+  maxFileChars: number
+  /** Bound on the complete project text of one session. */
+  maxTotalChars: number
+}
+
+/** One project's content: instructions plus knowledge files. */
+export interface ProjectEntry {
+  /** Instructions the agent follows in every session of the project. */
+  readonly instructions?: string
+  /** Knowledge files whose content joins the instructions. */
+  readonly files?: readonly ProjectKnowledgeFile[]
+}
+
+/** One knowledge file attached to a project. */
+export interface ProjectKnowledgeFile {
+  /** Stable id within the project's list. */
+  readonly id: string
+  /** Path to the file on the Host: absolute, or relative to the workspace folder. */
+  readonly path: string
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-projects -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-settings-account -->
 <a id="deepseek-aidsh-client-ui-settings-account"></a>

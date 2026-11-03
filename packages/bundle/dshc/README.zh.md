@@ -1,5 +1,5 @@
 ---
-description: "DSHC bundle：将 Web 配置档转为 DSHC 的补丁层，提供 Claude 应用配色、DSHC 品牌与免密钥 SearXNG 搜索，面向启动 DSHC 的用户与扩展该层的维护者。"
+description: "DSHC bundle：将 Web 配置档转为 DSHC 的补丁层，提供 Claude 应用配色、DSHC 品牌、保存的记忆、按工作区的项目与免密钥 SearXNG 搜索，面向启动 DSHC 的用户与扩展该层的维护者。"
 kind: "package-bundle"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-本 bundle 是 `dshc` 配置档的补丁层，该配置档将它叠加在 `dsh-base` 与 `dsh-web-app` 之上。它以 [`ui-brand-dshc`](../../client/ui-brand-dshc/README.zh.md) 替换官方品牌，后者的配色层在浅色、深色与跟随系统模式下为 Web 客户端提供 Claude 应用的颜色；它还挂载免密钥的 [`web-search-searxng`](../../web/web-search-searxng/README.zh.md) 提供方，并以 DSHC 的 Chat、Cowork 与 Code 预设替换上游智能体预设。它不包含自己的代码，也不改变其他配置档。
+本 bundle 是 `dshc` 配置档的补丁层，该配置档将它叠加在 `dsh-base` 与 `dsh-web-app` 之上。它以 [`ui-brand-dshc`](../../client/ui-brand-dshc/README.zh.md) 替换官方品牌，后者的配色层在浅色、深色与跟随系统模式下为 Web 客户端提供 Claude 应用的颜色；它还挂载免密钥的 [`web-search-searxng`](../../web/web-search-searxng/README.zh.md) 提供方，加入 [`ui-memory`](../../client/ui-memory/README.zh.md) 保存的记忆与 [`ui-projects`](../../client/ui-projects/README.zh.md) 按工作区的项目，并以 DSHC 的 Chat、Cowork 与 Code 预设替换上游智能体预设。它不包含自己的代码，也不改变其他配置档。
 
 ## 目录
 
@@ -53,7 +53,7 @@ dsh dshc
 <details>
 <summary>实现内部细节——点击展开</summary>
 
-[`cordis.patch.yml`](cordis.patch.yml) 禁用 Web 层中的 `ui-brand-official` 行，因为两个品牌包占用相同的单一槽位；插入 `ui-brand-dshc` 与 `web-search-searxng` 行；禁用 Standard、PTC 与 Minimal 预设；并将 `chat` 设为注册表默认值。[`presets/`](presets/) 下的三个文件在 `dsh.bundle.patch` 中紧随其后；除人设外，Cowork 与 Code 原样复用上游 standard 行，并由测试保持两者一致。每个被插入的包都是本 bundle 的运行时依赖，本 bundle 又是 `dsh` 安装的依赖，因此配置档从安装中解析它们。[`src/index.ts`](src/index.ts) 是一个空模块，为包提供入口点。
+[`cordis.patch.yml`](cordis.patch.yml) 禁用 Web 层中的 `ui-brand-official` 行，因为两个品牌包占用相同的单一槽位；插入 `ui-brand-dshc`、`web-search-searxng`、`ui-memory` 与 `ui-projects` 行；禁用 Standard、PTC 与 Minimal 预设；并将 `chat` 设为注册表默认值。[`presets/`](presets/) 下的三个文件在 `dsh.bundle.patch` 中紧随其后；除人设外，Cowork 与 Code 原样复用上游 standard 行，并由测试保持两者一致。每个被插入的包都是本 bundle 的运行时依赖，本 bundle 又是 `dsh` 安装的依赖，因此配置档从安装中解析它们。[`src/index.ts`](src/index.ts) 是一个空模块，为包提供入口点。
 
 </details>
 
@@ -66,6 +66,8 @@ dsh dshc
 
 - [ui-brand-dshc](../../client/ui-brand-dshc/README.zh.md) — 配色层与品牌占位组件。
 - [web-search-searxng](../../web/web-search-searxng/README.zh.md) — 免密钥搜索提供方及其实例要求。
+- [ui-memory](../../client/ui-memory/README.zh.md) — 保存的记忆列表及其运行时上下文文本。
+- [ui-projects](../../client/ui-projects/README.zh.md) — 按工作区的指令、知识文件及其运行时上下文文本。
 - [配置档 bundle](../README.zh.md) — 其他 bundle 层以及配置档如何叠加它们。
 - [app-boot 配置档](../../boot/app-boot/README.zh.md#profiles) — 配置档模板、bundle 与用户补丁如何组合。
 
@@ -74,7 +76,7 @@ dsh dshc
 <a id="model-experience"></a>
 ## 模型体验
 
-直接通过预设人设体现：每个预设的 `persona` 前缀成为该预设会话的 `deployment:persona-prefix` 系统段，预设的工具行决定模型能看到哪些工具（Chat 没有 shell 与写入工具）。间接地，`web-search-searxng` 在成为所选提供方时提供 `web_search` 来源；`ui-brand-dshc` 不进入任何模型请求。
+间接地，通过本 bundle 组合的人设、工具与上下文插件体现：每个预设的 `persona` 前缀成为该预设会话的 `deployment:persona-prefix` 系统段，预设的工具行决定模型能看到哪些工具（Chat 没有 shell 与写入工具），`ui-memory` 将保存的记忆加入每个会话的运行时上下文，`ui-projects` 加入会话所在工作区的项目，`web-search-searxng` 在成为所选提供方时提供 `web_search` 来源，`ui-brand-dshc` 不进入任何模型请求。
 
 #### KV Cache 影响
 
