@@ -37,7 +37,7 @@ Mount this plugin in the browser roster and disable `ui-brand-official`, because
 
 ### What changes on screen
 
-The canvas becomes `#FAF9F5` in light and `#262624` in dark, raised cards and the composer `#FFFFFF` and `#30302E`, the sidebar `#F5F4ED` and `#1F1E1D`, and text follows the three-step `#141413`/`#3D3D3A`/`#73726C` and `#FAF9F5`/`#C2C0B6`/`#9C9A92` ladders. Generic primary buttons are ink (`#141413` in light, `#FAF9F5` in dark), as on the app's own dialogs; the composer's send button and other accents use the clay fill `#C6613F` with the lighter `#D97757` hover in both schemes. Interface text uses the system UI sans stack and the wordmark uses the system serif stack, so no font file ships.
+The canvas becomes `#FAF9F5` in light and `#262624` in dark, raised cards and the composer `#FFFFFF` and `#30302E`, the sidebar `#F5F4ED` and `#1F1E1D`, and text follows the three-step `#141413`/`#3D3D3A`/`#73726C` and `#FAF9F5`/`#C2C0B6`/`#9C9A92` ladders. Generic primary buttons are ink (`#141413` in light, `#FAF9F5` in dark), as on the app's own dialogs; the composer's send button and other accents use the clay fill `#C6613F` with the lighter `#D97757` hover in both schemes. Interface text uses the system UI sans stack and the wordmark uses the system serif stack, so no font file ships. Assistant responses use the system serif stack, as in the Claude app; reasoning stays sans, and a text font chosen in Settings applies to responses too.
 
 ### Replacing the palette or the brand
 

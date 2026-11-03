@@ -146,7 +146,9 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-toast-label': both('#faf9f5'),
   '--dsw-alias-tooltip-bg': { light: '#141413', dark: '#3a3a37' },
 
-  // Typography: system UI sans for text, system serif for the brand display face.
+  // Typography: system UI sans for text, system serif for the brand display
+  // face and for assistant response prose.
   '--dsh-font-family-text-default': both(DSHC_FONT_SANS),
   '--dsw-font-family-brand': both(DSHC_FONT_SERIF),
+  '--dsh-font-family-response': both(DSHC_FONT_SERIF),
 })

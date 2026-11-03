@@ -1,4 +1,7 @@
+/* Reasoning keeps the interface family inside a response body that sets
+   its own prose family. */
 .root {
+  --dsh-markdown-font-family: initial;
   display: flex;
   flex-direction: column;
 }
