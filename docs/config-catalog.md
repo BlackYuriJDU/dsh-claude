@@ -4721,6 +4721,32 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-web-search-perplexity -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-web-search-searxng -->
+<a id="deepseek-aidsh-web-search-searxng"></a>
+
+## `@deepseek-ai/dsh-web-search-searxng`
+
+- `inject`: `web`
+- `source`: [`packages/web/web-search-searxng/src/index.ts:31`](../packages/web/web-search-searxng/src/index.ts)
+
+```ts config-catalog
+/** Plugin config (all optional — `apply` fills the environment fallback). */
+export interface Config {
+  /** Instance base URL. Falls back to `$SEARXNG_URL`. Empty → provider unavailable. */
+  baseURL?: string
+  /** Search language sent as `language` (for example `pt-BR`). Omitted = instance default. */
+  language?: string
+  /** Comma-separated SearXNG categories (for example `general,news`). Omitted = instance default. */
+  categories?: string
+  /** SafeSearch level: 0 off, 1 moderate, 2 strict. Omitted = instance default. */
+  safeSearch?: SearxngSafeSearch
+}
+
+/** SafeSearch levels SearXNG accepts: off, moderate, strict. */
+export type SearxngSafeSearch = 0 | 1 | 2
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-web-search-searxng -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-webhook-github -->
 <a id="deepseek-aidsh-webhook-github"></a>
 
