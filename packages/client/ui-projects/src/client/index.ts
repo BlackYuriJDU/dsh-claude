@@ -14,7 +14,7 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import { PROJECTS_ENTRY_ID, type ProjectsFormValue } from '../projects.ts'
 import { ProjectsSection } from './ProjectsSection.tsx'
-import { en, pt, zh, type ProjectsKey } from './locales.ts'
+import { de, en, es, fr, ja, pt, ru, zh, type ProjectsKey } from './locales.ts'
 
 export { ProjectsSection } from './ProjectsSection.tsx'
 export type { ProjectsSectionComponentProps, ProjectsSectionInjected } from './ProjectsSection.tsx'
@@ -39,7 +39,7 @@ export const inject = ['slots', 'locale', 'configForms']
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { en, zh, pt }), 'ui-projects: dictionaries')
+  ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-projects: dictionaries')
   const t = ctx.locale.bind(NS)
   const projects = ctx.configForms.get<ProjectsFormValue>(PROJECTS_ENTRY_ID)
   ctx.effect(() => ctx.configForms.whileServed([PROJECTS_ENTRY_ID], () => ctx.slots.inject('settings.section', () => ctx.slots.register({

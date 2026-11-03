@@ -12,7 +12,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { MEMORY_ENTRY_ID, type MemoryFormValue } from '../memory.ts'
 import { MemorySection } from './MemorySection.tsx'
-import { en, pt, zh, type MemoryKey } from './locales.ts'
+import { de, en, es, fr, ja, pt, ru, zh, type MemoryKey } from './locales.ts'
 
 export { MemorySection } from './MemorySection.tsx'
 export type { MemorySectionComponentProps, MemorySectionInjected } from './MemorySection.tsx'
@@ -37,7 +37,7 @@ export const inject = ['slots', 'locale', 'configForms']
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { en, zh, pt }), 'ui-memory: dictionaries')
+  ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-memory: dictionaries')
   const t = ctx.locale.bind(NS)
   const memory = ctx.configForms.get<MemoryFormValue>(MEMORY_ENTRY_ID)
   ctx.effect(() => ctx.configForms.whileServed([MEMORY_ENTRY_ID], () => ctx.slots.inject('settings.section', () => ctx.slots.register({
