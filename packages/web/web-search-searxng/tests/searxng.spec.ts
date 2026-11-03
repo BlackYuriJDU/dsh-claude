@@ -7,6 +7,18 @@ import { mapSearxngResponse, mapSearxngResult } from '../src/provider.ts'
 
 const options = { baseURL: 'https://searx.test' }
 
+type FetchArgs = [url: string, init?: RequestInit]
+
+/** A `fetch` stand-in whose recorded calls keep the URL and init types. */
+function fetchReturning(respond: () => Promise<Response>) {
+  return vi.fn<(...args: FetchArgs) => Promise<Response>>(respond)
+}
+
+/** A 200 response whose body stream fails with an abort while being read. */
+function abortingBody(): Response {
+  return new Response(new ReadableStream({ start(controller) { controller.error(new DOMException('aborted', 'AbortError')) } }))
+}
+
 function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' }, ...init })
 }
@@ -111,22 +123,22 @@ describe('SearxngSearchProvider availability', () => {
 
 describe('SearxngSearchProvider request', () => {
   it('sends a GET with JSON accept and refuses redirects', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ results: [{ url: 'https://a.test', content: 'hi' }] }))
+    const fetchMock = fetchReturning(async () => jsonResponse({ results: [{ url: 'https://a.test', content: 'hi' }] }))
     vi.stubGlobal('fetch', fetchMock)
     const result = await new SearxngSearchProvider(options).search({ query: 'hello', maxResults: 5 })
     expect(result.sources).toEqual([{ url: 'https://a.test', snippet: 'hi' }])
-    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    const [url, init = {}] = fetchMock.mock.calls[0]!
     expect(url).toBe('https://searx.test/search?q=hello&format=json')
     expect(init).toMatchObject({ method: 'GET', redirect: 'error' })
     expect((init.headers as Record<string, string>)['accept']).toBe('application/json')
   })
 
   it('forwards the abort signal', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ results: [] }))
+    const fetchMock = fetchReturning(async () => jsonResponse({ results: [] }))
     vi.stubGlobal('fetch', fetchMock)
     const controller = new AbortController()
     await new SearxngSearchProvider(options).search({ query: 'q' }, controller.signal)
-    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    const [, init = {}] = fetchMock.mock.calls[0]!
     expect(init.signal).toBe(controller.signal)
   })
 })
@@ -172,8 +184,7 @@ describe('SearxngSearchProvider error handling', () => {
   })
 
   it('surfaces an abort during body parse as WEB_ABORTED', async () => {
-    const body = { json: () => Promise.reject(new DOMException('aborted', 'AbortError')), ok: true, status: 200 }
-    vi.stubGlobal('fetch', vi.fn(async () => body as unknown as Response))
+    vi.stubGlobal('fetch', fetchReturning(async () => abortingBody()))
     await expect(new SearxngSearchProvider(options).search({ query: 'q' }))
       .rejects.toThrow(expect.objectContaining({ code: 'WEB_ABORTED' }))
   })
@@ -196,13 +207,13 @@ describe('web-search-searxng plugin registration', () => {
   })
 
   it('threads language, categories, and safeSearch config into the request', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ results: [] }))
+    const fetchMock = fetchReturning(async () => jsonResponse({ results: [] }))
     vi.stubGlobal('fetch', fetchMock)
     const ctx = new Context()
     await ctx.plugin(WebRuntime, { searchProvider: SEARXNG_PROVIDER_ID })
     const fiber = await ctx.plugin(searxngPlugin, { baseURL: 'https://searx.test', language: 'pt-BR', categories: 'news', safeSearch: 2 })
     await ctx.web.search({ query: 'q' })
-    const [url] = fetchMock.mock.calls[0] as unknown as [string]
+    const [url] = fetchMock.mock.calls[0]!
     expect(url).toBe('https://searx.test/search?q=q&format=json&language=pt-BR&categories=news&safesearch=2')
     await fiber.dispose()
   })
@@ -211,13 +222,13 @@ describe('web-search-searxng plugin registration', () => {
     const prev = process.env.SEARXNG_URL
     process.env.SEARXNG_URL = 'http://127.0.0.1:8888'
     try {
-      const fetchMock = vi.fn(async () => jsonResponse({ results: [] }))
+      const fetchMock = fetchReturning(async () => jsonResponse({ results: [] }))
       vi.stubGlobal('fetch', fetchMock)
       const ctx = new Context()
       await ctx.plugin(WebRuntime, { searchProvider: SEARXNG_PROVIDER_ID })
       const fiber = await ctx.plugin(searxngPlugin, {})
       await ctx.web.search({ query: 'q' })
-      const [url] = fetchMock.mock.calls[0] as unknown as [string]
+      const [url] = fetchMock.mock.calls[0]!
       expect(url).toBe('http://127.0.0.1:8888/search?q=q&format=json')
       await fiber.dispose()
     } finally {
