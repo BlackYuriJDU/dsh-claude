@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-brand-dshc/README.md
+/:
+  en: 5ad8f14791928bc0
+  zh: 718aa1a43a3989d4
+/deepseek-ai-dsh-client-ui-brand-dshc:
+  en: a3cfe64310f43985
+  zh: 64d6c81d8c0d6468
+/deepseek-ai-dsh-client-ui-brand-dshc/summary:
+  en: 318b2b7fc9134b56
+  zh: 788ed8563a86eb4e
+/deepseek-ai-dsh-client-ui-brand-dshc/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-brand-dshc/use-this-package:
+  en: b1f82d08d1727f4a
+  zh: 34b281b110f89850
+/deepseek-ai-dsh-client-ui-brand-dshc/use-this-package/what-changes-on-screen:
+  en: 0ea928b901155ceb
+  zh: e6c2572f30431d2a
+/deepseek-ai-dsh-client-ui-brand-dshc/use-this-package/replacing-the-palette-or-the-brand:
+  en: e6bdf4fe9c841b04
+  zh: 37f3ff1fbfbffb0c
+/deepseek-ai-dsh-client-ui-brand-dshc/understand-the-implementation:
+  en: a9b3e75a548f5eb5
+  zh: 4524c5cc9fcbcb46
+/deepseek-ai-dsh-client-ui-brand-dshc/further-exploration:
+  en: 0d109912bedaa378
+  zh: 63706226540a835c
+/deepseek-ai-dsh-client-ui-brand-dshc/model-experience:
+  en: 618008c7641070e7
+  zh: 29493b6dd238eb1c
+/deepseek-ai-dsh-client-ui-brand-dshc/model-experience/kv-cache-effect:
+  en: ca75c51c89c2c9b0
+  zh: f57cc48a1b5cbfa9
+/deepseek-ai-dsh-client-ui-brand-dshc/known-limitations-and-deferred-work:
+  en: ad28ef74a1ae4f8d
+  zh: aa27b499253cd878
+/deepseek-ai-dsh-client-ui-brand-dshc/known-limitations-and-deferred-work/dev-note:
+  en: b5ebcb927b7959b5
+  zh: 6d012ed00dbae35e
+/deepseek-ai-dsh-client-ui-brand-dshc/known-limitations-and-deferred-work/dev-note/future-geometry-tokens:
+  en: 0eeb589e4eb0d444
+  zh: 2661c1e3d45ef3d8
