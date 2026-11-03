@@ -1,0 +1,18 @@
+# The dsh-dshc bundle patch: the DSHC identity over dsh-base and dsh-web-app.
+# Applied after the web-app layer; the profile's own cordis.patch.yml and any
+# --patch overlays still come after it.
+
+# The DSHC brand occupies the same single slots as the official brand.
+- id: ui-brand-official
+  disabled: true
+
+- insert:
+    # Claude-app palette layer over the theme service, plus the DSHC mark.
+    - id: ui-brand-dshc
+      name: '@deepseek-ai/dsh-client-ui-brand-dshc'
+
+    # Keyless web search through a SearXNG instance. The provider reads
+    # $SEARXNG_URL and stays unavailable without it, so the web service keeps
+    # selecting among the other usable providers.
+    - id: web-search-searxng
+      name: '@deepseek-ai/dsh-web-search-searxng'

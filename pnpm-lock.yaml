@@ -336,6 +336,9 @@ importers:
       '@deepseek-ai/dsh-cordis-client-runner':
         specifier: workspace:*
         version: link:../../packages/extensions/cordis-client-runner
+      '@deepseek-ai/dsh-dshc':
+        specifier: workspace:*
+        version: link:../../packages/bundle/dshc
       '@deepseek-ai/dsh-experimental-agent-team-profile':
         specifier: workspace:*
         version: link:../../packages/experimental/agent-team-profile
@@ -2686,6 +2689,19 @@ importers:
       '@deepseek-ai/dsh-working-directory':
         specifier: workspace:*
         version: link:../../session/working-directory
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:~
+        version: link:../../../vendor/cordis
+
+  packages/bundle/dshc:
+    dependencies:
+      '@deepseek-ai/dsh-client-ui-brand-dshc':
+        specifier: workspace:*
+        version: link:../../client/ui-brand-dshc
+      '@deepseek-ai/dsh-web-search-searxng':
+        specifier: workspace:*
+        version: link:../../web/web-search-searxng
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:~
