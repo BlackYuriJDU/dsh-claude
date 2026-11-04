@@ -4860,19 +4860,23 @@ export interface Config {
 ## `@deepseek-ai/dsh-web-search-searxng`
 
 - `inject`: `web`
-- `source`: [`packages/web/web-search-searxng/src/index.ts:31`](../packages/web/web-search-searxng/src/index.ts)
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/web/web-search-searxng/src/index.ts:36`](../packages/web/web-search-searxng/src/index.ts)
 
 ```ts config-catalog
-/** Plugin config (all optional — `apply` fills the environment fallback). */
+/**
+ * Plugin config. Every field is live: Settings edits apply to the next search
+ * without reloading the plugin.
+ */
 export interface Config {
-  /** Instance base URL. Falls back to `$SEARXNG_URL`. Empty → provider unavailable. */
-  baseURL?: string
-  /** Search language sent as `language` (for example `pt-BR`). Omitted = instance default. */
-  language?: string
-  /** Comma-separated SearXNG categories (for example `general,news`). Omitted = instance default. */
-  categories?: string
-  /** SafeSearch level: 0 off, 1 moderate, 2 strict. Omitted = instance default. */
-  safeSearch?: SearxngSafeSearch
+  /** Instance base URL. Empty or unset falls back to `$SEARXNG_URL`; neither → provider unavailable. */
+  baseURL: Volatile<string | undefined>
+  /** Search language sent as `language` (for example `pt-BR`). Unset = instance default. */
+  language: Volatile<string | undefined>
+  /** Comma-separated SearXNG categories (for example `general,news`). Unset = instance default. */
+  categories: Volatile<string | undefined>
+  /** SafeSearch level: 0 off, 1 moderate, 2 strict. Unset = instance default. */
+  safeSearch: Volatile<SearxngSafeSearch | undefined>
 }
 
 /** SafeSearch levels SearXNG accepts: off, moderate, strict. */
