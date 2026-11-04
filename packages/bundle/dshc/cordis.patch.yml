@@ -45,3 +45,10 @@
 - id: agent-preset-registry
   config:
     default: chat
+
+# The upstream welcome notice introduces the DeepSeek Harness preview; DSHC
+# starts with it acknowledged. The value matches WELCOME_NOTICE_VERSION in
+# ui-settings-models, and a bundle test fails when that version changes.
+- id: ui-settings-general
+  config:
+    welcomeNoticeVersion: '2026-09-28.1'

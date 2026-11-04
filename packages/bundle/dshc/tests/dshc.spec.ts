@@ -73,6 +73,13 @@ describe('dsh-dshc bundle identity layer', () => {
     }
   })
 
+  it('starts with the upstream welcome notice acknowledged at its current version', () => {
+    const copy = readFileSync(resolve(root, '../../client/ui-settings-models/src/onboarding-copy.ts'), 'utf8')
+    const version = /WELCOME_NOTICE_VERSION = '([^']+)'/.exec(copy)?.[1]
+    expect(version).toBeDefined()
+    expect(identityRows).toContainEqual({ id: 'ui-settings-general', config: { welcomeNoticeVersion: version } })
+  })
+
   it('replaces the standard preset and starts new sessions in Chat', () => {
     expect(identityRows).toContainEqual({ id: 'preset-standard', disabled: true })
     expect(identityRows).toContainEqual({ id: 'preset-ptc', disabled: true })

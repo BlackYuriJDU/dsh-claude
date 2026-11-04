@@ -183,6 +183,7 @@ Factory: conversation.content [ConversationContent]
 │  └─ id=queue [QueueDock]
 │     └─ calls Factory: conversation.user.text
 ├─ conversation.hero.brand.mark
+├─ conversation.hero.headline
 ├─ conversation.hero.workspace
 │  └─ conversation.hero.workspace.directoryFlow
 ├─ conversation.hero.agentPreset

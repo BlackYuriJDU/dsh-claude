@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package gives the Web client the DSHC identity. It stacks one palette layer over the theme service that recolors the shipped light and dark palettes to the Claude app's warm neutrals and clay accent, and it fills the sidebar and blank-session hero brand slots with the DSHC clay burst and serif wordmark. Light, dark, and system preferences keep working, because every override names both schemes. Choose it for the DSHC deployment instead of `ui-brand-official`. It has no runtime state and does not affect model requests.
+This package gives the Web client the DSHC identity. It stacks one palette layer over the theme service that recolors the shipped light and dark palettes to the Claude app's warm neutrals and clay accent, and it fills the sidebar and blank-session hero brand slots with the DSHC clay burst, the serif wordmark, and a serif part-of-day greeting as the hero headline. Light, dark, and system preferences keep working, because every override names both schemes. Choose it for the DSHC deployment instead of `ui-brand-official`. It has no runtime state and does not affect model requests.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ This package gives the Web client the DSHC identity. It stacks one palette layer
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount this plugin in the browser roster and disable `ui-brand-official`, because both occupy the same single slots. The plugin needs the `slots` and `theme` services; the Web bundle provides both.
+Mount this plugin in the browser roster and disable `ui-brand-official`, because both occupy the same single slots. The plugin needs the `slots`, `theme`, and `locale` services; the Web bundle provides all three.
 
 ```yaml
 - insert:
@@ -37,7 +37,7 @@ Mount this plugin in the browser roster and disable `ui-brand-official`, because
 
 ### What changes on screen
 
-The canvas becomes `#FAF9F5` in light and `#262624` in dark, raised cards and the composer `#FFFFFF` and `#30302E`, the sidebar `#F5F4ED` and `#1F1E1D`, and text follows the three-step `#141413`/`#3D3D3A`/`#73726C` and `#FAF9F5`/`#C2C0B6`/`#9C9A92` ladders. Generic primary buttons are ink (`#141413` in light, `#FAF9F5` in dark), as on the app's own dialogs; the composer's send button and other accents use the clay fill `#C6613F` with the lighter `#D97757` hover in both schemes. Interface text uses the system UI sans stack and the wordmark uses the system serif stack, so no font file ships. Assistant responses use the system serif stack, as in the Claude app; reasoning stays sans, and a text font chosen in Settings applies to responses too.
+The canvas becomes `#FAF9F5` in light and `#262624` in dark, raised cards and the composer `#FFFFFF` and `#30302E`, the sidebar `#F5F4ED` and `#1F1E1D`, and text follows the three-step `#141413`/`#3D3D3A`/`#73726C` and `#FAF9F5`/`#C2C0B6`/`#9C9A92` ladders. Generic primary buttons are ink (`#141413` in light, `#FAF9F5` in dark), as on the app's own dialogs; the composer's send button and other accents use the clay fill `#C6613F` with the lighter `#D97757` hover in both schemes. Interface text uses the system UI sans stack and the wordmark uses the system serif stack, so no font file ships. The blank-session hero greets with Good morning before noon, Good afternoon before 18:00, and Good evening after, by the browser's local clock and in the interface language, in place of the upstream headline and Preview badge. Assistant responses use the system serif stack, as in the Claude app; reasoning stays sans, and a text font chosen in Settings applies to responses too.
 
 ### Replacing the palette or the brand
 
@@ -58,6 +58,8 @@ The palette is one `ctx.theme.overrideTokens` layer whose source is the package 
 | [`src/client/index.ts`](src/client/index.ts) | Browser entry: palette layer and slot registrations |
 | [`src/client/tokens.ts`](src/client/tokens.ts) | The override map, clay constants, and font stacks |
 | [`src/client/Brand.tsx`](src/client/Brand.tsx) | The clay burst mark and serif wordmark |
+| [`src/client/Greeting.tsx`](src/client/Greeting.tsx) | The part-of-day hero greeting |
+| [`src/client/locales.ts`](src/client/locales.ts) | Greeting dictionaries for every shipped language |
 | [`src/index.ts`](src/index.ts) | Empty node half |
 
 </details>
@@ -71,7 +73,7 @@ Read these pages when the identity surface is not enough. They move from the ser
 
 - [ui-theme](../ui-theme/README.md) — the theme service, its built-in palettes, and override layers.
 - [ui-sidebar](../ui-sidebar/README.md) — declares `sidebar.brand.mark` and `sidebar.brand.name` and renders their fallbacks.
-- [ui-conversation](../ui-conversation/README.md) — declares `conversation.hero.brand.mark` in the hero.
+- [ui-conversation](../ui-conversation/README.md) — declares `conversation.hero.brand.mark` and `conversation.hero.headline` in the hero.
 - [ui-brand-official](../ui-brand-official/README.md) — the official occupants this package replaces.
 
 -----

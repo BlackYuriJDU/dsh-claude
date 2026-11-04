@@ -53,7 +53,7 @@ dsh dshc
 <details>
 <summary>实现内部细节——点击展开</summary>
 
-[`cordis.patch.yml`](cordis.patch.yml) 禁用 Web 层中的 `ui-brand-official` 行，因为两个品牌包占用相同的单一槽位；插入 `ui-brand-dshc`、`web-search-searxng`、`ui-memory` 与 `ui-projects` 行；禁用 Standard、PTC 与 Minimal 预设；并将 `chat` 设为注册表默认值。[`presets/`](presets/) 下的三个文件在 `dsh.bundle.patch` 中紧随其后；除人设外，Cowork 与 Code 原样复用上游 standard 行，并由测试保持两者一致。每个被插入的包都是本 bundle 的运行时依赖，本 bundle 又是 `dsh` 安装的依赖，因此配置档从安装中解析它们。[`src/index.ts`](src/index.ts) 是一个空模块，为包提供入口点。
+[`cordis.patch.yml`](cordis.patch.yml) 禁用 Web 层中的 `ui-brand-official` 行，因为两个品牌包占用相同的单一槽位；插入 `ui-brand-dshc`、`web-search-searxng`、`ui-memory` 与 `ui-projects` 行；禁用 Standard、PTC 与 Minimal 预设；将 `chat` 设为注册表默认值；并将上游 DeepSeek Harness 欢迎通知标记为已在当前版本确认，由测试保持与 `ui-settings-models` 一致。[`presets/`](presets/) 下的三个文件在 `dsh.bundle.patch` 中紧随其后；除人设外，Cowork 与 Code 原样复用上游 standard 行，并由测试保持两者一致。每个被插入的包都是本 bundle 的运行时依赖，本 bundle 又是 `dsh` 安装的依赖，因此配置档从安装中解析它们。[`src/index.ts`](src/index.ts) 是一个空模块，为包提供入口点。
 
 </details>
 

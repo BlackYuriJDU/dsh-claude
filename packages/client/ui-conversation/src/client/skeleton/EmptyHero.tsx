@@ -65,7 +65,7 @@ export function WorkspaceChip({ buttonRef, label, menuOpen = false, onClick, t }
 export interface HeroShellProps {
   /** The owner's locale seat, passed down as a plain prop. */
   t: HeroTranslate
-  /** Authorized renderer for the hero brand-mark slot. */
+  /** Authorized renderer for the hero brand-mark and headline slots. */
   renderSlot: ConversationContentProps['renderSlot']
   /** Overlay content after the stack (modals). */
   children?: ReactNode
@@ -125,7 +125,8 @@ function HeroFish({ hovering }: { hovering: boolean }) {
 }
 
 /**
- * Render the hero chrome (headline only; no composer, no workspace row).
+ * Render the hero chrome: the brand-mark and headline slots, each with its
+ * product fallback (no composer, no workspace row).
  * @param props - see {@link HeroShellProps}.
  * @returns the centered hero element tree.
  */
@@ -150,11 +151,15 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
               fallback: <HeroFish hovering={hovering} />,
             })}
           </span>
-          <span className={css.titleGroup}>
-            {/* Own element: keeps the headline text addressable apart from the badge. */}
-            <span>{t('hero.headline')}</span>
-            <span className={css.previewBadge}>{t('hero.preview')}</span>
-          </span>
+          {renderSlot('conversation.hero.headline', { className: css.titleGroup }, {
+            fallback: (
+              <span className={css.titleGroup}>
+                {/* Own element: keeps the headline text addressable apart from the badge. */}
+                <span>{t('hero.headline')}</span>
+                <span className={css.previewBadge}>{t('hero.preview')}</span>
+              </span>
+            ),
+          })}
         </div>
         <div className={css.body}>
           {/* The composer remains mounted outside this component. */}

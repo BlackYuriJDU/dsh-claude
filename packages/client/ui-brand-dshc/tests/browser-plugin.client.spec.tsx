@@ -1,19 +1,22 @@
 // @vitest-environment jsdom
 import { Context } from '@deepseek-ai/cordis'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type { ThemeTokenOverrides } from '@deepseek-ai/dsh-client-ui-theme/client'
 import { apply, inject } from '../src/client/index.ts'
 import { burstSpokes, DSHC_WORDMARK, DshcMark, DshcName } from '../src/client/Brand.tsx'
 import { DSHC_CLAY, DSHC_TOKEN_SOURCE, DSHC_TOKENS } from '../src/client/tokens.ts'
+import { DshcGreeting, greetingKey, type DshcGreetingProps } from '../src/client/Greeting.tsx'
+import { en } from '../src/client/locales.ts'
 import { apply as hostApply } from '../src/index.ts'
 
 afterEach(() => {
   cleanup()
+  vi.useRealTimers()
 })
 
-const HOLES = ['sidebar.brand.mark', 'sidebar.brand.name', 'conversation.hero.brand.mark'] as const
+const HOLES = ['sidebar.brand.mark', 'sidebar.brand.name', 'conversation.hero.brand.mark', 'conversation.hero.headline'] as const
 
 /** Minimal theme service: records the live override layers by source. */
 class FakeTheme {
@@ -30,13 +33,18 @@ async function bench(declare = true) {
   const theme = new FakeTheme()
   ctx.provide('theme')
   ctx.set('theme', theme)
+  const dictionaries = new Map<string, Record<string, unknown>>()
+  ctx.provide('locale')
+  ctx.set('locale', {
+    register: (ns: string, dicts: Record<string, unknown>) => { dictionaries.set(ns, dicts); return () => { dictionaries.delete(ns) } },
+  })
   const slots = ctx.get('slots') as SlotRegistry
   const declareHoles = () => slots.register({
     name: 'root',
     children: Object.fromEntries(HOLES.map(name => [name, { kind: 'single', scope: 'root' }])),
   } as never, () => null)
   const disposeHoles = declare ? declareHoles() : undefined
-  return { ctx, slots, theme, declareHoles, disposeHoles }
+  return { ctx, slots, theme, dictionaries, declareHoles, disposeHoles }
 }
 
 describe('DSHC browser-brand plugin', () => {
@@ -44,8 +52,8 @@ describe('DSHC browser-brand plugin', () => {
     expect(hostApply).not.toThrow()
   })
 
-  it('declares the slot and theme services it uses', () => {
-    expect(inject).toEqual(['slots', 'theme'])
+  it('declares the slot, theme, and locale services it uses', () => {
+    expect(inject).toEqual(['slots', 'theme', 'locale'])
   })
 
   it('stacks the palette layer and fills every brand slot until teardown', async () => {
@@ -53,10 +61,13 @@ describe('DSHC browser-brand plugin', () => {
     const fiber = subject.ctx.plugin({ inject: [...inject], apply })
     await fiber.await()
     expect(subject.theme.layers.get(DSHC_TOKEN_SOURCE)).toBe(DSHC_TOKENS)
+    expect(Object.keys(subject.dictionaries.get('brand.dshc') ?? {}).sort()).toEqual(['de', 'en', 'es', 'fr', 'ja', 'pt', 'ru', 'zh'])
     for (const hole of HOLES) expect(subject.slots.entries(hole)).toHaveLength(1)
+    expect(subject.slots.entries('conversation.hero.headline')[0]?.locale).toBe('brand.dshc')
 
     await fiber.dispose()
     expect(subject.theme.layers.has(DSHC_TOKEN_SOURCE)).toBe(false)
+    expect(subject.dictionaries.has('brand.dshc')).toBe(false)
     for (const hole of HOLES) expect(subject.slots.entries(hole)).toHaveLength(0)
   })
 
@@ -109,5 +120,23 @@ describe('DSHC artwork', () => {
   it('renders the serif wordmark', () => {
     const { container } = render(<DshcName />)
     expect(container.textContent).toBe(DSHC_WORDMARK)
+  })
+})
+
+describe('DSHC hero greeting', () => {
+  it('splits the day at noon and at 18:00', () => {
+    expect([0, 11, 12, 17, 18, 23].map(greetingKey))
+      .toEqual(['greeting.morning', 'greeting.morning', 'greeting.afternoon', 'greeting.afternoon', 'greeting.evening', 'greeting.evening'])
+  })
+
+  it('greets by the local clock in the brand serif and keeps the host class', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 10, 4, 19, 30))
+    const t: DshcGreetingProps['t'] = key => (en as Record<string, string>)[key] ?? key
+    const { container } = render(<DshcGreeting className="title" t={t} />)
+    const span = container.querySelector('span')
+    expect(span?.textContent).toBe('Good evening')
+    expect(span?.getAttribute('class')).toBe('title')
+    expect(span?.style.fontFamily).toMatch(/^ui-serif, Georgia/)
   })
 })
