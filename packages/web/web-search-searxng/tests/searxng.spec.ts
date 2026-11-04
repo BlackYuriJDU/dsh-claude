@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
+import { updateVolatile } from '@deepseek-ai/cosmokit'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import { SearxngSearchProvider, SEARXNG_PROVIDER_ID, searxngSearchUrl } from '@deepseek-ai/dsh-web-search-searxng'
 import * as searxngPlugin from '@deepseek-ai/dsh-web-search-searxng'
@@ -249,5 +250,32 @@ describe('web-search-searxng plugin registration', () => {
     } finally {
       if (prev !== undefined) process.env.SEARXNG_URL = prev
     }
+  })
+
+  it('lists itself in provider pickers as SearXNG with a localized description', async () => {
+    const ctx = new Context()
+    await ctx.plugin(WebRuntime, { searchProvider: SEARXNG_PROVIDER_ID })
+    await ctx.plugin(searxngPlugin, { baseURL: 'https://searx.test' })
+    const entry = ctx.web.listProviders().search.find(provider => provider.id === SEARXNG_PROVIDER_ID)
+    expect(entry).toMatchObject({ title: 'SearXNG', description: searxngPlugin.SEARXNG_DESCRIPTION })
+    expect(Object.keys(searxngPlugin.SEARXNG_DESCRIPTION).sort()).toEqual(['de', 'en', 'es', 'fr', 'ja', 'pt', 'ru', 'zh'])
+  })
+
+  it('applies Settings edits to the next search without reloading', async () => {
+    const fetchMock = fetchReturning(async () => jsonResponse({ results: [] }))
+    vi.stubGlobal('fetch', fetchMock)
+    const ctx = new Context()
+    await ctx.plugin(WebRuntime, { searchProvider: SEARXNG_PROVIDER_ID })
+    const parse = (value: object) => searxngPlugin.Config(value) as searxngPlugin.Config
+    const config = parse({ baseURL: 'https://a.test' })
+    searxngPlugin.apply(ctx, config)
+    await ctx.web.search({ query: 'q' })
+    updateVolatile(config.baseURL, parse({ baseURL: 'https://b.test' }).baseURL)
+    updateVolatile(config.language, parse({ language: 'pt-BR' }).language)
+    await ctx.web.search({ query: 'q' })
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://a.test/search?q=q&format=json',
+      'https://b.test/search?q=q&format=json&language=pt-BR',
+    ])
   })
 })

@@ -49,6 +49,8 @@ Load the web service and the provider; the base URL falls back to `$SEARXNG_URL`
 | `categories` | (instance default) | Comma-separated SearXNG categories sent as `categories`, for example `general,news` |
 | `safeSearch` | (instance default) | SafeSearch level sent as `safesearch`: `0` off, `1` moderate, `2` strict |
 
+All four fields are live: an edit to the profile configuration (**Settings → Open configuration file**) applies to the next availability check and search without a reload. An empty `baseURL` falls back to `$SEARXNG_URL`. The provider registers with the title **SearXNG** and a localized description, so **Web search and fetch** lists it in the search provider menu; selecting it there, or `$DSH_WEB_SEARCH_PROVIDER=searxng`, makes it the search provider.
+
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-web-search-searxng) is the exhaustive source for every accepted field and its JSDoc.
 
 ### What a search returns
@@ -81,7 +83,7 @@ The provider is a thin adapter over SearXNG's JSON output with three rules:
 
 | File | Role |
 |---|---|
-| [`src/index.ts`](src/index.ts) | Plugin entry: config schema, environment fallback, provider registration |
+| [`src/index.ts`](src/index.ts) | Plugin entry: live config schema, environment fallback, provider registration |
 | [`src/provider.ts`](src/provider.ts) | The `SearxngSearchProvider`: URL building, request dispatch, abort classification, result mapping |
 | [`src/types.ts`](src/types.ts) | SearXNG wire types: `SearxngSearchResponse`, `SearxngResult` |
 
@@ -125,6 +127,7 @@ These limits define when the provider is a poor fit. They are current package co
 
 - **The instance must enable JSON output** — SearXNG ships with `json` disabled in `search.formats`; public instances commonly keep it disabled and rate-limit automated clients, so a self-hosted instance is the supported deployment.
 - **Result quality follows the instance's engines** — the provider sends no engine selection; the instance's `engines` settings decide coverage and ranking.
+- **No settings page yet** — the Plugins page lists no SearXNG page, so the fields change only in the profile configuration; the search provider menu still lists and selects SearXNG.
 - **Abort classification is error-shape-based** — only a `DOMException` named `AbortError` maps to `WEB_ABORTED`; an abort carrying a custom reason surfaces as `WEB_PROVIDER_ERROR`.
 
 <a id="dev-note"></a>

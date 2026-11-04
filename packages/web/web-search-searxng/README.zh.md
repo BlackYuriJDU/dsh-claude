@@ -49,6 +49,8 @@ kind: "package-reference"
 | `categories` | （实例默认） | 以 `categories` 发送的逗号分隔 SearXNG 分类，例如 `general,news` |
 | `safeSearch` | （实例默认） | 以 `safesearch` 发送的安全搜索级别：`0` 关闭、`1` 中等、`2` 严格 |
 
+四个字段都是实时的：对配置档配置（**Settings → Open configuration file**）的修改会在下一次可用性检查与搜索时生效，无需重新加载。`baseURL` 为空时回退到 `$SEARXNG_URL`。提供方以标题 **SearXNG** 和本地化描述注册，因此 **Web search and fetch** 会在搜索提供方菜单中列出它；在那里选择它，或设置 `$DSH_WEB_SEARCH_PROVIDER=searxng`，即可让它成为搜索提供方。
+
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-web-search-searxng)是每个受支持字段及其 JSDoc 的穷尽式真源。
 
 ### 搜索返回什么
@@ -81,7 +83,7 @@ kind: "package-reference"
 
 | 文件 | 角色 |
 |---|---|
-| [`src/index.ts`](src/index.ts) | 插件入口：配置 schema、环境回退、提供方注册 |
+| [`src/index.ts`](src/index.ts) | 插件入口：实时配置 schema、环境回退、提供方注册 |
 | [`src/provider.ts`](src/provider.ts) | `SearxngSearchProvider`：URL 构建、请求分发、中止分类、结果映射 |
 | [`src/types.ts`](src/types.ts) | SearXNG 线上类型：`SearxngSearchResponse`、`SearxngResult` |
 
@@ -125,6 +127,7 @@ kind: "package-reference"
 
 - **实例必须启用 JSON 输出** — SearXNG 默认在 `search.formats` 中禁用 `json`；公共实例通常保持禁用并对自动化客户端限流，因此受支持的部署是自托管实例。
 - **结果质量取决于实例的引擎** — 本提供方不发送引擎选择；实例的 `engines` 设置决定覆盖面与排序。
+- **尚无设置页面** — Plugins 页面没有 SearXNG 页面，因此这些字段只能在配置档配置中修改；搜索提供方菜单仍会列出并选择 SearXNG。
 - **中止分类基于错误形状** — 只有名为 `AbortError` 的 `DOMException` 映射为 `WEB_ABORTED`；携带自定义原因的中止以 `WEB_PROVIDER_ERROR` 呈现。
 
 <a id="dev-note"></a>

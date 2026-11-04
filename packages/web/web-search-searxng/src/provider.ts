@@ -97,9 +97,26 @@ export function searxngSearchUrl(options: SearxngSearchProviderOptions, query: s
   return url.toString()
 }
 
+/** Display name shown in provider pickers. SearXNG is a product name and is not translated. */
+export const SEARXNG_TITLE = 'SearXNG'
+
+/** Picker description: what this provider suits and what it costs or cannot do. */
+export const SEARXNG_DESCRIPTION: NonNullable<WebSearchProvider['description']> = {
+  en: 'Searches through a SearXNG instance you run or trust, with no API key or per-search charge. Needs the instance URL with JSON output enabled; result quality follows the instance\'s engines.',
+  zh: '通过你运行或信任的 SearXNG 实例搜索，无需 API Key，也不按次收费。需要启用 JSON 输出的实例 URL；结果质量取决于实例所用的搜索引擎。',
+  ja: '自分で運用するか信頼できる SearXNG インスタンスで検索します。API キーも検索ごとの料金も不要です。JSON 出力を有効にしたインスタンスの URL が必要で、結果の品質はインスタンスのエンジンに依存します。',
+  es: 'Busca a través de una instancia de SearXNG que ejecutas o en la que confías, sin clave de API ni cargo por búsqueda. Necesita la URL de la instancia con la salida JSON activada; la calidad depende de los motores de la instancia.',
+  fr: 'Recherche via une instance SearXNG que vous hébergez ou en laquelle vous avez confiance, sans clé API ni coût par recherche. Nécessite l’URL de l’instance avec la sortie JSON activée ; la qualité dépend des moteurs de l’instance.',
+  de: 'Sucht über eine SearXNG-Instanz, die du betreibst oder der du vertraust, ohne API-Schlüssel und ohne Kosten pro Suche. Benötigt die Instanz-URL mit aktivierter JSON-Ausgabe; die Qualität hängt von den Suchmaschinen der Instanz ab.',
+  ru: 'Ищет через экземпляр SearXNG, который вы запускаете или которому доверяете, без ключа API и оплаты за поиск. Нужен URL экземпляра с включённым выводом JSON; качество зависит от поисковых систем экземпляра.',
+  pt: 'Pesquisa por uma instância SearXNG que você roda ou em que confia, sem chave de API nem cobrança por pesquisa. Precisa da URL da instância com a saída JSON ativada; a qualidade depende dos buscadores da instância.',
+}
+
 /** The SearXNG-backed search provider; HTTP redirects fail as `WEB_PROVIDER_ERROR`. */
 export class SearxngSearchProvider implements WebSearchProvider {
   readonly id = SEARXNG_PROVIDER_ID
+  readonly title = SEARXNG_TITLE
+  readonly description = SEARXNG_DESCRIPTION
 
   constructor(private readonly options: SearxngSearchProviderOptions) {}
 
