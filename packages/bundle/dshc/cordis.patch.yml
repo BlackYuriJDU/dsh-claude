@@ -46,6 +46,18 @@
   config:
     default: chat
 
+# Privacy: DSHC sends no Session log to DeepSeek by default. The OpenTelemetry
+# row that exports a Session-log prefix after message feedback is disabled, the
+# same row DSH_TELEMETRY_DISABLED disables. Session-log upload with official
+# DeepSeek API requests starts off; the Settings → General switch still turns
+# it on.
+- id: session-telemetry-otel
+  disabled: true
+
+- id: session-log-deepseek
+  config:
+    enabled: false
+
 # The upstream welcome notice introduces the DeepSeek Harness preview; DSHC
 # starts with it acknowledged. The value matches WELCOME_NOTICE_VERSION in
 # ui-settings-models, and a bundle test fails when that version changes.

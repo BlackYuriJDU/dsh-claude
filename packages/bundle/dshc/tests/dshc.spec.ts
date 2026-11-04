@@ -73,6 +73,11 @@ describe('dsh-dshc bundle identity layer', () => {
     }
   })
 
+  it('sends no Session log to DeepSeek by default', () => {
+    expect(identityRows).toContainEqual({ id: 'session-telemetry-otel', disabled: true })
+    expect(identityRows).toContainEqual({ id: 'session-log-deepseek', config: { enabled: false } })
+  })
+
   it('starts with the upstream welcome notice acknowledged at its current version', () => {
     const copy = readFileSync(resolve(root, '../../client/ui-settings-models/src/onboarding-copy.ts'), 'utf8')
     const version = /WELCOME_NOTICE_VERSION = '([^']+)'/.exec(copy)?.[1]

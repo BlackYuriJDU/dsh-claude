@@ -43,7 +43,9 @@ dsh dshc
 
 上游的 Standard、PTC 与 Minimal 预设被禁用，因为它们以 Standard 为参照描述自身；Creator 仍在三者之后可用。
 
-将 `$SEARXNG_URL` 设为启用了 JSON 输出的 SearXNG 实例，即可使搜索提供方可用。未设置时提供方保持不可用，web 服务继续在其他可用的搜索提供方中选择。当有多个搜索提供方可用时，用 `$DSH_WEB_SEARCH_PROVIDER` 固定其中一个，例如 `searxng`。
+将 `$SEARXNG_URL` 设为启用了 JSON 输出的 SearXNG 实例，即可使搜索提供方可用，然后在 **Plugins → Web search and fetch** 中选择它，或用 `$DSH_WEB_SEARCH_PROVIDER=searxng` 固定；设置了 `$SEARXNG_URL` 时，`bin/dshc` 启动器会自动固定它。web 服务从不从所选提供方回退，因此所选提供方不可用时搜索会失败。
+
+DSHC 默认不向 DeepSeek 发送任何 Session 日志。本 bundle 禁用 `session-telemetry-otel` 行（它会在消息反馈后导出 Session 日志前缀），并以 `enabled: false` 启动 `session-log-deepseek`，因此在打开 **Settings → General → Upload Session Log when using the official model API** 之前，发往官方 DeepSeek API 的请求不携带 Session 日志字段。
 
 -----
 
@@ -92,6 +94,7 @@ dsh dshc
 - **人设只做引导，不做再训练** — 所配置的模型在其遵循指令的程度内遵循这些书面规则；不同模型的行为不同。
 - **输入框内没有 Chat/Cowork/Code 切换** — 预设标签位于工作区选择器旁，这是 Web 层的布局。
 - **上游产品文案仍然保留** — Web 层的通知与引导文本仍然提及 DeepSeek Harness。
+- **反馈对话框仍提及对话日志** — 其提示称提交会包含日志，但 DSHC 只将反馈保存在本地 Session 日志中，不导出任何内容。
 
 <a id="dev-note"></a>
 ### 开发备注

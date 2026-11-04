@@ -43,7 +43,9 @@ New sessions start in Chat; the preset chip beside the workspace picker switches
 
 The upstream Standard, PTC, and Minimal presets are disabled because they describe themselves relative to Standard; Creator stays available after the three.
 
-Set `$SEARXNG_URL` to a SearXNG instance with JSON output enabled to make the search provider usable. Without it the provider stays unavailable, and the web service keeps selecting among the other usable search providers. When more than one search provider is usable, pin one with `$DSH_WEB_SEARCH_PROVIDER`, for example `searxng`.
+Set `$SEARXNG_URL` to a SearXNG instance with JSON output enabled to make the search provider usable, then choose it under **Plugins → Web search and fetch** or pin it with `$DSH_WEB_SEARCH_PROVIDER=searxng`; the `bin/dshc` launcher pins it when `$SEARXNG_URL` is set. The web service never falls back from the selected provider, so a search fails while the selected provider is unavailable.
+
+DSHC sends no Session log to DeepSeek by default. The bundle disables the `session-telemetry-otel` row, which would export a Session-log prefix after message feedback, and starts `session-log-deepseek` with `enabled: false`, so requests to the official DeepSeek API carry no Session-log field until **Settings → General → Upload Session Log when using the official model API** is turned on.
 
 -----
 
@@ -92,6 +94,7 @@ These limits define what the layer changes. They are current package constraints
 - **The personas steer, they do not retrain** — the configured model follows the written rules to the extent it follows instructions; behavior differs between models.
 - **No Chat/Cowork/Code switch inside the composer** — the preset chip sits beside the workspace picker, as the Web layer places it.
 - **Upstream product copy remains** — notices and onboarding text from the Web layer still name DeepSeek Harness.
+- **The feedback dialog still mentions the conversation log** — its hint says a submission includes the log, although DSHC keeps feedback in the local Session log and exports nothing.
 
 <a id="dev-note"></a>
 ### Dev Note
