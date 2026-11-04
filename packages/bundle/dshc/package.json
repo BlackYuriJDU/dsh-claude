@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-dshc",
   "description": "The DSHC bundle: Chat, Cowork, and Code presets with the DSHC persona, saved memories, per-workspace projects, the DSHC brand and Claude-app palette, and keyless SearXNG search over dsh-web-app",
-  "version": "0.2.2-alpha.2",
+  "version": "0.2.2-alpha.3",
   "publishConfig": {
     "access": "public"
   },
