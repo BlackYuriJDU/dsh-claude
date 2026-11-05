@@ -128,7 +128,9 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-scrollbar-hover-l1': { light: '#c2c0b6', dark: '#5a5955' },
   '--dsw-alias-scrollbar-hover-l2': { light: '#c2c0b6', dark: '#62615c' },
 
-  // States: the guidelines' danger, success, and warning pairs; business accents follow the clay.
+  // States: the guidelines' danger, success, and warning pairs. Business
+  // accents color text (the active tab, links, selected rows), so they use a
+  // deeper clay than the fill to keep WCAG AA (4.5:1) on every surface.
   '--dsw-alias-state-error-primary': { light: '#a73d39', dark: '#cd5c58' },
   '--dsw-alias-state-error-secondary': { light: '#b53333', dark: '#dd5353' },
   '--dsw-alias-state-success-primary': { light: '#437426', dark: '#599130' },
@@ -138,8 +140,27 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-state-warn-secondary': { light: '#a87829', dark: '#d1a041' },
   '--dsw-alias-state-warn-label': { light: '#5a4815', dark: '#d1a041' },
   '--dsw-alias-state-warn-tertiary': { light: '#f6eedf', dark: '#483a0f' },
-  '--dsw-alias-state-business-primary': { light: DSHC_CLAY, dark: DSHC_CLAY_HOVER },
+  '--dsw-alias-state-business-primary': { light: '#ad5230', dark: '#e08b6d' },
   '--dsw-alias-state-business-tertiary': { light: '#f7e7df', dark: '#4a2c21' },
+
+  // Empty-state illustrations: warm neutrals at the lightness of the base sheet's bluish ones.
+  '--dsw-alias-illustration-background': { light: '#f5f4ed', dark: '#2b2a27' },
+  '--dsw-alias-illustration-surface': { light: '#f0eee6', dark: '#5f5d58' },
+  '--dsw-alias-illustration-backing': { light: '#d6d3c8', dark: '#45443f' },
+  '--dsw-alias-illustration-detail': { light: '#d6d3c8', dark: '#85837c' },
+  '--dsw-alias-illustration-inset': { light: '#f0eee6', dark: '#45443f' },
+  '--dsw-alias-illustration-shadow': { light: '#f0eee6', dark: '#45443f' },
+
+  // Code highlighting: a warm palette, every token at least 4.5:1 on the code block.
+  '--shiki-token-constant': { light: '#8a5300', dark: '#e8b860' },
+  '--shiki-token-string': { light: '#4b7329', dark: '#a8c686' },
+  '--shiki-token-comment': { light: '#6b6a64', dark: '#a6a39a' },
+  '--shiki-token-keyword': { light: '#a3402b', dark: '#f0a58a' },
+  '--shiki-token-parameter': { light: '#9c4f16', dark: '#f2b27a' },
+  '--shiki-token-function': { light: '#6b4fa3', dark: '#c5b0f0' },
+  '--shiki-token-string-expression': { light: '#3f6b26', dark: '#b9d49a' },
+  '--shiki-token-punctuation': { light: '#4a4945', dark: '#c2c0b6' },
+  '--shiki-token-link': { light: '#ad5230', dark: '#e08b6d' },
 
   // Toasts and tooltips stay dark on the light canvas.
   '--dsw-alias-toast-bg': { light: '#262624', dark: '#3a3a37' },

@@ -86,7 +86,7 @@ describe('DSHC browser-brand plugin', () => {
 describe('DSHC palette', () => {
   it('names both color schemes for every token', () => {
     for (const [name, modes] of Object.entries(DSHC_TOKENS)) {
-      expect(name).toMatch(/^--(dsw|dsh)-/)
+      expect(name).toMatch(/^--(dsw|dsh|shiki)-/)
       expect(typeof modes.light).toBe('string')
       expect(typeof modes.dark).toBe('string')
     }
@@ -101,6 +101,43 @@ describe('DSHC palette', () => {
     expect(DSHC_TOKENS['--dsw-alias-label-tertiary']).toEqual({ light: '#73726c', dark: '#9c9a92' })
     expect(DSHC_TOKENS['--dsw-alias-button-primary-fill']).toEqual({ light: '#141413', dark: '#faf9f5' })
     expect(DSHC_TOKENS['--dsw-alias-button-info-fill']).toEqual({ light: DSHC_CLAY, dark: DSHC_CLAY })
+  })
+})
+
+/** WCAG relative luminance of a `#rrggbb` color. */
+function luminance(hex: string): number {
+  const channel = (offset: number) => {
+    const value = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  }
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5)
+}
+
+/** WCAG contrast ratio between two `#rrggbb` colors. */
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number]
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+describe('DSHC contrast', () => {
+  const token = (name: string) => DSHC_TOKENS[name]!
+
+  it('keeps the business accent at WCAG AA on the canvas, cards, and sidebar', () => {
+    const accent = token('--dsw-alias-state-business-primary')
+    for (const surface of ['--dsw-alias-bg-base', '--dsw-alias-bg-layer-1', '--dsw-specific-sidebar-fill']) {
+      expect(contrast(accent.light, token(surface).light)).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(accent.dark, token(surface).dark)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('keeps every code highlight color at WCAG AA on the code block', () => {
+    const block = token('--dsw-alias-markdown-code-block')
+    const highlights = Object.keys(DSHC_TOKENS).filter(name => name.startsWith('--shiki-token-'))
+    expect(highlights).toHaveLength(9)
+    for (const name of highlights) {
+      expect(contrast(token(name).light, block.light)).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(token(name).dark, block.dark)).toBeGreaterThanOrEqual(4.5)
+    }
   })
 })
 
