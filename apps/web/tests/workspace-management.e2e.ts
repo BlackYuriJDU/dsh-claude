@@ -430,7 +430,7 @@ describe('web e2e: workspace management (create / rename / grouping / hover affo
     acknowledgeReloadConnectionLoss(tripwire, warningStart)
     await expect.poll(() => page.getByText('Ungrouped', { exact: true }).count(), { timeout: 15_000 }).toBe(0)
     await page.getByRole('button', { name: 'View options' }).click()
-    await page.getByRole('menuitem', { name: 'WorkSpace', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Workspace', exact: true }).click()
     await expect.poll(() => page.getByText('Ungrouped', { exact: true }).count(), { timeout: 10_000 }).toBeGreaterThanOrEqual(1)
     expect(tripwire.pageErrors).toEqual([])
   }, 90_000)
@@ -717,7 +717,7 @@ describe('web e2e: workspace management (create / rename / grouping / hover affo
       await seedSession(hoverScaffold, seed, 'hover-second')
       await hoverScaffold.ctx.sessionController.rename({ sessionId: SessionId('hover-first'), title: 'Hover first' })
       await hoverScaffold.ctx.sessionController.rename({ sessionId: SessionId('hover-second'), title: 'Hover second' })
-      for (const layout of ['In one list', 'Workspace Tree']) {
+      for (const layout of ['In one list', 'Workspace tree']) {
         // Each page owns a browser context, so layout preferences and paused clocks cannot leak between layouts.
         const ui = await newEnglishPage(browser)
         try {
@@ -928,7 +928,7 @@ describe('web e2e: workspace management (create / rename / grouping / hover affo
     await page.getByRole('button', { name: 'View options', exact: true }).click()
     const optionsExpected = fileURLToPath(new URL('./expected/workspace-management/grouping-options.expected.md', import.meta.url))
     await compareOrRefreshGolden(optionsExpected, await captureStableAria(page, '[role="menu"]', scaffold.workspaceCwd), MODE)
-    await page.getByRole('menuitem', { name: 'Workspace Tree', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Workspace tree', exact: true }).click()
     await section.getByText('project-one', { exact: true }).waitFor()
     await addNewFolderWorkspace(parentPath, 'project-two')
     const project = section.getByRole('treeitem', { name: 'project-two', exact: true })
@@ -980,11 +980,11 @@ describe('web e2e: workspace management (create / rename / grouping / hover affo
     await parent.click()
     await section.getByText('project-two', { exact: true }).waitFor()
     await page.getByRole('button', { name: 'View options', exact: true }).click()
-    await page.getByRole('menuitem', { name: 'WorkSpace', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Workspace', exact: true }).click()
     await page.getByRole('tree', { name: 'Sessions', exact: true }).getByText('project-two', { exact: true }).waitFor()
     expect(await section.getByText('project-two', { exact: true }).count()).toBe(0)
     await page.getByRole('button', { name: 'View options', exact: true }).click()
-    await page.getByRole('menuitem', { name: 'Workspace Tree', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Workspace tree', exact: true }).click()
     await section.getByText('project-two', { exact: true }).waitFor()
     const previousParentSessionIds = [...parentWorkspace.sessionIds]
     const newParentSession = page.waitForResponse('**/api/session/create')

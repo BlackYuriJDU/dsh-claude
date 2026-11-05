@@ -71,7 +71,7 @@ it.each([false, true])('keeps workspace and archived search actions reachable wi
   await connectFreshWorkspace(page, scaffold.workspaceCwd)
   await openFixture()
   await activate(page.getByRole('button', { name: 'View options', exact: true }))
-  await activate(page.getByRole('menuitem', { name: 'WorkSpace', exact: true }))
+  await activate(page.getByRole('menuitem', { name: 'Workspace', exact: true }))
   const menu = page.getByRole('button', { name: 'Workspace actions for workspace', exact: true, includeHidden: true })
   const project = page.locator('[data-row-key^="workspace:"]').filter({ has: menu })
   await page.mouse.move(0, 0)

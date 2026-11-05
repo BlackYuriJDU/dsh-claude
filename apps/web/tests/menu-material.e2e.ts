@@ -19,7 +19,7 @@ it('keeps the view options menu anchored and dismissible through WebKit window r
   await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
   const anchor = page.getByRole('button', { name: 'View options', exact: true })
   await anchor.click()
-  const menu = page.getByRole('menu').filter({ has: page.getByRole('menuitem', { name: 'Workspace Tree', exact: true }) })
+  const menu = page.getByRole('menu').filter({ has: page.getByRole('menuitem', { name: 'Workspace tree', exact: true }) })
   await menu.waitFor()
   for (const viewport of [{ width: 1440, height: 1000 }, { width: 1200, height: 700 }]) {
     await page.setViewportSize(viewport)

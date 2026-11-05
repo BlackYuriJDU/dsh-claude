@@ -3,9 +3,11 @@
 /** Dictionary namespace owned by this plugin. */
 export const NS = 'conversation'
 
-// The claimed /plan hint and the plan-mode textarea placeholder describe the same next action.
+// The claimed /plan hint and the plan-mode textarea placeholder describe the same next action;
+// the English placeholder takes sentence case, while inline hints stay lowercase.
 const PLAN_NEXT_ACTION_ZH = '描述你的任务以生成计划'
 const PLAN_NEXT_ACTION_EN = 'describe your task to generate plan'
+const PLAN_PLACEHOLDER_EN = 'Describe your task to generate a plan'
 
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {
@@ -408,7 +410,7 @@ export const en = {
   'hint.plan': PLAN_NEXT_ACTION_EN,
   'hint.goal': 'describe the objective for a long-running task',
   'hint.goal.active': 'goal active — edit / pause / resume / clear',
-  'placeholder.plan': PLAN_NEXT_ACTION_EN,
+  'placeholder.plan': PLAN_PLACEHOLDER_EN,
   'placeholder.default': 'Message or run a task, / commands, @ files or sessions',
   'placeholder.unavailable': 'Session unavailable',
   'placeholder.hero': 'Describe what you want to build, / commands, @ files or sessions',
@@ -1186,7 +1188,7 @@ export const es = {
   'hint.plan': PLAN_NEXT_ACTION_EN,
   'hint.goal': 'describir el objetivo de una tarea de larga duración',
   'hint.goal.active': 'Objetivo activo: editar/pausar/reanudar/borrar',
-  'placeholder.plan': PLAN_NEXT_ACTION_EN,
+  'placeholder.plan': PLAN_PLACEHOLDER_EN,
   'placeholder.default': 'Envía mensajes o ejecuta una tarea, / comandos, @ archivos o sesiones',
   'placeholder.unavailable': 'Sesión no disponible',
   'placeholder.hero': 'Describe lo que quieres construir, / comandos, @ archivos o sesiones',
@@ -1576,7 +1578,7 @@ export const fr = {
   'hint.plan': PLAN_NEXT_ACTION_EN,
   'hint.goal': "décrire l'objectif d'une tâche de longue durée",
   'hint.goal.active': 'objectif actif — modifier/mettre en pause/reprendre/effacer',
-  'placeholder.plan': PLAN_NEXT_ACTION_EN,
+  'placeholder.plan': PLAN_PLACEHOLDER_EN,
   'placeholder.default': 'Envoyez un message ou exécutez une tâche, des commandes /, des fichiers @ ou des sessions',
   'placeholder.unavailable': 'Séance indisponible',
   'placeholder.hero': 'Décrivez ce que vous souhaitez construire, / commandes, @ fichiers ou sessions',
@@ -1966,7 +1968,7 @@ export const de = {
   'hint.plan': PLAN_NEXT_ACTION_EN,
   'hint.goal': 'Beschreiben Sie das Ziel einer lang andauernden Aufgabe',
   'hint.goal.active': 'Ziel aktiv – Bearbeiten / Anhalten / Fortsetzen / Löschen',
-  'placeholder.plan': PLAN_NEXT_ACTION_EN,
+  'placeholder.plan': PLAN_PLACEHOLDER_EN,
   'placeholder.default': 'Senden Sie eine Nachricht oder führen Sie eine Aufgabe, /-Befehle, @-Dateien oder Sitzungen aus',
   'placeholder.unavailable': 'Sitzung nicht verfügbar',
   'placeholder.hero': 'Beschreiben Sie, was Sie erstellen möchten: /-Befehle, @-Dateien oder Sitzungen',
@@ -2356,7 +2358,7 @@ export const ru = {
   'hint.plan': PLAN_NEXT_ACTION_EN,
   'hint.goal': 'описать цель долгосрочной задачи',
   'hint.goal.active': 'цель активна — изменить/приостановить/возобновить/очистить',
-  'placeholder.plan': PLAN_NEXT_ACTION_EN,
+  'placeholder.plan': PLAN_PLACEHOLDER_EN,
   'placeholder.default': 'Отправьте сообщение или запустите задачу, /команды, @файлы или сеансы',
   'placeholder.unavailable': 'Сеанс недоступен',
   'placeholder.hero': 'Опишите, что вы хотите построить: /команды, @файлы или сеансы.',
@@ -2746,7 +2748,7 @@ export const pt = {
   'hint.plan': PLAN_NEXT_ACTION_EN,
   'hint.goal': 'descrever o objetivo de uma tarefa de longa duração',
   'hint.goal.active': 'meta ativa — editar/pausar/resumir/limpar',
-  'placeholder.plan': PLAN_NEXT_ACTION_EN,
+  'placeholder.plan': PLAN_PLACEHOLDER_EN,
   'placeholder.default': 'Envie mensagens ou execute uma tarefa, / comandos, @ arquivos ou sessões',
   'placeholder.unavailable': 'Sessão indisponível',
   'placeholder.hero': 'Descreva o que você deseja construir, / comandos, @ arquivos ou sessões',
