@@ -78,6 +78,10 @@ describe('dsh-dshc bundle identity layer', () => {
     expect(identityRows).toContainEqual({ id: 'session-log-deepseek', config: { enabled: false } })
   })
 
+  it('keeps the default Workspace in a DSHC folder', () => {
+    expect(identityRows).toContainEqual({ id: 'workspace-controller', config: { productDirectory: 'dsh-claude' } })
+  })
+
   it('starts with the upstream welcome notice acknowledged at its current version', () => {
     const copy = readFileSync(resolve(root, '../../client/ui-settings-models/src/onboarding-copy.ts'), 'utf8')
     const version = /WELCOME_NOTICE_VERSION = '([^']+)'/.exec(copy)?.[1]

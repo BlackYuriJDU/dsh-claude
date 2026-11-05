@@ -62,6 +62,12 @@
   config:
     enabled: false
 
+# The default Workspace lives under <Documents>/dsh-claude instead of the
+# upstream product folder. An existing default Workspace keeps its path.
+- id: workspace-controller
+  config:
+    productDirectory: dsh-claude
+
 # The upstream welcome notice introduces the DeepSeek Harness preview; DSHC
 # starts with it acknowledged. The value matches WELCOME_NOTICE_VERSION in
 # ui-settings-models, and a bundle test fails when that version changes.
