@@ -164,3 +164,10 @@
     transition: none;
   }
 }
+
+/* A closed group with a failed Tool result names the count in the error tone,
+   so the failure is visible without expanding the group. */
+.failed {
+  flex: none;
+  color: var(--dsw-alias-state-error-primary);
+}

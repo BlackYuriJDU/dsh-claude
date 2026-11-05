@@ -36,6 +36,7 @@ interface TurnProcessState {
   readonly messageCount: number
   readonly toolCallCount: number
   readonly subagentCount: number
+  readonly failedToolCallCount: number
 }
 
 type ConversationEvent = Parameters<ConversationNodeDefinition['match']>[0]
@@ -143,6 +144,7 @@ function fallbackState(context: ConversationNodeContext<TurnProcessState>): Turn
     messageCount: 0,
     toolCallCount: 0,
     subagentCount: 0,
+    failedToolCallCount: 0,
   }
   for (const match of context.matches) state = updateProcessState(state, match.event)
   return state
@@ -173,6 +175,7 @@ function processSpec(state: TurnProcessState, turn: TurnLocation): TurnProcessSp
         .reduce((total, [, count]) => total + count, 0),
     toolCallCount: state.toolCallCount,
     subagentCount: state.subagentCount,
+    failedToolCallCount: state.failedToolCallCount,
   }
   if (answer === null) {
     return {
@@ -224,6 +227,9 @@ function updateProcessState(state: TurnProcessState, event: ConversationEvent): 
       subagentCount: current.subagentCount + (subagent ? 1 : 0),
     }
   }
+  if (event.type === 'tool/result' && event.surfaceOp === 'append' && event.data.message.isError === true) {
+    current = { ...current, failedToolCallCount: current.failedToolCallCount + 1 }
+  }
   const evidence = processEvidence(event)
   if (evidence === undefined) return current
   if (evidence.kind === 'other') {
@@ -274,6 +280,7 @@ export const turnProcessDefinition: ConversationNodeDefinition<TurnProcessState>
       messageCount: 0,
       toolCallCount: 0,
       subagentCount: 0,
+      failedToolCallCount: 0,
     }
   },
   update: (context, match) => updateProcessState(context.state, match.event),

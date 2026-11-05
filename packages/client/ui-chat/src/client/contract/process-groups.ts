@@ -9,6 +9,8 @@ export interface ProcessActivitySummary {
   readonly runningDetail: string
   /** Present only while the selected live activity has not reached tool/call. */
   readonly preparing?: true
+  /** Settled Tool results reporting an error, present only when at least one did. */
+  readonly failed?: number
 }
 
 /** Presentation facts for one group between independent replies or input. */

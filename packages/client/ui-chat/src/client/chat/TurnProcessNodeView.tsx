@@ -55,6 +55,9 @@ export const TurnProcessNodeView = memo(function TurnProcessNodeView({
             <span key={index} className={part.numeric ? css.durationNumber : undefined}>{part.text}</span>
           ))}
         </span>
+        {node.data.failedToolCallCount > 0 && (
+          <span className={css.failed}>{t('message.process.failedCount', { count: node.data.failedToolCallCount })}</span>
+        )}
         {canCollapse && <IconChevronDownOutlineRegular className={css.chevron} />}
       </button>
     </>
