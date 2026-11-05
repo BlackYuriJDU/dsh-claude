@@ -21,7 +21,7 @@ import {
 // Type-only: pulls the ui-conversation SlotMap merge (the hero seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
-import type { SeatPresentation } from '../index.ts'
+import type { SeatPolicy } from '../index.ts'
 import type { AgentPresetSeatState } from './seat-store.ts'
 import { presetDisplayText } from './locales.ts'
 import { requiresCodingTools } from './settings-store.ts'
@@ -34,8 +34,8 @@ export interface AgentPresetSeatInjected {
     developerTools: ObservableSnapshot<boolean>
     /** Seat snapshot bound by the renderer as useAgentPresetSeat. */
     agentPresetSeat: SnapshotStore<AgentPresetSeatState>
-    /** Host seat presentation; an unread value keeps the menu. */
-    seatPresentation: ObservableSnapshot<ConfigFormSnapshot<{ seatPresentation?: SeatPresentation }>>
+    /** Host picker policy; an unread value keeps the menu with every preset. */
+    seatPolicy: ObservableSnapshot<ConfigFormSnapshot<SeatPolicy>>
   }
   /** Read the roster when the chip first renders. */
   load: () => Promise<void>
@@ -84,10 +84,11 @@ export type AgentPresetSeatProps =
  */
 export function AgentPresetSeat({
   sessionId, useSessionRetainInfo, load, select, dismissRefusal, introduced, useAgentPresetSeat, useDeveloperTools,
-  useSeatPresentation, t,
+  useSeatPolicy, t,
 }: AgentPresetSeatProps) {
   const developerTools = useDeveloperTools(value => value)
-  const segmented = useSeatPresentation(snapshot => snapshot.value?.seatPresentation === 'segmented')
+  const segmented = useSeatPolicy(snapshot => snapshot.value?.seatPresentation === 'segmented')
+  const hidden = useSeatPolicy(snapshot => snapshot.value?.seatHiddenPresets)
   const state = useAgentPresetSeat(snapshot => snapshot)
   const main = useSessionRetainInfo(info => sessionId === undefined
     || (info?.retainedBy.mainView ?? 0) > 0)
@@ -109,8 +110,9 @@ export function AgentPresetSeat({
   }, [load])
 
   const options = useMemo(
-    () => state.options.filter(option => developerTools || !requiresCodingTools(option)),
-    [state.options, developerTools],
+    () => state.options.filter(option => (developerTools || !requiresCodingTools(option))
+      && (option.id === state.current || hidden?.includes(option.id) !== true)),
+    [state.options, state.current, developerTools, hidden],
   )
 
   useEffect(() => {

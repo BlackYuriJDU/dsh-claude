@@ -10,7 +10,13 @@ import z from '@deepseek-ai/schemastery'
 /** New-session seat presentation. */
 export type SeatPresentation = 'menu' | 'segmented'
 
-/** Seat presentation projected to the browser. */
+/** Picker policy fields the browser reads. */
+export interface SeatPolicy {
+  seatPresentation?: SeatPresentation
+  seatHiddenPresets?: readonly string[]
+}
+
+/** New-session picker policy projected to the browser. */
 export interface Config {
   /**
    * `menu` shows the chosen preset with a menu of the others; `segmented`
@@ -18,11 +24,17 @@ export interface Config {
    * fields are projected to the browser.
    */
   seatPresentation: Volatile<SeatPresentation>
+  /**
+   * Preset ids the new-session picker leaves out unless one is the staged
+   * choice; other entry points can still stage them.
+   */
+  seatHiddenPresets: Volatile<readonly string[]>
 }
 
-/** Seat presentation; the default is the upstream menu. */
+/** Picker policy; the defaults are the upstream menu with every preset. */
 export const Config = z.object({
   seatPresentation: z.union(['menu', 'segmented'] as const).default('menu').volatile(),
+  seatHiddenPresets: z.array(z.string()).default([]).volatile(),
 })
 
 /**

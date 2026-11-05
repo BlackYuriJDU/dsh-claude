@@ -96,7 +96,7 @@ describe('dsh-dshc bundle identity layer', () => {
     expect(identityRows).toContainEqual({ id: 'preset-ptc', disabled: true })
     expect(identityRows).toContainEqual({ id: 'preset-minimal', disabled: true })
     expect(identityRows).toContainEqual({ id: 'agent-preset-registry', config: { default: 'chat' } })
-    expect(identityRows).toContainEqual({ id: 'ui-agent-preset', config: { seatPresentation: 'segmented' } })
+    expect(identityRows).toContainEqual({ id: 'ui-agent-preset', config: { seatPresentation: 'segmented', seatHiddenPresets: ['cordis'] } })
   })
 })
 

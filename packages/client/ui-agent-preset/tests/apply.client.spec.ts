@@ -345,6 +345,8 @@ describe('ui-agent-preset apply', () => {
     expect(HostConfig({}).seatPresentation.get()).toBe('menu')
     expect(HostConfig({ seatPresentation: 'segmented' }).seatPresentation.get()).toBe('segmented')
     expect(() => HostConfig({ seatPresentation: 'tabs' as never })).toThrow()
+    expect(HostConfig({}).seatHiddenPresets.get()).toEqual([])
+    expect(HostConfig({ seatHiddenPresets: ['cordis'] }).seatHiddenPresets.get()).toEqual(['cordis'])
     const ctx = new Context()
     const dispose = vi.fn()
     const configure = vi.fn((_options: { auto: boolean }, _owner: object) => dispose)

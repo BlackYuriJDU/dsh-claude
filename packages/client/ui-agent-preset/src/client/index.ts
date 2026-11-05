@@ -45,10 +45,10 @@ import { AgentPresetSectionController } from './section-store.ts'
 import { en, ja, es, fr, de, ru, pt, zh, type AgentPresetSettingsKey } from './locales.ts'
 import { AGENT_PRESET_SETTINGS_NS, AgentPresetSettingsController } from './settings-store.ts'
 import { analyticsMode } from './analytics.ts'
-import type { SeatPresentation } from '../index.ts'
+import type { SeatPolicy } from '../index.ts'
 
-/** Host entry whose Config holds the seat presentation. */
-const SEAT_PRESENTATION_ENTRY_ID = 'ui-agent-preset'
+/** Host entry whose Config holds the picker policy. */
+const SEAT_POLICY_ENTRY_ID = 'ui-agent-preset'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
@@ -77,7 +77,7 @@ export const inject = [
 export function apply(ctx: ClientContext): void {
   const toolsSettings = ctx.configForms.get<{ enabled: boolean }>('ui-settings')
   const presetSettings = ctx.configForms.get(AGENT_PRESET_SETTINGS_NS)
-  const seatPresentation = ctx.configForms.get<{ seatPresentation?: SeatPresentation }>(SEAT_PRESENTATION_ENTRY_ID)
+  const seatPolicy = ctx.configForms.get<SeatPolicy>(SEAT_POLICY_ENTRY_ID)
   let active = true
   // Host preferences start at false before their first accepted document.
   const codingToolsDisabled = (): boolean => active && toolsSettings.getSnapshot().value?.enabled === false
@@ -191,7 +191,7 @@ export function apply(ctx: ClientContext): void {
       const binding = sessionId === undefined ? undefined : ctx.sessions.binding(sessionId)
       const seat = binding === undefined ? unboundSeat : seatFor(binding)
       return {
-        hooks: { agentPresetSeat: seat.store, developerTools: ctx.configForms.developerTools.enabled, seatPresentation },
+        hooks: { agentPresetSeat: seat.store, developerTools: ctx.configForms.developerTools.enabled, seatPolicy },
         load: () => seat.load(),
         select: async (id: string) => {
           const state = seat.store.getSnapshot()
