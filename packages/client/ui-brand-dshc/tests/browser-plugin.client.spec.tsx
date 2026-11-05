@@ -34,9 +34,11 @@ async function bench(declare = true) {
   ctx.provide('theme')
   ctx.set('theme', theme)
   const dictionaries = new Map<string, Record<string, unknown>>()
+  const products: string[] = []
   ctx.provide('locale')
   ctx.set('locale', {
     register: (ns: string, dicts: Record<string, unknown>) => { dictionaries.set(ns, dicts); return () => { dictionaries.delete(ns) } },
+    registerProductName: (name: string) => { products.push(name); return () => { products.splice(products.indexOf(name), 1) } },
   })
   const slots = ctx.get('slots') as SlotRegistry
   const declareHoles = () => slots.register({
@@ -44,7 +46,7 @@ async function bench(declare = true) {
     children: Object.fromEntries(HOLES.map(name => [name, { kind: 'single', scope: 'root' }])),
   } as never, () => null)
   const disposeHoles = declare ? declareHoles() : undefined
-  return { ctx, slots, theme, dictionaries, declareHoles, disposeHoles }
+  return { ctx, slots, theme, dictionaries, products, declareHoles, disposeHoles }
 }
 
 describe('DSHC browser-brand plugin', () => {
@@ -64,8 +66,10 @@ describe('DSHC browser-brand plugin', () => {
     expect(Object.keys(subject.dictionaries.get('brand.dshc') ?? {}).sort()).toEqual(['de', 'en', 'es', 'fr', 'ja', 'pt', 'ru', 'zh'])
     for (const hole of HOLES) expect(subject.slots.entries(hole)).toHaveLength(1)
     expect(subject.slots.entries('conversation.hero.headline')[0]?.locale).toBe('brand.dshc')
+    expect(subject.products).toEqual([DSHC_WORDMARK])
 
     await fiber.dispose()
+    expect(subject.products).toEqual([])
     expect(subject.theme.layers.has(DSHC_TOKEN_SOURCE)).toBe(false)
     expect(subject.dictionaries.has('brand.dshc')).toBe(false)
     for (const hole of HOLES) expect(subject.slots.entries(hole)).toHaveLength(0)

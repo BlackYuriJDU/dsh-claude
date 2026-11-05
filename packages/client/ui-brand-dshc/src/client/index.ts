@@ -11,7 +11,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
-import { DshcMark, DshcName } from './Brand.tsx'
+import { DSHC_WORDMARK, DshcMark, DshcName } from './Brand.tsx'
 import { DshcGreeting } from './Greeting.tsx'
 import { de, en, es, fr, ja, pt, ru, zh, type BrandDshcKey } from './locales.ts'
 import { DSHC_TOKEN_SOURCE, DSHC_TOKENS } from './tokens.ts'
@@ -43,8 +43,9 @@ export {
 export const inject = ['slots', 'theme', 'locale']
 
 /**
- * Apply the DSHC palette, register the greeting dictionaries, and fill the
- * brand slots. The palette layer, the dictionaries, and each
+ * Apply the DSHC palette, register the greeting dictionaries and the product
+ * name that interface copy shows, and fill the brand slots. The palette
+ * layer, the dictionaries, the product name, and each
  * slot occupant are fiber effects, so unloading the plugin restores the base
  * palette and the shell's fallback brand.
  * @param ctx - client root context.
@@ -52,6 +53,7 @@ export const inject = ['slots', 'theme', 'locale']
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.theme.overrideTokens(DSHC_TOKEN_SOURCE, DSHC_TOKENS), 'ui-brand-dshc: palette layer')
   ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-brand-dshc: dictionaries')
+  ctx.effect(() => ctx.locale.registerProductName(DSHC_WORDMARK), 'ui-brand-dshc: product name')
   ctx.slots.inject('sidebar.brand.mark', () =>
     ctx.slots.inject('sidebar.brand.name', function* () {
       yield ctx.slots.register({ name: 'sidebar.brand.mark' }, DshcMark)

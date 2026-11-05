@@ -15,6 +15,11 @@ import type {} from '../src/client/index.ts'
 import { en, zh, type AccountKey } from '../src/client/locales.ts'
 import css from '../src/client/AccountSection.module.css'
 import type { AccountAvatarSnapshot } from '../src/client/account-avatar.ts'
+import { DEFAULT_PRODUCT_NAME } from '@deepseek-ai/dsh-client-locale/client'
+
+/** Fill `{product}` the way the locale runtime does when no brand registers a name. */
+const withProduct = (text: string): string => text.replace('{product}', DEFAULT_PRODUCT_NAME)
+
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
@@ -54,7 +59,7 @@ function mount(state: Omit<AccountView, 'links'>, copy: typeof en | typeof zh = 
     <AccountSection {...globals} {...operations}
       useAccount={selector => selector(operations.hooks.account.getSnapshot())}
       useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-      close={() => {}} t={key => key in copy ? copy[key as AccountKey] : key} />
+      close={() => {}} t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
     {/* The application renders this from `shell.overlay`; the settings page only requests a page. */}
     {platform !== undefined && pages !== undefined
       && <SharedPlatformHost Globals={globals} pages={pages} platform={platform} copy={copy}
@@ -84,7 +89,7 @@ function SharedPlatformHost({ Globals, pages, platform, copy, refreshAccount }: 
       const page = pages.getSnapshot()?.page
       pages.close()
       if (page === 'top-up') void refreshAccount()
-    }} t={key => key in copy ? copy[key as AccountKey] : key} />
+    }} t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
 }
 
 /**
@@ -98,7 +103,7 @@ async function accountMenu(operations: AccountSectionInjected, snapshot: () => A
   return <AccountMenu {...({} as GlobalStandardProps)} {...operations}
     settingsOpen={settingsOpen} useAccount={selector => selector(snapshot())} wide
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    openOnboarding={() => {}} openSettings={() => {}} t={key => en[key as AccountKey]} />
+    openOnboarding={() => {}} openSettings={() => {}} t={key => withProduct(en[key as AccountKey])} />
 }
 
 it.each([en, zh])('renders account cards without inventing profile or balance data', async (copy) => {
@@ -132,7 +137,7 @@ it.each([en, zh].flatMap(copy => ([false, true, 'unknown'] as const).map(running
     hasRunningAccountTasks={async () => { if (running === 'unknown') throw new Error('offline'); return running }}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
-    t={key => key in copy ? copy[key as AccountKey] : key} />)
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />)
   fireEvent.click(screen.getByRole('button', { name: copy.menu }))
   expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([copy.settings, copy.contactUs, copy.signOut])
   await expect(`${screen.getByRole('menu').textContent}\n`).toMatchFileSnapshot(`./expected/menu-${copy === en ? 'en' : 'zh'}.txt`)
@@ -187,7 +192,7 @@ it.each([en, zh])('offers settings, contact and sign-in from the signed-out acco
   render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
-    t={key => key in copy ? copy[key as AccountKey] : key} />)
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />)
   const trigger = screen.getByRole('button', { name: copy.menu })
   expect(trigger.textContent).toBe(copy.more)
   expect(trigger.querySelector('svg')).not.toBeNull()
@@ -304,11 +309,11 @@ it('opens usage inside Desktop and returns to the same Account settings', async 
   act(() => { usage.focus() })
   await act(async () => { fireEvent.click(usage) })
   expect(platform.open).toHaveBeenCalledWith('usage', { x: 0, y: 0, width: 0, height: 0 })
-  const back = screen.getByRole('button', { name: en.backToHarness })
+  const back = screen.getByRole('button', { name: withProduct(en.backToHarness) })
   await expect(`${back.parentElement!.parentElement!.textContent}\n`).toMatchFileSnapshot('./expected/platform-header-en.txt')
   await act(async () => { fireEvent.click(back) })
   expect(platform.close).toHaveBeenCalledOnce()
-  expect(screen.queryByRole('button', { name: en.backToHarness })).toBeNull()
+  expect(screen.queryByRole('button', { name: withProduct(en.backToHarness) })).toBeNull()
   expect(screen.getByRole('region', { name: en.nav })).toBeTruthy()
   // The overlay's layout cleanup hands the page's return focus back to the link
   // that opened it, with no dialog to take it instead.
@@ -324,7 +329,7 @@ it('keeps a return action available when the native document fails to load', asy
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: zh.topUp })) })
   expect(platform.open).toHaveBeenCalledWith('top-up', { x: 0, y: 0, width: 0, height: 0 })
   expect(screen.getByText(zh.platformFailed)).toBeTruthy()
-  const back = screen.getByRole('button', { name: zh.backToHarness })
+  const back = screen.getByRole('button', { name: withProduct(zh.backToHarness) })
   await expect(`${back.parentElement!.parentElement!.textContent}\n`).toMatchFileSnapshot('./expected/platform-header-zh.txt')
   await act(async () => { fireEvent.click(back) })
   expect(platform.close).toHaveBeenCalledOnce()
@@ -352,13 +357,13 @@ it.each([en, zh])('retries the failed Platform destination and removes the error
   expect(screen.getByRole('status', { name: copy.loading })).toBeTruthy()
   // Retrying removes the button that was focused, so the return action keeps
   // keyboard focus instead of dropping it onto the document body.
-  const backAgain = screen.getByRole('button', { name: copy.backToHarness })
+  const backAgain = screen.getByRole('button', { name: withProduct(copy.backToHarness) })
   expect(document.activeElement).toBe(backAgain)
   await act(async () => { loaded.resolve(undefined); await loaded.promise })
   expect(screen.queryByText(copy.platformFailed)).toBeNull()
   expect(screen.queryByRole('status', { name: copy.loading })).toBeNull()
   expect(document.activeElement).toBe(backAgain)
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: copy.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(copy.backToHarness) })) })
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(platform.close).toHaveBeenCalledTimes(3)
 })
@@ -372,7 +377,7 @@ it('ignores a retried document completing after returning to Account', async () 
   mount({ status: 'credential-stored', attempt: null }, en, undefined, platform)
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: en.usage })) })
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.platformRetry })) })
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   await act(async () => { loaded.resolve(undefined); await loaded.promise })
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(screen.getByRole('region', { name: en.nav })).toBeTruthy()
@@ -405,7 +410,7 @@ it.each(['usage', 'top-up'] as const)('shows an accessible spinner until %s fini
     }
   `)
   expect(status.querySelector('[aria-hidden="true"]')).not.toBeNull()
-  expect(screen.getByRole('button', { name: en.backToHarness })).toBeTruthy()
+  expect(screen.getByRole('button', { name: withProduct(en.backToHarness) })).toBeTruthy()
   await act(async () => { loaded.resolve(undefined) })
   expect(screen.queryByRole('status', { name: en.loading })).toBeNull()
 })
@@ -425,7 +430,7 @@ it.each([
   render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    wide openSettings={() => {}} openOnboarding={() => {}} t={key => en[key as AccountKey]} />)
+    wide openSettings={() => {}} openOnboarding={() => {}} t={key => withProduct(en[key as AccountKey])} />)
   expect(screen.getByRole('button', { name: en.menu }).textContent).toBe(expected)
 })
 
@@ -438,7 +443,7 @@ it('shows the same shared picture outcome in settings and the sidebar', async ()
   render(<AccountMenu {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    wide openSettings={() => {}} openOnboarding={() => {}} t={key => en[key as AccountKey]} />)
+    wide openSettings={() => {}} openOnboarding={() => {}} t={key => withProduct(en[key as AccountKey])} />)
   const images = document.querySelectorAll('img')
   expect(images).toHaveLength(2)
   for (const image of images) expect(image.getAttribute('src')).toBe('https://example.test/avatar.png')
@@ -510,7 +515,7 @@ it.each([en, zh])('shows a localized toast when the account credential expires',
     settingsOpen={false} subscribeSessionExpired={(listener) => { expire = listener; return unsubscribe }}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={() => {}}
-    t={key => key in copy ? copy[key as AccountKey] : key} />
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
   const view = render(element)
   expect(screen.queryByRole('alert')).toBeNull()
   act(() => { expire!() })
@@ -575,9 +580,9 @@ it('opens the embedded Platform page from a failed balance row on Desktop', asyn
   // inspect the balance the Harness could not load without leaving the app.
   await act(async () => { fireEvent.click(screen.getAllByRole('link', { name: en.balanceUnavailable })[0]!) })
   expect(platform.open).toHaveBeenCalledWith('usage', expect.anything())
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   expect(platform.close).toHaveBeenCalledOnce()
-  expect(screen.queryByRole('button', { name: en.backToHarness })).toBeNull()
+  expect(screen.queryByRole('button', { name: withProduct(en.backToHarness) })).toBeNull()
 })
 
 it('reports a rejected settings login and disables login while initial state is unavailable', async () => {
@@ -676,13 +681,13 @@ it('reads the account again when the user returns from the top-up view, and not 
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: en.topUp })) })
   expect(platform.open).toHaveBeenCalledWith('top-up', expect.anything())
   expect(operations.refreshAccount).not.toHaveBeenCalled()
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   // The page leaves immediately and the account reads settle behind it.
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(operations.refreshAccount).toHaveBeenCalledOnce()
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: en.usage })) })
   expect(platform.open).toHaveBeenCalledWith('usage', expect.anything())
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   // Usage changed nothing the account owns, so returning from it reads nothing.
   expect(operations.refreshAccount).toHaveBeenCalledOnce()
 })
@@ -703,7 +708,7 @@ it('reports resize failure, ignores late native failures, and tolerates a remove
   await act(async () => { resize!() })
   expect(platform.setBounds).toHaveBeenCalled()
   expect(screen.getByText(en.platformFailed)).toBeTruthy()
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   await act(async () => { loaded.reject(new Error('late failure')); await loaded.promise.catch(() => {}) })
   expect(screen.queryByRole('dialog')).toBeNull()
 })
@@ -720,7 +725,7 @@ it.each([en, zh])('shows live model sign-in guidance without replaying it after 
     settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={() => {}}
-    t={key => key in copy ? copy[key as AccountKey] : key} />
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
   const view = render(element)
   expect(screen.queryByRole('alert')).toBeNull()
   act(() => { listener?.() })

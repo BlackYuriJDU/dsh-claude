@@ -4,7 +4,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { stubConfigForm, type StubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import type { LocaleSettings, LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import { zh, en, ja } from '../src/locales/settings.ts'
-import { FALLBACK_LOCALE, LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
+import { DEFAULT_PRODUCT_NAME, FALLBACK_LOCALE, LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 const make = (host?: StubConfigForm<LocaleSettings>): {
   ctx: Context
   svc: LocaleRuntime
@@ -53,6 +53,30 @@ describe('LocaleRuntime', () => {
       // @ts-expect-error additional locales do not replace the English baseline
       svc.register('settings.locale', { zh, ja })
     }
+  })
+
+  it('fills {product} from the registered brand name and restores the default on dispose', () => {
+    const { svc } = make()
+    svc.register('ns', 'zh', { warn: '{product} 可能损坏', plain: '无占位', count: '{product}：{n}' })
+    const t = svc.bind('ns')
+    const seen: number[] = []
+    svc.subscribe(() => { seen.push(svc.getSnapshot().revision) })
+    expect(t('warn')).toBe(`${DEFAULT_PRODUCT_NAME} 可能损坏`)
+    const dispose = svc.registerProductName('DSHC')
+    expect(seen).toHaveLength(1)
+    expect(t('warn')).toBe('DSHC 可能损坏')
+    expect(t('plain')).toBe('无占位')
+    expect(t('count', { n: 2 })).toBe('DSHC：2')
+    expect(t('warn', { product: 'Explicit' })).toBe('Explicit 可能损坏')
+    expect(() => svc.registerProductName('Other')).toThrow('already registered as "DSHC"')
+    expect(() => svc.registerProductName(' ')).toThrow('must not be blank')
+    dispose()
+    dispose()
+    expect(seen).toHaveLength(2)
+    expect(t('warn')).toBe(`${DEFAULT_PRODUCT_NAME} 可能损坏`)
+    const again = svc.registerProductName('Again')
+    expect(t('warn')).toBe('Again 可能损坏')
+    again()
   })
 
   it('translates through the active-locale -> en -> key chain', () => {

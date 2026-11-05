@@ -37,7 +37,7 @@ Mount this plugin in the browser roster and disable `ui-brand-official`, because
 
 ### What changes on screen
 
-The canvas becomes `#FAF9F5` in light and `#262624` in dark, raised cards and the composer `#FFFFFF` and `#30302E`, the sidebar `#F5F4ED` and `#1F1E1D`, and text follows the three-step `#141413`/`#3D3D3A`/`#73726C` and `#FAF9F5`/`#C2C0B6`/`#9C9A92` ladders. Generic primary buttons are ink (`#141413` in light, `#FAF9F5` in dark), as on the app's own dialogs; the composer's send button and other filled accents use the clay `#C6613F` with the lighter `#D97757` hover in both schemes. Accent text, such as the active tab, links, and selected rows, uses a deeper clay (`#AD5230` light, `#E08B6D` dark) that keeps WCAG AA contrast on every surface. Code highlighting uses a warm palette whose every color reaches 4.5:1 on the code block, and empty-state illustrations use warm neutrals. Interface text uses the system UI sans stack and the wordmark uses the system serif stack, so no font file ships. The blank-session hero greets with Good morning before noon, Good afternoon before 18:00, and Good evening after, by the browser's local clock and in the interface language, in place of the upstream headline and Preview badge. Assistant responses use the system serif stack, as in the Claude app; reasoning stays sans, and a text font chosen in Settings applies to responses too.
+The canvas becomes `#FAF9F5` in light and `#262624` in dark, raised cards and the composer `#FFFFFF` and `#30302E`, the sidebar `#F5F4ED` and `#1F1E1D`, and text follows the three-step `#141413`/`#3D3D3A`/`#73726C` and `#FAF9F5`/`#C2C0B6`/`#9C9A92` ladders. Generic primary buttons are ink (`#141413` in light, `#FAF9F5` in dark), as on the app's own dialogs; the composer's send button and other filled accents use the clay `#C6613F` with the lighter `#D97757` hover in both schemes. Accent text, such as the active tab, links, and selected rows, uses a deeper clay (`#AD5230` light, `#E08B6D` dark) that keeps WCAG AA contrast on every surface. Code highlighting uses a warm palette whose every color reaches 4.5:1 on the code block, and empty-state illustrations use warm neutrals. Interface text uses the system UI sans stack and the wordmark uses the system serif stack, so no font file ships. The blank-session hero greets with Good morning before noon, Good afternoon before 18:00, and Good evening after, by the browser's local clock and in the interface language, in place of the upstream headline and Preview badge. Assistant responses use the system serif stack, as in the Claude app; reasoning stays sans, and a text font chosen in Settings applies to responses too. Interface text that names the product, such as the plugin safety notice, the Office preview notice, and the Platform Back button, says DSHC, the same name as the wordmark.
 
 ### Replacing the palette or the brand
 
@@ -55,7 +55,7 @@ The palette is one `ctx.theme.overrideTokens` layer whose source is the package 
 
 | File | Role |
 |---|---|
-| [`src/client/index.ts`](src/client/index.ts) | Browser entry: palette layer and slot registrations |
+| [`src/client/index.ts`](src/client/index.ts) | Browser entry: palette layer, product name, and slot registrations |
 | [`src/client/tokens.ts`](src/client/tokens.ts) | The override map, clay constants, and font stacks |
 | [`src/client/Brand.tsx`](src/client/Brand.tsx) | The clay burst mark and serif wordmark |
 | [`src/client/Greeting.tsx`](src/client/Greeting.tsx) | The part-of-day hero greeting |
