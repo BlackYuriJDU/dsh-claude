@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-有了 `dsh-client-ui-projects`，每个工作区都成为一个拥有自己指令与知识文件的项目，智能体会在该工作区中运行的每个会话里遵循它们。Host 部分找到包含会话工作目录的工作区，并把该项目渲染进会话的运行时上下文；浏览器部分在设置中加入“项目”分区，每个工作区一张卡片。项目以工作区 id 为键保存在本插件的 Config 中，因此随配置档持久化。
+有了 `dsh-client-ui-projects`，每个工作区都成为一个拥有自己指令与知识文件的项目，智能体会在该工作区中运行的每个会话里遵循它们。Host 部分找到包含会话工作目录的工作区，并把该项目渲染进会话的运行时上下文；浏览器部分在设置中加入“项目”分区，每个工作区一张卡片。项目以工作区 id 为键保存在本插件的 Config 中，因此随配置档持久化。侧栏列表中的“项目”入口会在主区域以页面形式打开同样的卡片。
 
 ## 目录
 
@@ -61,6 +61,7 @@ Host 部分注册一个 `systemPrompt.context` 条目 `project:content`，顺序
 | [`src/knowledge.ts`](src/knowledge.ts) | 有上限且带缓存的知识文件读取 |
 | [`src/client/index.ts`](src/client/index.ts) | 浏览器部分：词典、设置分区注册及其导航图标 |
 | [`src/client/ProjectsSection.tsx`](src/client/ProjectsSection.tsx) | 每个工作区的卡片 |
+| [`src/client/ProjectsPage.tsx`](src/client/ProjectsPage.tsx) | 侧栏入口打开的主区域项目页面 |
 
 </details>
 

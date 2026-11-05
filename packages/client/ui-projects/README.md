@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-With `dsh-client-ui-projects`, each workspace becomes a project with its own instructions and knowledge files, and the agent follows them in every session that runs in that workspace. The Host half finds the workspace that contains the session's working directory and renders that project into the session's runtime context; the browser half adds a Projects section to Settings with one card per workspace. The projects live in this plugin's Config, keyed by workspace id, so they persist with the profile.
+With `dsh-client-ui-projects`, each workspace becomes a project with its own instructions and knowledge files, and the agent follows them in every session that runs in that workspace. The Host half finds the workspace that contains the session's working directory and renders that project into the session's runtime context; the browser half adds a Projects section to Settings with one card per workspace. The projects live in this plugin's Config, keyed by workspace id, so they persist with the profile. A Projects entry in the sidebar list opens the same cards as a page in the main area.
 
 ## Table of Contents
 
@@ -61,6 +61,7 @@ The Host half registers one `systemPrompt.context` entry, `project:content`, at 
 | [`src/knowledge.ts`](src/knowledge.ts) | Bounded, cached knowledge-file reads |
 | [`src/client/index.ts`](src/client/index.ts) | Browser half: dictionaries, the Settings section registration, and its row icon |
 | [`src/client/ProjectsSection.tsx`](src/client/ProjectsSection.tsx) | The per-workspace cards |
+| [`src/client/ProjectsPage.tsx`](src/client/ProjectsPage.tsx) | The main-area Projects page the sidebar entry opens |
 
 </details>
 

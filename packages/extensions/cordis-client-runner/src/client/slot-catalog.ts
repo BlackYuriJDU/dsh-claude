@@ -2670,6 +2670,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [
       'client-ui-conversation ConversationPanel key \'conversation\'',
       'client-ui-plugin-manager PluginManagerPage',
+      'client-ui-projects ProjectsPage',
       'client-ui-schedule TaskManagerPage',
     ],
     replaceRisk: 'shadows-shipped-ui',
@@ -4305,6 +4306,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     declaredBy: 'factory \'sidebar.panel.icon\' (client-ui-sidebar), so it exists while that definition is registered',
     occupants: [
       'client-ui-plugin-manager PluginsPanelIcon',
+      'client-ui-projects ProjectsPanelIcon',
       'client-ui-schedule TaskManagerIcon',
     ],
     replaceRisk: 'none',

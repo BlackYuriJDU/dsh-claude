@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render } from '@testing-library/react'
 import type { WorkspaceId, WorkspaceSnapshot } from '@deepseek-ai/dsh-api-workspace-controller/client'
 import { stubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import { ProjectsSection, type ProjectsSectionComponentProps } from '../src/client/ProjectsSection.tsx'
+import { ProjectsPage } from '../src/client/ProjectsPage.tsx'
 import { en } from '../src/client/locales.ts'
 import type { ProjectsFormValue } from '../src/projects.ts'
 
@@ -62,5 +63,15 @@ describe('ProjectsSection', () => {
     expect((getByLabelText(en['knowledge']) as HTMLInputElement).value).toBe('')
     fireEvent.click(getByText(en['knowledge.remove']))
     expect(form.set).toHaveBeenLastCalledWith('projects', { 'ws-0': other, 'ws-1': { files: [] } })
+  })
+})
+
+describe('ProjectsPage', () => {
+  it('heads the page once and keeps the project editor', () => {
+    const form = stubConfigForm<ProjectsFormValue>()
+    const view = render(<ProjectsPage projects={form.scope} useWorkspaces={select => select(one)} t={t} />)
+    expect(view.getByRole('heading', { level: 1, name: en['title'] }).textContent).toBe(en['title'])
+    expect(view.getAllByText(en['title'])).toHaveLength(1)
+    expect(view.getByText('site')).toBeTruthy()
   })
 })

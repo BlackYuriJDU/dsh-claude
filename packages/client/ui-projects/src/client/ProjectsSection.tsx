@@ -25,6 +25,10 @@ export type ProjectsSectionComponentProps =
   Pick<GlobalStandardProps, 'useWorkspaces'>
   & PropsLocale<'projects'>
   & ProjectsSectionInjected
+  & {
+    /** Hide the section title when the surrounding page already shows it. */
+    hideTitle?: boolean
+  }
 
 interface ProjectCardProps {
   workspace: Pick<WorkspaceView, 'path' | 'title'>
@@ -118,14 +122,14 @@ function ProjectCard({ workspace, entry, onSave, t }: ProjectCardProps) {
  * @param props - the workspace hook, the locale seat, and the projects form.
  * @returns the section element tree.
  */
-export function ProjectsSection({ projects, useWorkspaces, t }: ProjectsSectionComponentProps) {
+export function ProjectsSection({ projects, useWorkspaces, t, hideTitle = false }: ProjectsSectionComponentProps) {
   const snapshot = useSyncExternalStore(projects.subscribe.bind(projects), projects.getSnapshot.bind(projects))
   const workspaces = useWorkspaces(state => state.items)
   const map = snapshot.value?.projects ?? {}
 
   return (
     <div className={css.section}>
-      <div className={css.groupTitle}>{t('title')}</div>
+      {!hideTitle && <div className={css.groupTitle}>{t('title')}</div>}
       <p className={css.hint}>{t('hint')}</p>
       {workspaces.length === 0
         ? <p className={css.empty}>{t('empty')}</p>
