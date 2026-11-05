@@ -17,6 +17,10 @@
     - id: web-search-searxng
       name: '@deepseek-ai/dsh-web-search-searxng'
 
+    # The SearXNG provider's settings page on the Plugins page.
+    - id: ui-settings-searxng
+      name: '@deepseek-ai/dsh-client-ui-settings-searxng'
+
     # Saved memories: a Settings section and a runtime-context contribution
     # that carries the list into every session.
     - id: ui-memory

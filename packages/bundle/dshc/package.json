@@ -48,6 +48,7 @@
     "@deepseek-ai/dsh-client-ui-brand-dshc": "workspace:*",
     "@deepseek-ai/dsh-client-ui-memory": "workspace:*",
     "@deepseek-ai/dsh-client-ui-projects": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-settings-searxng": "workspace:*",
     "@deepseek-ai/dsh-web-search-searxng": "workspace:*"
   },
   "peerDependencies": {
