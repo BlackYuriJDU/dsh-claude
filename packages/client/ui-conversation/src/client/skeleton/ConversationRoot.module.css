@@ -612,6 +612,19 @@
   display: none;
 }
 
+/* Plugin suggestions sit centered below the hero composer card. */
+.heroSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+
+.heroSuggestions:empty {
+  display: none;
+}
+
 /* Hero: the composer sits inside the session scroll body; center there so
    the tree seat matches active (sticky footer) without a Root remount. */
 .root[data-phase='hero'] .scrollBody,

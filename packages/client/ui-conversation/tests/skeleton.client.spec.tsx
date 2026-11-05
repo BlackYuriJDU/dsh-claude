@@ -907,6 +907,17 @@ describe('ConversationRoot resident composer', () => {
     expect(cold.slotCalls).not.toContain('conversation.hero.options')
   })
 
+  it('seats the New Session suggestions after the composer card, and only for a Session', () => {
+    const b = mount(sessionSnapshotOf({ blank: true }))
+    const suggestions = within(b.view.container).getByTestId('view-conversation.hero.suggestions')
+    const previous = suggestions.parentElement?.previousElementSibling
+    expect(previous?.matches('[data-composer-card]') === true || previous?.querySelector('[data-composer-card]') != null).toBe(true)
+    expect(suggestions.parentElement?.nextElementSibling).toBeNull()
+
+    const cold = mount(sessionSnapshotOf(), [], undefined, { sessionId: undefined })
+    expect(cold.slotCalls).not.toContain('conversation.hero.suggestions')
+  })
+
   it('prompt failure renders the promptError strip (ordinary failure, no transaction UI)', () => {
     const b = mount(sessionSnapshotOf({
       promptError: { op: 'send', error: { code: 'offline', message: 'Message send failed' } as never },
