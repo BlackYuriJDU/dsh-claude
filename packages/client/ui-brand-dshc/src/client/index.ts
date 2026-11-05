@@ -15,9 +15,15 @@ import { DSHC_WORDMARK, DshcMark, DshcName } from './Brand.tsx'
 import { DshcGreeting } from './Greeting.tsx'
 import { de, en, es, fr, ja, pt, ru, zh, type BrandDshcKey } from './locales.ts'
 import { DSHC_TOKEN_SOURCE, DSHC_TOKENS } from './tokens.ts'
+// Type-only: the ctx.sessions Context merge.
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { DshcSuggestions, type DshcSuggestionsInjected } from './Suggestions.tsx'
 
 export { burstSpokes, DSHC_WORDMARK, DshcMark, DshcName } from './Brand.tsx'
 export { DshcGreeting, greetingKey } from './Greeting.tsx'
+export { DshcSuggestions, SUGGESTION_CATEGORIES, SUGGESTION_PROMPTS } from './Suggestions.tsx'
+export type { DshcSuggestionsInjected, DshcSuggestionsProps } from './Suggestions.tsx'
 export type { DshcGreetingProps } from './Greeting.tsx'
 export type { BrandDshcKey } from './locales.ts'
 
@@ -44,7 +50,8 @@ export const inject = ['slots', 'theme', 'locale']
 
 /**
  * Apply the DSHC palette, register the greeting dictionaries and the product
- * name that interface copy shows, and fill the brand slots. The palette
+ * name that interface copy shows, fill the brand slots, and, once the Session
+ * registry is available, show the starting suggestions below the hero composer. The palette
  * layer, the dictionaries, the product name, and each
  * slot occupant are fiber effects, so unloading the plugin restores the base
  * palette and the shell's fallback brand.
@@ -64,4 +71,22 @@ export function apply(ctx: ClientContext): void {
       yield ctx.slots.register({ name: 'conversation.hero.brand.mark' }, DshcMark)
       yield ctx.slots.register({ name: 'conversation.hero.headline', locale: NS }, DshcGreeting)
     }))
+  // Suggestions write into the current Session's draft, so they wait for the Session registry.
+  ctx.inject(['sessions'], (scope) => {
+    scope.slots.inject('conversation.hero.suggestions', () => scope.slots.register({
+      name: 'conversation.hero.suggestions',
+      id: 'dshc-suggestions',
+      locale: NS,
+      inject: (sessionId: SessionId): DshcSuggestionsInjected => ({
+        fill: (text) => {
+          const session = scope.sessions.scope(sessionId)
+          const input = session?.get('conversation')?.input.for(session)
+          if (input === undefined) return
+          input.setDraft(text)
+          input.focus()
+        },
+        pickIndex: count => Math.floor(Math.random() * count),
+      }),
+    }, DshcSuggestions))
+  })
 }

@@ -28,6 +28,12 @@
     },
     {
       "path": "../ui-theme/tsconfig.client.json"
+    },
+    {
+      "path": "../../api/session-controller/tsconfig.client.json"
+    },
+    {
+      "path": "../../core/session"
     }
   ]
 }

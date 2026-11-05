@@ -56,7 +56,9 @@
     "@deepseek-ai/dsh-client-ui-theme": "workspace:*",
     "@testing-library/react": "^16.3.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@deepseek-ai/dsh-api-session-controller": "workspace:*",
+    "@deepseek-ai/dsh-session": "workspace:*"
   },
   "files": [
     "locale/*.json",
