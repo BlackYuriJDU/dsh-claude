@@ -1,8 +1,9 @@
 /* Visual baseline: deepsuite `@deepseek/md` markdown.css, adapted to CSS
    Modules. Cite pills and header anchors are absent (no matching DOM).
-   Token names match that sheet. Prose text (body, headings, tables) takes its
+   Token names match that sheet. Prose text (body and headings) takes its
    family from --dsh-markdown-font-family when an ancestor sets it, otherwise
-   from the interface family; code keeps the code family. */
+   from the interface family; tables keep the interface family, whose weights
+   their header token needs, and code keeps the code family. */
 
 .markdown {
   min-width: 0;
@@ -268,7 +269,6 @@
   border-bottom: 0.5px solid var(--dsw-alias-border-l3);
   border-top: none;
   font: var(--dsw-font-markdown-table-head);
-  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   max-width: 320px;
   max-width: min(30vw, 320px);
   min-width: 100px;
@@ -278,7 +278,6 @@
   padding: 10px 16px;
   border-bottom: 0.5px solid var(--dsw-alias-border-l2);
   font: var(--dsw-font-markdown-table);
-  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   max-width: 320px;
   max-width: min(30vw, 320px);
   min-width: 100px;
