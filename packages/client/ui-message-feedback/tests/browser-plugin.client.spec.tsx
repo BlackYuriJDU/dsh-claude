@@ -339,8 +339,8 @@ describe('ui-message-feedback browser plugin', () => {
   })
 
   it('declares the sharing policy and hides its generated settings page until unload', async () => {
-    expect(NodeConfig({})).toEqual({ sharesConversationLog: true })
-    expect(NodeConfig({ sharesConversationLog: false })).toEqual({ sharesConversationLog: false })
+    expect(NodeConfig({}).sharesConversationLog.get()).toBe(true)
+    expect(NodeConfig({ sharesConversationLog: false }).sharesConversationLog.get()).toBe(false)
     const ctx = new Context()
     const dispose = vi.fn()
     const configure = vi.fn((_options: { auto: boolean }, _owner: object) => dispose)

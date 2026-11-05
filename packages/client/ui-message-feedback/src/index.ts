@@ -5,7 +5,7 @@
  * declaration.
  */
 import type {} from '@deepseek-ai/dsh-settings'
-import type { Context } from '@deepseek-ai/cordis'
+import type { Context, Volatile } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 
 /** Feedback dialog policy projected to the browser. */
@@ -14,13 +14,14 @@ export interface Config {
    * Whether a composed exporter sends the conversation log with submitted
    * feedback. The dialog states that the submission includes the log when
    * true, and that feedback stays in the local conversation log when false.
+   * Volatile because only live fields are projected to the browser.
    */
-  sharesConversationLog?: boolean
+  sharesConversationLog: Volatile<boolean>
 }
 
 /** Feedback dialog policy; the default matches the shipped feedback export. */
 export const Config = z.object({
-  sharesConversationLog: z.boolean().default(true),
+  sharesConversationLog: z.boolean().default(true).volatile(),
 })
 
 /**
