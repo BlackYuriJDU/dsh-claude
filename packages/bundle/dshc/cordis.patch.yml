@@ -62,6 +62,12 @@
   config:
     enabled: false
 
+# With no feedback export composed, the feedback dialog says the note stays in
+# the local conversation log instead of promising to send it.
+- id: ui-message-feedback
+  config:
+    sharesConversationLog: false
+
 # The default Workspace lives under <Documents>/dsh-claude instead of the
 # upstream product folder. An existing default Workspace keeps its path.
 - id: workspace-controller

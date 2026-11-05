@@ -52,6 +52,15 @@
     },
     {
       "path": "../store"
+    },
+    {
+      "path": "../../../vendor/schemastery"
+    },
+    {
+      "path": "../../settings/settings"
+    },
+    {
+      "path": "../ui-settings/tsconfig.client.json"
     }
   ]
 }

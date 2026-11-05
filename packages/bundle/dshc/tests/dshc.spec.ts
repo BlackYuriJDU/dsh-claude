@@ -76,6 +76,8 @@ describe('dsh-dshc bundle identity layer', () => {
   it('sends no Session log to DeepSeek by default', () => {
     expect(identityRows).toContainEqual({ id: 'session-telemetry-otel', disabled: true })
     expect(identityRows).toContainEqual({ id: 'session-log-deepseek', config: { enabled: false } })
+    // The dialog's local-only notice is true only while the export stays off.
+    expect(identityRows).toContainEqual({ id: 'ui-message-feedback', config: { sharesConversationLog: false } })
   })
 
   it('keeps the default Workspace in a DSHC folder', () => {

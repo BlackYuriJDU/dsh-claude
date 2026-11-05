@@ -24,7 +24,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import { FeedbackDialog } from './FeedbackDialog.tsx'
 import { MessageFeedbackActions } from './MessageFeedbackActions.tsx'
-import type { FeedbackDialogInjected, MessageFeedbackInjected } from './slots.ts'
+import type { FeedbackDialogInjected, FeedbackLogPolicy, MessageFeedbackInjected } from './slots.ts'
 import { FeedbackSurface } from './surface.ts'
 import { en, ja, es, fr, de, ru, pt, zh } from './locales.ts'
 
@@ -56,8 +56,11 @@ declare module '@deepseek-ai/cordis' {
 /** Dictionary namespace owned by this plugin. */
 const NS = 'feedback'
 
-/** Required services: the slot registry, the two Remote namespaces, and the copy. */
-export const inject = ['slots', 'remote', 'remote.messageFeedback', 'remote.sessionFeedback', 'locale']
+/** Host entry whose Config holds the feedback log policy. */
+const POLICY_ENTRY_ID = 'ui-message-feedback'
+
+/** Required services: the slot registry, the two Remote namespaces, the copy, and the Host feedback policy. */
+export const inject = ['slots', 'remote', 'remote.messageFeedback', 'remote.sessionFeedback', 'locale', 'configForms']
 
 /**
  * Client plugin body: the per-message feedback entry, the Session's dialog
@@ -67,6 +70,7 @@ export const inject = ['slots', 'remote', 'remote.messageFeedback', 'remote.sess
  */
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-message-feedback: dictionaries')
+  const logPolicy = ctx.configForms.get<FeedbackLogPolicy>(POLICY_ENTRY_ID)
 
   const surfaces = new Map<SessionId, FeedbackSurface>()
   const surfaceFor = (sessionId: SessionId): FeedbackSurface => {
@@ -120,7 +124,7 @@ export function apply(ctx: ClientContext): void {
     inject: (sessionId): FeedbackDialogInjected => {
       const { dialog } = surfaceFor(sessionId)
       return {
-        hooks: { dialog: dialog.state },
+        hooks: { dialog: dialog.state, logPolicy },
         edit: (draft) => { dialog.edit(draft) },
         submit: () => dialog.submitDraft(),
         dismiss: () => { dialog.dismiss() },

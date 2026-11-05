@@ -16,13 +16,14 @@ import { FEEDBACK_CATEGORIES } from '@deepseek-ai/dsh-command-feedback'
 import { FeedbackDialog } from '../src/client/FeedbackDialog.tsx'
 import type { FeedbackDialogState } from '../src/client/dialog.ts'
 import { en, zh } from '../src/client/locales.ts'
+import type { FeedbackLogPolicy } from '../src/client/slots.ts'
 
 afterEach(cleanup)
 
 const t = makeTranslate(zh, commonZh)
 
 /** Render the entry over a fixed state and recording verbs. */
-function mount(overrides: Partial<FeedbackDialogState> = {}) {
+function mount(overrides: Partial<FeedbackDialogState> = {}, policy?: FeedbackLogPolicy) {
   const state: FeedbackDialogState = {
     target: { kind: 'session' }, category: null, text: '', submitting: false, failure: null, toast: 0,
     ...overrides,
@@ -36,11 +37,22 @@ function mount(overrides: Partial<FeedbackDialogState> = {}) {
   }
   const useDialog = (<T,>(select: (v: FeedbackDialogState) => T): T =>
     useSyncExternalStore(() => () => {}, () => select(state))) as never
-  const props = { useDialog, ...verbs, t } as Parameters<typeof FeedbackDialog>[0]
+  const policySnapshot = { status: 'ready', value: policy, base: undefined, user: undefined, revision: 1, writable: false } as const
+  const useLogPolicy = (<T,>(select: (v: typeof policySnapshot) => T): T =>
+    useSyncExternalStore(() => () => {}, () => select(policySnapshot))) as never
+  const props = { useDialog, useLogPolicy, ...verbs, t } as Parameters<typeof FeedbackDialog>[0]
   return { ...render(<FeedbackDialog {...props} />), ...verbs }
 }
 
 describe('FeedbackDialog', () => {
+  it.each([
+    [undefined, 'dialog.hint'], [{}, 'dialog.hint'], [{ sharesConversationLog: true }, 'dialog.hint'],
+    [{ sharesConversationLog: false }, 'dialog.hintLocal'],
+  ] as const)('states where the note goes for Host policy %j', (policy, key) => {
+    const ui = mount({}, policy)
+    expect(ui.getByLabelText(zh['dialog.detail']).getAttribute('placeholder')).toBe(zh[key])
+  })
+
   it('owns the conversation-log disclosure and stability category in both supported locales', () => {
     expect(zh['dialog.hint']).toBe('填写详情以帮助我们改进体验，提交内容会包括当前对话的日志')
     expect(en['dialog.hint']).toBe('Add details to help us improve. Your submission will include the current conversation log.')
