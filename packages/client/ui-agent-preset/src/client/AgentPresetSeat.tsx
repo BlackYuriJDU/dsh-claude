@@ -20,6 +20,8 @@ import {
 } from '@deepseek-ai/dsh-client-ui-primitives'
 // Type-only: pulls the ui-conversation SlotMap merge (the hero seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { SeatPresentation } from '../index.ts'
 import type { AgentPresetSeatState } from './seat-store.ts'
 import { presetDisplayText } from './locales.ts'
 import { requiresCodingTools } from './settings-store.ts'
@@ -32,6 +34,8 @@ export interface AgentPresetSeatInjected {
     developerTools: ObservableSnapshot<boolean>
     /** Seat snapshot bound by the renderer as useAgentPresetSeat. */
     agentPresetSeat: SnapshotStore<AgentPresetSeatState>
+    /** Host seat presentation; an unread value keeps the menu. */
+    seatPresentation: ObservableSnapshot<ConfigFormSnapshot<{ seatPresentation?: SeatPresentation }>>
   }
   /** Read the roster when the chip first renders. */
   load: () => Promise<void>
@@ -79,9 +83,11 @@ export type AgentPresetSeatProps =
  * @returns The chip and any pending selection refusal, or null outside the main view.
  */
 export function AgentPresetSeat({
-  sessionId, useSessionRetainInfo, load, select, dismissRefusal, introduced, useAgentPresetSeat, useDeveloperTools, t,
+  sessionId, useSessionRetainInfo, load, select, dismissRefusal, introduced, useAgentPresetSeat, useDeveloperTools,
+  useSeatPresentation, t,
 }: AgentPresetSeatProps) {
   const developerTools = useDeveloperTools(value => value)
+  const segmented = useSeatPresentation(snapshot => snapshot.value?.seatPresentation === 'segmented')
   const state = useAgentPresetSeat(snapshot => snapshot)
   const main = useSessionRetainInfo(info => sessionId === undefined
     || (info?.retainedBy.mainView ?? 0) > 0)
@@ -159,6 +165,51 @@ export function AgentPresetSeat({
     )
     : label
 
+  const refusal = toast !== null && (
+    <Toast
+      key={toast.seq}
+      text={t('switchRefused', { name: presetDisplayText(toast.error.preset, t).name, reason: toast.error.reason })}
+      icon={<IconWarningOutlineRegular />}
+      holdMs={REFUSAL_HOLD_MS}
+      // The composer card, which is the content column this chip sits
+      // above rather than inside — hence a page query, not `closest`.
+      // Absent, the banner centers on the window, which is off-center
+      // whenever the sidebar is open.
+      anchor={document.querySelector<HTMLElement>('[data-composer-card]')}
+      onDone={() => { dismissRefusal(toast.error) }}
+    />
+  )
+
+  if (segmented) {
+    return (
+      <>
+        {ready && (
+          <div className={css.segments} role="radiogroup" aria-label={t('seatHint')}>
+            {options.map((option) => {
+              const text = presetDisplayText(option, t)
+              const checked = option.id === state.current
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={checked}
+                  className={css.segment}
+                  title={text.description ?? t('noDescription')}
+                  disabled={state.busy}
+                  onClick={() => { if (!checked) void select(option.id) }}
+                >
+                  {text.name}
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {refusal}
+      </>
+    )
+  }
+
   return (
     <>
       {ready && <Menu
@@ -202,20 +253,7 @@ export function AgentPresetSeat({
           </button>
         )}
       />}
-      {toast !== null && (
-        <Toast
-          key={toast.seq}
-          text={t('switchRefused', { name: presetDisplayText(toast.error.preset, t).name, reason: toast.error.reason })}
-          icon={<IconWarningOutlineRegular />}
-          holdMs={REFUSAL_HOLD_MS}
-          // The composer card, which is the content column this chip sits
-          // above rather than inside — hence a page query, not `closest`.
-          // Absent, the banner centers on the window, which is off-center
-          // whenever the sidebar is open.
-          anchor={document.querySelector<HTMLElement>('[data-composer-card]')}
-          onDone={() => { dismissRefusal(toast.error) }}
-        />
-      )}
+      {refusal}
     </>
   )
 }

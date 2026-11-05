@@ -50,6 +50,12 @@
   config:
     default: chat
 
+# The new-session screen switches between Chat, Cowork, and Code side by side
+# instead of opening a menu.
+- id: ui-agent-preset
+  config:
+    seatPresentation: segmented
+
 # Privacy: DSHC sends no Session log to DeepSeek by default. The OpenTelemetry
 # row that exports a Session-log prefix after message feedback is disabled, the
 # same row DSH_TELEMETRY_DISABLED disables. Session-log upload with official

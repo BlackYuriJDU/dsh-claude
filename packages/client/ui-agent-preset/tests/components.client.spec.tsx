@@ -6,7 +6,7 @@
  * tools, so the choice is only ever offered before one starts.
  */
 
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -18,6 +18,7 @@ import { AgentPresetSeat } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSeatProps } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSettingsState } from '../src/client/settings-store.ts'
 import type { AgentPresetSeatState } from '../src/client/seat-store.ts'
+import type { SeatPresentation } from '../src/index.ts'
 import { en } from '../src/client/locales.ts'
 
 afterEach(cleanup)
@@ -54,9 +55,14 @@ function renderSeat(
   select: () => Promise<string | undefined> = () => Promise.resolve(undefined),
   session?: { id: string; retainInfo: SessionRetainInfo | undefined },
   enabled = true,
+  seatPresentation?: SeatPresentation,
 ) {
   const store = createSnapshotStore<AgentPresetSeatState>({ ...SEAT_READY, ...state })
   const developerTools = createSnapshotStore(enabled)
+  const presentation = createSnapshotStore({
+    status: 'ready' as const, value: seatPresentation === undefined ? undefined : { seatPresentation },
+    base: undefined, user: undefined, revision: 1, writable: false,
+  })
   const actions = {
     load: vi.fn(() => Promise.resolve()), select: vi.fn(select), introduced: vi.fn(),
     dismissRefusal: vi.fn((error: AgentPresetSeatState['error']) => {
@@ -70,6 +76,7 @@ function renderSeat(
     sessionId: session === undefined ? undefined : SessionId(session.id),
     useDeveloperTools: bindSnapshotSelector(developerTools),
     useAgentPresetSeat: bindSnapshotSelector(store),
+    useSeatPresentation: bindSnapshotSelector(presentation),
     useSessionRetainInfo: session === undefined
       ? useSessionRetainInfo
       : <Selected,>(selector: (value: SessionRetainInfo | undefined) => Selected) => selector(session.retainInfo),
@@ -423,5 +430,33 @@ describe('the session-header label', () => {
     await act(async () => { await Promise.resolve() })
     expect(absent.load).not.toHaveBeenCalled()
     expect(unknown.load).not.toHaveBeenCalled()
+  })
+})
+
+describe('the segmented seat', () => {
+  it('shows every visible preset as a radio and stages a different one', async () => {
+    const { select } = renderSeat({}, undefined, undefined, true, 'segmented')
+    const group = screen.getByRole('radiogroup', { name: en.seatHint })
+    const radios = within(group).getAllByRole('radio')
+    expect(radios.map(radio => radio.textContent)).toEqual(['Standard mode', 'mine'])
+    expect(radios.map(radio => radio.getAttribute('aria-checked'))).toEqual(['true', 'false'])
+    expect(screen.queryByRole('button', { expanded: false })).toBeNull()
+    fireEvent.click(radios[0]!)
+    expect(select).not.toHaveBeenCalled()
+    fireEvent.click(radios[1]!)
+    await waitFor(() => { expect(select).toHaveBeenCalledWith('mine') })
+  })
+
+  it('disables the radios while a switch is in flight and keeps the menu for other presentations', () => {
+    renderSeat({ busy: true }, undefined, undefined, true, 'segmented')
+    for (const radio of screen.getAllByRole('radio')) expect(radio).toHaveProperty('disabled', true)
+    cleanup()
+    renderSeat({}, undefined, undefined, true, 'menu')
+    expect(screen.queryByRole('radiogroup')).toBeNull()
+  })
+
+  it('renders nothing segmented before the roster arrives', () => {
+    renderSeat({ options: [] }, undefined, undefined, true, 'segmented')
+    expect(screen.queryByRole('radiogroup')).toBeNull()
   })
 })

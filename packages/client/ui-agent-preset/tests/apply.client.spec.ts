@@ -24,7 +24,7 @@ import type { AgentPresetSeatInjected } from '../src/client/AgentPresetSeat.tsx'
 import { AgentPresetSeatController } from '../src/client/seat-store.ts'
 import { CreatePluginMenuItem, type CreatePluginMenuItemInjected } from '../src/client/CreatePluginMenuItem.tsx'
 import { AgentPresetSectionController } from '../src/client/section-store.ts'
-import { apply as hostApply } from '../src/index.ts'
+import { apply as hostApply, Config as HostConfig } from '../src/index.ts'
 import type { AgentPresetRow } from '@deepseek-ai/dsh-agent-preset-registry/types'
 
 // These specs assert the shipped Chinese copy. The lane has no jsdom `window`,
@@ -341,8 +341,20 @@ describe('ui-agent-preset apply', () => {
     },
   )
 
-  it('keeps the host Loader entry inert', () => {
-    expect(hostApply).not.toThrow()
+  it('declares the seat presentation and hides its generated settings page until unload', async () => {
+    expect(HostConfig({}).seatPresentation.get()).toBe('menu')
+    expect(HostConfig({ seatPresentation: 'segmented' }).seatPresentation.get()).toBe('segmented')
+    expect(() => HostConfig({ seatPresentation: 'tabs' as never })).toThrow()
+    const ctx = new Context()
+    const dispose = vi.fn()
+    const configure = vi.fn((_options: { auto: boolean }, _owner: object) => dispose)
+    ctx.provide('settings', { configure } as never)
+    const fiber = ctx.plugin({ apply: hostApply })
+    await fiber.await()
+    await vi.waitFor(() => { expect(configure).toHaveBeenCalledOnce() })
+    expect(configure.mock.calls[0]?.[0]).toEqual({ auto: false })
+    await fiber.dispose()
+    expect(dispose).toHaveBeenCalledOnce()
   })
 
   it('declares the services it uses', () => {

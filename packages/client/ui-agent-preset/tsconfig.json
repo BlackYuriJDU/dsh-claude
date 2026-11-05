@@ -61,6 +61,12 @@
     },
     {
       "path": "../../util/values"
+    },
+    {
+      "path": "../../../vendor/schemastery"
+    },
+    {
+      "path": "../../settings/settings"
     }
   ]
 }
