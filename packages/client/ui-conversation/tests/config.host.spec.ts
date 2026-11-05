@@ -9,14 +9,15 @@ import {
 
 
 describe('ui-conversation host', () => {
-  it('registers, validates, and disposes the durable busy-Enter preference', async () => {
+  it('registers, validates, and disposes the busy-Enter preference and the hero placeholder', async () => {
     const ctx = new Context()
     const configuration = await liveConfig(ctx, { Config, apply })
     const { fiber } = configuration
-    expect(plainConfig(configuration.fiber.effectiveConfig)).toEqual({ busyEnter: DEFAULT_BUSY_ENTER_BEHAVIOR })
-    await configuration.update({ busyEnter: 'steer' })
-    expect(plainConfig(configuration.fiber.effectiveConfig)).toEqual({ busyEnter: 'steer' })
+    expect(plainConfig(configuration.fiber.effectiveConfig)).toEqual({ busyEnter: DEFAULT_BUSY_ENTER_BEHAVIOR, heroPlaceholder: 'build' })
+    await configuration.update({ busyEnter: 'steer', heroPlaceholder: 'help' })
+    expect(plainConfig(configuration.fiber.effectiveConfig)).toEqual({ busyEnter: 'steer', heroPlaceholder: 'help' })
     await expect(configuration.update({ busyEnter: 'invalid' })).rejects.toThrow()
+    await expect(configuration.update({ heroPlaceholder: 'invalid' })).rejects.toThrow()
     await fiber.dispose()
   })
 })

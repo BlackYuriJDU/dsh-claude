@@ -140,6 +140,8 @@ function mount(
     nestedSubagent?: boolean
     /** A composer block another plugin raised for this session. */
     composerBlock?: { reason: string }
+    /** Host New Session placeholder choice; absent leaves the setting unread. */
+    heroPlaceholder?: 'build' | 'help'
     /** Mutable view ledger used by registration-order regressions. */
     viewTabs?: ViewTab[]
     /** Persisted ids of unpinned View tabs. */
@@ -363,6 +365,10 @@ function mount(
       ...allowAllAccess,
       useProjection: (() => undefined),
       useComposerBlock: select => select(options.composerBlock),
+      useConversationSettings: select => select({
+        status: 'ready', base: undefined, user: undefined, revision: 1, writable: true,
+        value: options.heroPlaceholder === undefined ? undefined : { busyEnter: 'queue', heroPlaceholder: options.heroPlaceholder },
+      }),
       useInput,
       inputActions,
       renderSlot,
@@ -458,6 +464,13 @@ describe('ConversationRoot resident composer', () => {
     })
 
     expect(dispatchCount()).toBe(before)
+  })
+
+  it.each([
+    [undefined, 'placeholder.hero'], ['build', 'placeholder.hero'], ['help', 'placeholder.heroHelp'],
+  ] as const)('shows the New Session placeholder for the Host choice %s', (heroPlaceholder, key) => {
+    const b = mount(sessionSnapshotOf({ blank: true }), undefined, undefined, heroPlaceholder === undefined ? {} : { heroPlaceholder })
+    expect(b.view.getByRole('textbox').getAttribute('data-placeholder')).toBe(zh[key])
   })
 
   it('renders the composer inert with the blocker\u2019s own reason', () => {

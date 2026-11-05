@@ -17,10 +17,24 @@ export type BusyEnterBehavior = typeof BUSY_ENTER_BEHAVIORS[number]
 /** Default preserves Enter-as-Queue for running conversations. */
 export const DEFAULT_BUSY_ENTER_BEHAVIOR: BusyEnterBehavior = 'queue'
 
+/** Field choosing the New Session composer placeholder. */
+export const HERO_PROMPT_FIELD = 'heroPlaceholder'
+
+/**
+ * New Session placeholders: `build` names what to build and the `/` and `@`
+ * menus; `help` asks how the assistant can help.
+ */
+export const HERO_PROMPT_KINDS = ['build', 'help'] as const
+
+/** One New Session placeholder choice. */
+export type HeroPlaceholder = typeof HERO_PROMPT_KINDS[number]
+
 /** Durable conversation section shared by the Host schema and the browser scope. */
 export interface ConversationSettings {
   /** Delivery mode for plain Enter while the addressed agent is busy. */
   busyEnter: BusyEnterBehavior
+  /** New Session composer placeholder; absent before the Host projects it. */
+  heroPlaceholder?: HeroPlaceholder
 }
 
 /** Durable conversation schema; also the wire envelope the browser scope validates against. */
