@@ -56,7 +56,7 @@ Host 部分注册一个 `systemPrompt.context` 条目 `memory:saved`，顺序为
 |---|---|
 | [`src/index.ts`](src/index.ts) | Host 部分：Config schema 与运行时上下文注册 |
 | [`src/memory.ts`](src/memory.ts) | 共享类型、条目 id 与有上限的上下文文本 |
-| [`src/client/index.ts`](src/client/index.ts) | 浏览器部分：词典与设置分区注册 |
+| [`src/client/index.ts`](src/client/index.ts) | 浏览器部分：词典、设置分区注册及其导航图标 |
 | [`src/client/MemorySection.tsx`](src/client/MemorySection.tsx) | 可编辑列表 |
 
 </details>

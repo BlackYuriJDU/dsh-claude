@@ -59,7 +59,7 @@ The Host half registers one `systemPrompt.context` entry, `project:content`, at 
 | [`src/index.ts`](src/index.ts) | Host half: Config schema and the runtime-context registration |
 | [`src/projects.ts`](src/projects.ts) | Shared types, workspace matching, and the bounded context text |
 | [`src/knowledge.ts`](src/knowledge.ts) | Bounded, cached knowledge-file reads |
-| [`src/client/index.ts`](src/client/index.ts) | Browser half: dictionaries and the Settings section registration |
+| [`src/client/index.ts`](src/client/index.ts) | Browser half: dictionaries, the Settings section registration, and its row icon |
 | [`src/client/ProjectsSection.tsx`](src/client/ProjectsSection.tsx) | The per-workspace cards |
 
 </details>

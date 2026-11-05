@@ -10,6 +10,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 // Type-only: pulls ctx.locale into this program.
 import type {} from '@deepseek-ai/dsh-client-locale/client'
+import { IconFolderOpenOutlineMedium } from '@deepseek-ai/dsh-client-ui-primitives'
 // Type-only: the useWorkspaces global standard prop.
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import { PROJECTS_ENTRY_ID, type ProjectsFormValue } from '../projects.ts'
@@ -34,8 +35,8 @@ const NS = 'projects'
 export const inject = ['slots', 'locale', 'configForms']
 
 /**
- * Register the dictionaries and, while the Host serves the `ui-projects` entry,
- * the Settings Projects section.
+ * Register the dictionaries, the Projects row icon, and, while the Host serves
+ * the `ui-projects` entry, the Settings Projects section.
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
@@ -50,4 +51,8 @@ export function apply(ctx: ClientContext): void {
     locale: NS,
     inject: () => ({ projects }),
   }, ProjectsSection))), 'ui-projects: settings section')
+  ctx.effect(() => ctx.slots.inject('settings.section.icon', () => ctx.slots.register({
+    name: 'settings.section.icon',
+    id: 'projects',
+  }, IconFolderOpenOutlineMedium)), 'ui-projects: settings section icon')
 }

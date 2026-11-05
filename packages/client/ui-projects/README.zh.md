@@ -59,7 +59,7 @@ Host 部分注册一个 `systemPrompt.context` 条目 `project:content`，顺序
 | [`src/index.ts`](src/index.ts) | Host 部分：Config schema 与运行时上下文注册 |
 | [`src/projects.ts`](src/projects.ts) | 共享类型、工作区匹配与有上限的上下文文本 |
 | [`src/knowledge.ts`](src/knowledge.ts) | 有上限且带缓存的知识文件读取 |
-| [`src/client/index.ts`](src/client/index.ts) | 浏览器部分：词典与设置分区注册 |
+| [`src/client/index.ts`](src/client/index.ts) | 浏览器部分：词典、设置分区注册及其导航图标 |
 | [`src/client/ProjectsSection.tsx`](src/client/ProjectsSection.tsx) | 每个工作区的卡片 |
 
 </details>

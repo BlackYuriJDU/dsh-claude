@@ -56,7 +56,7 @@ The Host half registers one `systemPrompt.context` entry, `memory:saved`, at ord
 |---|---|
 | [`src/index.ts`](src/index.ts) | Host half: Config schema and the runtime-context registration |
 | [`src/memory.ts`](src/memory.ts) | Shared types, the entry id, and the bounded context text |
-| [`src/client/index.ts`](src/client/index.ts) | Browser half: dictionaries and the Settings section registration |
+| [`src/client/index.ts`](src/client/index.ts) | Browser half: dictionaries, the Settings section registration, and its row icon |
 | [`src/client/MemorySection.tsx`](src/client/MemorySection.tsx) | The editable list |
 
 </details>

@@ -2,6 +2,7 @@
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
+import { IconContextInjectionOutlineMedium } from '@deepseek-ai/dsh-client-ui-primitives'
 import { apply, inject } from '../src/client/index.ts'
 import { MEMORY_ENTRY_ID } from '../src/memory.ts'
 
@@ -34,7 +35,7 @@ async function bench() {
     bind: () => (key: string) => key,
   })
   const slots = ctx.get('slots') as SlotRegistry
-  slots.register({ name: 'root', children: { 'settings.section': { kind: 'list', scope: 'root' } } } as never, () => null)
+  slots.register({ name: 'root', children: { 'settings.section': { kind: 'list', scope: 'root' }, 'settings.section.icon': { kind: 'list', scope: 'root' } } } as never, () => null)
   return { ctx, slots, configForms, registered }
 }
 
@@ -57,5 +58,16 @@ describe('ui-memory browser plugin', () => {
     expect((entry?.inject as () => unknown)()).toEqual({ memory: { entry: MEMORY_ENTRY_ID } })
     await fiber.dispose()
     expect(subject.slots.entries('settings.section')).toHaveLength(0)
+  })
+
+  it('gives the Memory row its own icon and removes it on unload', async () => {
+    const subject = await bench()
+    const fiber = subject.ctx.plugin({ inject: [...inject], apply })
+    await fiber.await()
+    const [icon] = subject.slots.entries('settings.section.icon')
+    expect(icon?.options.id).toBe('memory')
+    expect(icon?.component).toBe(IconContextInjectionOutlineMedium)
+    await fiber.dispose()
+    expect(subject.slots.entries('settings.section.icon')).toHaveLength(0)
   })
 })
