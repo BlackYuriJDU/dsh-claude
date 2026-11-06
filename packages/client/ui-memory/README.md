@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-With `dsh-client-ui-memory`, a person saves facts, preferences, and corrections once in Settings, and the agent follows them in every session. The Host half renders the list into each session's runtime context; the browser half adds a Memory section to Settings that adds, edits, and deletes entries. The list lives in this plugin's Config, so it persists with the profile and every session sees the same version. A "Your {product}" section beside it holds what the person wants to be called and their instructions for every conversation, which the Host half renders just before the memories.
+With `dsh-client-ui-memory`, a person saves facts, preferences, and corrections once in Settings, and the agent follows them in every session. The Host half renders the list into each session's runtime context; the browser half adds a Memory section to Settings that adds, edits, and deletes entries. The list lives in this plugin's Config, so it persists with the profile and every session sees the same version. A "Your {product}" section beside it holds what the person wants to be called and their instructions for every conversation, which the Host half renders just before the memories. While a name is set, the account launcher at the foot of the sidebar shows its initials and, when wide, the name.
 
 ## Table of Contents
 

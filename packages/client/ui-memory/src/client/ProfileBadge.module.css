@@ -1,0 +1,24 @@
+/* The initials circle and name in the signed-out account launcher. */
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-secondary);
+  color: var(--dsw-alias-bg-base);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
