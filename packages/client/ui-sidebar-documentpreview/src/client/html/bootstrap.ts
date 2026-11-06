@@ -1,5 +1,6 @@
-/** A fixed bootstrap runs inside the opaque iframe; no Host callbacks enter its document. */
+/** A fixed bootstrap runs inside the opaque iframe; no Host callbacks enter its document, and only the comment-mode switch reaches it. */
 import { decodeText, encodeText } from './bytes.ts'
+import { COMMENT_SCRIPT } from './comments.ts'
 
 /** One statically declared local script or stylesheet, already read under the source file's authority. */
 export interface HtmlAsset {
@@ -43,6 +44,6 @@ if(bundle.assets.length){
   }
   html='<!doctype html>'+parsed.documentElement.outerHTML;
 }
-document.open();document.write(html);document.close();
+document.open();document.write(html);document.close();${COMMENT_SCRIPT}
 })()</script>`
 }
