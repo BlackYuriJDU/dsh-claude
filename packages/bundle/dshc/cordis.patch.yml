@@ -39,7 +39,7 @@
   disabled: true
 
 # PTC and Minimal describe themselves relative to the standard preset that
-# Code replaces; Creator stays after the three DSHC presets.
+# Code replaces; Creator stays after the four DSHC presets.
 - id: preset-ptc
   disabled: true
 
@@ -50,7 +50,7 @@
   config:
     default: chat
 
-# The new-session screen switches between Chat, Cowork, and Code side by side
+# The new-session screen switches between Chat, Cowork, Code, and Design side by side
 # instead of opening a menu. Creator mode stays reachable from Settings.
 - id: ui-agent-preset
   config:

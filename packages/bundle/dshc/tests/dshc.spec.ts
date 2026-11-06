@@ -51,11 +51,11 @@ function persona(config: PresetConfig): string {
 
 const identityRows = load(resolve(root, 'cordis.patch.yml'))
 const upstreamStandard = (load(resolve(root, '../web-app/presets/standard.patch.yml'))[0]!.insert![0]!.config) as PresetConfig
-const presets = { chat: preset('chat'), cowork: preset('cowork'), code: preset('code') }
+const presets = { chat: preset('chat'), cowork: preset('cowork'), code: preset('code'), design: preset('design') }
 
 describe('dsh-dshc bundle identity layer', () => {
-  it('lists the identity patch first, then the three presets, all published', () => {
-    const patches = ['./cordis.patch.yml', './presets/chat.patch.yml', './presets/cowork.patch.yml', './presets/code.patch.yml']
+  it('lists the identity patch first, then the four presets, all published', () => {
+    const patches = ['./cordis.patch.yml', './presets/chat.patch.yml', './presets/cowork.patch.yml', './presets/code.patch.yml', './presets/design.patch.yml']
     expect(manifest.dsh?.bundle?.patch).toEqual(patches)
     for (const patch of patches) expect(manifest.files).toContain(patch.slice(2))
   })
@@ -102,9 +102,9 @@ describe('dsh-dshc bundle identity layer', () => {
 })
 
 describe('DSHC presets', () => {
-  it('declares Chat, Cowork, and Code in that order with display copy', () => {
+  it('declares Chat, Cowork, Code, and Design in that order with display copy', () => {
     expect(Object.values(presets).map(config => [config.id, config.name, config.order]))
-      .toEqual([['chat', 'Chat', 1], ['cowork', 'Cowork', 2], ['code', 'Code', 3]])
+      .toEqual([['chat', 'Chat', 1], ['cowork', 'Cowork', 2], ['code', 'Code', 3], ['design', 'Design', 4]])
     for (const config of Object.values(presets)) expect(config.description.length).toBeGreaterThan(0)
   })
 
@@ -129,14 +129,17 @@ describe('DSHC presets', () => {
     expect(presets.chat.plugins.find(row => row.id === 'tool-web')?.config).toMatchObject({ fetch: true })
   })
 
-  it('gives Cowork and Code the upstream standard rows with their own personas', () => {
+  it('gives Cowork, Code, and Design the upstream standard rows with their own personas', () => {
     const withoutPersona = (config: PresetConfig) => config.plugins.filter(row => row.id !== 'persona')
-    for (const config of [presets.cowork, presets.code]) {
+    for (const config of [presets.cowork, presets.code, presets.design]) {
       expect(withoutPersona(config)).toEqual(withoutPersona(upstreamStandard))
     }
     expect(persona(presets.cowork)).toContain('the present tool')
     expect(persona(presets.cowork)).toContain('Ask before deleting or overwriting files')
     expect(persona(presets.code)).not.toContain('{{cwd}}')
     expect(persona(presets.code)).toContain('exit_plan_mode')
+    expect(persona(presets.design)).toContain('self-contained HTML file under designs/')
+    expect(persona(presets.design)).toContain('DESIGN.md')
+    expect(persona(presets.design)).toContain('the present tool')
   })
 })

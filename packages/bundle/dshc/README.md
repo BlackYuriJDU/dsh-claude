@@ -31,17 +31,18 @@ Start the `dshc` profile; its template lists `dsh-base`, `dsh-web-app`, and this
 dsh dshc
 ```
 
-### Chat, Cowork, and Code
+### Chat, Cowork, Code, and Design
 
-New sessions start in Chat; the preset chip beside the workspace picker switches between the three, and the Settings default overrides the start choice. Every preset opens its persona with the same identity, DSHC powered by the configured model and not Claude, and closes with the same communication rules: warm and direct, prose by default with lists only when needed, effort matched to the ask, at most one question per reply, honest about uncertainty and mistakes, balanced on contested topics, and replies in the person's language.
+New sessions start in Chat; the segmented switch beside the workspace picker moves between the four, and the Settings default overrides the start choice. Every preset opens its persona with the same identity, DSHC powered by the configured model and not Claude, and closes with the same communication rules: warm and direct, prose by default with lists only when needed, effort matched to the ask, at most one question per reply, honest about uncertainty and mistakes, balanced on contested topics, and replies in the person's language.
 
 | Preset | For | Tools | Persona focus |
 |---|---|---|---|
 | Chat | Conversation, questions, writing, learning | File reads, web search and fetch, skills, compaction; no shell and no file writes | Answers in the conversation and points to Cowork or Code when a task needs commands or files |
 | Cowork | Multi-step knowledge work in the workspace folder | The upstream standard set: shell, files, search, jobs, schedules, skills, goals, plan mode, subagents, questions, todos, web, `present` | Clarifies the goal, plans visibly with todos, delivers finished files through `present`, asks before deleting or sending anything out |
 | Code | Software engineering in the workspace | The same standard set | Gathers context, acts, verifies with real test results; minimal root-cause changes; commits only when asked |
+| Design | Pages, screens, slides, and components | The same standard set | Builds each design as one self-contained HTML file under `designs/`, follows the workspace `DESIGN.md`, presents it in the preview, and treats quoted elements as comments to apply |
 
-The upstream Standard, PTC, and Minimal presets are disabled because they describe themselves relative to Standard; Creator stays available after the three.
+The upstream Standard, PTC, and Minimal presets are disabled because they describe themselves relative to Standard; Creator stays available from Settings and is hidden from the switch.
 
 Set `$SEARXNG_URL` to a SearXNG instance with JSON output enabled to make the search provider usable, then choose it under **Plugins → Web search and fetch** or pin it with `$DSH_WEB_SEARCH_PROVIDER=searxng`; the `bin/dshc` launcher pins it when `$SEARXNG_URL` is set. The web service never falls back from the selected provider, so a search fails while the selected provider is unavailable.
 
