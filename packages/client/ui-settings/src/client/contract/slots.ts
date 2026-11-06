@@ -15,6 +15,11 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
     /** Optional sidebar account launcher; opens the shell-owned settings panel. */
     'settings.launcher': { kind: 'single'; scope: 'root'; owner: SettingsLauncherOwnerProps }
+    /**
+     * Identity shown in the account launcher while no account is signed in,
+     * in place of the generic More label; declared by the launcher occupant.
+     */
+    'settings.launcher.badge': { kind: 'single'; scope: 'root'; owner: SettingsLauncherBadgeOwnerProps }
 
     /**
      * The sidebar-foot trigger row content: icon + label, supplied as slot
@@ -154,6 +159,12 @@ export interface SettingsOnboardingOwnerProps {
   complete: () => void
   /** Open the settings panel directly on one registered section. */
   openSection: (id: string) => void
+}
+
+/** Launcher geometry shared with the signed-out identity badge. */
+export interface SettingsLauncherBadgeOwnerProps {
+  /** Whether the sidebar shows labels. */
+  wide: boolean
 }
 
 /** Sidebar launcher geometry and settings navigation. */
