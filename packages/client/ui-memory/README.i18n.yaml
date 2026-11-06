@@ -9,14 +9,14 @@
   en: 99e686d0b5d18479
   zh: a35c7d0d8042e25b
 /deepseek-ai-dsh-client-ui-memory/summary:
-  en: 10ca201501819da6
-  zh: 3acb47e98f831e6a
+  en: 0b6ffc8c3914c410
+  zh: 7b6c61a5b819f2de
 /deepseek-ai-dsh-client-ui-memory/table-of-contents:
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /deepseek-ai-dsh-client-ui-memory/use-this-package:
-  en: 9609e164227e2257
-  zh: 7f4737012300bcfa
+  en: 2c16d92dab36705c
+  zh: 74a6e7295fa67365
 /deepseek-ai-dsh-client-ui-memory/understand-the-implementation:
   en: 8fbd2b4053fc5b2f
   zh: 7ef9bdfb5630a689
@@ -26,6 +26,21 @@
 /deepseek-ai-dsh-client-ui-memory/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
+/deepseek-ai-dsh-client-ui-memory/model-experience/profile:
+  en: 98e69e9d0935ce8f
+  zh: 508a5466b7672005
+/deepseek-ai-dsh-client-ui-memory/model-experience/profile/what-the-model-sees:
+  en: b6b97159664ccfc0
+  zh: d663f4957c9fa83c
+/deepseek-ai-dsh-client-ui-memory/model-experience/profile/what-the-model-sees/memory-profile-context:
+  en: 9094f33d44b71700
+  zh: 9df9359c263443a1
+/deepseek-ai-dsh-client-ui-memory/model-experience/profile/token-effect:
+  en: 15ee98e1d3446bee
+  zh: efc0a677091da644
+/deepseek-ai-dsh-client-ui-memory/model-experience/profile/kv-cache-effect:
+  en: 6bb53ef3954242ef
+  zh: e458c51c1ec7e8f6
 /deepseek-ai-dsh-client-ui-memory/model-experience/saved-memories:
   en: 05dc04ef769a0301
   zh: b2918a23cae241e3

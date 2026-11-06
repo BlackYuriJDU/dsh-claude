@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-With `dsh-client-ui-memory`, a person saves facts, preferences, and corrections once in Settings, and the agent follows them in every session. The Host half renders the list into each session's runtime context; the browser half adds a Memory section to Settings that adds, edits, and deletes entries. The list lives in this plugin's Config, so it persists with the profile and every session sees the same version.
+With `dsh-client-ui-memory`, a person saves facts, preferences, and corrections once in Settings, and the agent follows them in every session. The Host half renders the list into each session's runtime context; the browser half adds a Memory section to Settings that adds, edits, and deletes entries. The list lives in this plugin's Config, so it persists with the profile and every session sees the same version. A "Your {product}" section beside it holds what the person wants to be called and their instructions for every conversation, which the Host half renders just before the memories.
 
 ## Table of Contents
 
@@ -38,7 +38,9 @@ Mount the plugin with the row id `ui-memory`; the Settings section edits that ro
 | Field | Default | Meaning |
 |---|---|---|
 | `memories` | `[]` | Ordered saved memories, each `{ id, text }`; edited from Settings and written to the profile patch |
-| `maxChars` | `8000` | Bound on the complete rendered memory text, header and omission line included; at least `200` |
+| `profileName` | `''` | What the person wants to be called; edited from the "Your {product}" section |
+| `instructions` | `''` | The person's instructions for every conversation; edited from the same section |
+| `maxChars` | `8000` | Bound on each complete rendered context text, profile and memories alike, header and omission line included; at least `200` |
 
 Blank entries contribute nothing. When the whole list does not fit in `maxChars`, the earliest memories that fit are kept and a final line states how many were omitted.
 
@@ -74,6 +76,30 @@ The Host half registers one `systemPrompt.context` entry, `memory:saved`, at ord
 
 <a id="model-experience"></a>
 ## Model Experience
+
+### Profile
+
+#### What the model sees
+
+When a name or instructions are set, the runtime-context snapshot carries this section before the saved memories; instructions that do not fit in `maxChars` are shortened and the last line says so.
+
+##### `memory:profile` context
+
+```markdown
+The person set these in Settings. They apply to this and every session; follow them unless the person says otherwise in this conversation:
+- Call them <name>.
+- Their instructions:
+<instructions>
+(Instructions shortened to fit the limit.)
+```
+
+#### Token effect
+
+At most `maxChars` characters per snapshot; an empty name and empty instructions contribute zero tokens.
+
+#### KV Cache effect
+
+Append-only, like the saved memories: an edit appends a new snapshot at the next request instead of changing the cached prefix.
 
 ### Saved memories
 

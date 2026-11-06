@@ -582,14 +582,18 @@ export interface Config {
 
 - `inject`: `settings` · `systemPrompt`
 - `refs`: `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/client/ui-memory/src/index.ts:18`](../packages/client/ui-memory/src/index.ts)
+- `source`: [`packages/client/ui-memory/src/index.ts:24`](../packages/client/ui-memory/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config. */
 export interface Config {
   /** Ordered saved memories, edited from Settings. */
   memories: Volatile<MemoryItem[]>
-  /** Bound on the complete memory context text, in characters. */
+  /** What the person wants to be called, edited from Settings. */
+  profileName: Volatile<string>
+  /** The person's instructions for every conversation, edited from Settings. */
+  instructions: Volatile<string>
+  /** Bound on each complete context text (profile and memories), in characters. */
   maxChars: number
 }
 

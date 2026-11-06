@@ -21,10 +21,46 @@ export interface MemoryItem {
   text: string
 }
 
-/** The editable Config fields the browser section reads and writes. */
+/** Prompt-context name carrying the person's name and standing instructions. */
+export const PROFILE_CONTEXT_NAME = 'memory:profile'
+
+/** Runtime-context position, just before the saved memories. */
+export const PROFILE_CONTEXT_ORDER = 295
+
+/** The editable Config fields the browser sections read and write. */
 export interface MemoryFormValue {
   /** Ordered saved memories. */
   memories: MemoryItem[]
+  /** What the person wants to be called; empty when unset. */
+  profileName?: string
+  /** The person's instructions for every conversation; empty when unset. */
+  instructions?: string
+}
+
+/**
+ * Render the person's name and standing instructions as runtime context,
+ * bounded as a whole: when the complete text exceeds `maxChars`, the
+ * instructions are shortened and the text says so; when not even a shortened
+ * excerpt fits, only the name is kept.
+ * @param name - what the person wants to be called.
+ * @param instructions - instructions for every conversation.
+ * @param maxChars - the bound on the complete returned text.
+ * @returns the context text, or `''` when nothing is set or nothing fits.
+ */
+export function profileContextText(name: string, instructions: string, maxChars: number): string {
+  const called = name.trim()
+  const rules = instructions.trim()
+  if (called === '' && rules === '') return ''
+  const header = 'The person set these in Settings. They apply to this and every session; follow them unless the person says otherwise in this conversation:'
+  const nameLine = called === '' ? '' : `\n- Call them ${called}.`
+  const lead = '\n- Their instructions:\n'
+  const shortened = '\n(Instructions shortened to fit the limit.)'
+  const complete = header + nameLine + (rules === '' ? '' : lead + rules)
+  if (complete.length <= maxChars) return complete
+  const room = maxChars - header.length - nameLine.length - lead.length - shortened.length
+  if (rules !== '' && room > 0) return header + nameLine + lead + rules.slice(0, room) + shortened
+  const nameOnly = header + nameLine
+  return called !== '' && nameOnly.length <= maxChars ? nameOnly : ''
 }
 
 /**

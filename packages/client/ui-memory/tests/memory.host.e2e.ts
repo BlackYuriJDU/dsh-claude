@@ -20,7 +20,7 @@ async function jsonlFiles(dir: string): Promise<string[]> {
 }
 
 describe('ui-memory through the production headless profile', () => {
-  it('logs the saved memories as a runtime-context snapshot the model reads', async () => {
+  it('logs the profile and the saved memories as a runtime-context snapshot the model reads', async () => {
     let events: SessionEvent[] = []
     const { stderr } = await runLoaderSmoke({
       label: 'ui-memory headless smoke',
@@ -43,6 +43,10 @@ describe('ui-memory through the production headless profile', () => {
       .filter(block => block.type === 'text')
       .map(block => block.text)
       .join('\n')
+    expect(text).toContain('The person set these in Settings.')
+    expect(text).toContain('- Call them Ana.')
+    expect(text).toContain('- Their instructions:\nAnswer in two sentences at most.')
+    expect(text.indexOf('- Call them Ana.')).toBeLessThan(text.indexOf('Memories the person saved in Settings.'))
     expect(text).toContain('Memories the person saved in Settings.')
     expect(text).toContain('- The person prefers metric units.')
     expect(text).not.toMatch(/^- +$/m)

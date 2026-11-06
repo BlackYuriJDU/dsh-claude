@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-有了 `dsh-client-ui-memory`，用户只需在设置中保存一次事实、偏好与更正，智能体就会在每个会话中遵循它们。Host 部分把列表渲染进每个会话的运行时上下文；浏览器部分在设置中加入“记忆”分区，用于添加、编辑与删除条目。列表保存在本插件的 Config 中，因此随配置档持久化，每个会话看到的都是同一版本。
+有了 `dsh-client-ui-memory`，用户只需在设置中保存一次事实、偏好与更正，智能体就会在每个会话中遵循它们。Host 部分把列表渲染进每个会话的运行时上下文；浏览器部分在设置中加入“记忆”分区，用于添加、编辑与删除条目。列表保存在本插件的 Config 中，因此随配置档持久化，每个会话看到的都是同一版本。旁边的“你的 {product}”分区保存用户希望被称呼的名字以及对每次对话的指令，Host 部分会把它们渲染在记忆之前。
 
 ## 目录
 
@@ -38,7 +38,9 @@ kind: "package-reference"
 | 字段 | 默认值 | 含义 |
 |---|---|---|
 | `memories` | `[]` | 有序的已保存记忆，每条为 `{ id, text }`；在设置中编辑并写入配置档补丁 |
-| `maxChars` | `8000` | 渲染后完整记忆文本的上限，包含标题与省略行；至少为 `200` |
+| `profileName` | `''` | 用户希望被称呼的名字；在“你的 {product}”分区中编辑 |
+| `instructions` | `''` | 用户对每次对话的指令；在同一分区中编辑 |
+| `maxChars` | `8000` | 每段渲染后完整上下文文本（个人资料与记忆）的上限，包含标题与省略行；至少为 `200` |
 
 空白条目不产生任何内容。当整个列表放不进 `maxChars` 时，保留能放下的最早记忆，并在最后一行说明省略了多少条。
 
@@ -74,6 +76,30 @@ Host 部分注册一个 `systemPrompt.context` 条目 `memory:saved`，顺序为
 
 <a id="model-experience"></a>
 ## 模型体验
+
+### 个人资料
+
+#### 模型看到的内容
+
+设置了名字或指令时，运行时上下文快照会在已保存的记忆之前携带此段；放不进 `maxChars` 的指令会被截短，并由最后一行说明。
+
+##### `memory:profile` 上下文
+
+```markdown
+The person set these in Settings. They apply to this and every session; follow them unless the person says otherwise in this conversation:
+- Call them <name>.
+- Their instructions:
+<instructions>
+(Instructions shortened to fit the limit.)
+```
+
+#### Token 影响
+
+每个快照最多 `maxChars` 个字符；名字与指令都为空时不产生任何 token。
+
+#### KV Cache 影响
+
+与已保存的记忆一样只追加：编辑会在下一次请求时追加新的快照，而不会改动已缓存的前缀。
 
 ### 已保存的记忆
 

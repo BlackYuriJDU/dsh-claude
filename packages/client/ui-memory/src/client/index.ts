@@ -10,12 +10,15 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 // Type-only: pulls ctx.locale into this program.
 import type {} from '@deepseek-ai/dsh-client-locale/client'
-import { IconContextInjectionOutlineMedium } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconContextInjectionOutlineMedium, IconUserOutlineMedium } from '@deepseek-ai/dsh-client-ui-primitives'
 import { MEMORY_ENTRY_ID, type MemoryFormValue } from '../memory.ts'
 import { MemorySection } from './MemorySection.tsx'
+import { ProfileSection } from './ProfileSection.tsx'
 import { de, en, es, fr, ja, pt, ru, zh, type MemoryKey } from './locales.ts'
 
 export { MemorySection } from './MemorySection.tsx'
+export { ProfileSection } from './ProfileSection.tsx'
+export type { ProfileSectionComponentProps } from './ProfileSection.tsx'
 export type { MemorySectionComponentProps, MemorySectionInjected } from './MemorySection.tsx'
 export type { MemoryKey } from './locales.ts'
 
@@ -33,8 +36,8 @@ const NS = 'memory'
 export const inject = ['slots', 'locale', 'configForms']
 
 /**
- * Register the dictionaries, the Memory row icon, and, while the Host serves
- * the `ui-memory` entry, the Settings Memory section.
+ * Register the dictionaries, the Memory and profile row icons, and, while the
+ * Host serves the `ui-memory` entry, the Settings profile and Memory sections.
  * @param ctx - client root context.
  */
 export function apply(ctx: ClientContext): void {
@@ -49,6 +52,18 @@ export function apply(ctx: ClientContext): void {
     locale: NS,
     inject: () => ({ memory }),
   }, MemorySection))), 'ui-memory: settings section')
+  ctx.effect(() => ctx.configForms.whileServed([MEMORY_ENTRY_ID], () => ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
+    id: 'profile',
+    order: 12,
+    label: () => t('profile.title'),
+    locale: NS,
+    inject: () => ({ memory }),
+  }, ProfileSection))), 'ui-memory: profile section')
+  ctx.effect(() => ctx.slots.inject('settings.section.icon', () => ctx.slots.register({
+    name: 'settings.section.icon',
+    id: 'profile',
+  }, IconUserOutlineMedium)), 'ui-memory: profile section icon')
   ctx.effect(() => ctx.slots.inject('settings.section.icon', () => ctx.slots.register({
     name: 'settings.section.icon',
     id: 'memory',

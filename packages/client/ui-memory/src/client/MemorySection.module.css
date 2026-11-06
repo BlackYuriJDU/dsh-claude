@@ -152,3 +152,12 @@
   opacity: 0.5;
   cursor: default;
 }
+
+/* Profile field labels sit above their fields with the section's caption tone. */
+.fieldLabel {
+  display: block;
+  margin: 16px 0 6px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}

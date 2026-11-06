@@ -3784,6 +3784,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [
       'client-ui-agent-preset AgentPresetSection id \'agent-presets\'',
       'client-ui-memory MemorySection id \'memory\'',
+      'client-ui-memory ProfileSection id \'profile\'',
       'client-ui-projects ProjectsSection id \'projects\'',
       'client-ui-settings-account AccountSection id \'account\'',
       'client-ui-settings-general GeneralSection id \'general\'',
@@ -3841,6 +3842,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     slotInject: '',
     declaredBy: 'an entry in \'sidebar.settings\' (client-ui-settings-general), so it exists while that entry is mounted',
     occupants: [
+      'client-ui-memory IconUserOutlineMedium id \'profile\'',
       'client-ui-memory IconContextInjectionOutlineMedium id \'memory\'',
       'client-ui-projects IconFolderOpenOutlineMedium id \'projects\'',
     ],

@@ -14,6 +14,13 @@ export const en = {
   'edit': 'Edit',
   'edit.save': 'Save',
   'edit.cancel': 'Cancel',
+  'profile.title': 'Your {product}',
+  'profile.hint': '{product} follows these in this and every session.',
+  'profile.name': 'What should {product} call you?',
+  'profile.name.placeholder': 'Your name',
+  'profile.instructions': 'Instructions for every conversation',
+  'profile.instructions.placeholder': 'For example: reply in Portuguese, keep answers short, explain code step by step.',
+  'profile.saved': 'Saved',
 } satisfies Record<string, string>
 
 /** The pt-BR dictionary. */
@@ -27,6 +34,13 @@ export const pt = {
   'edit': 'Editar',
   'edit.save': 'Salvar',
   'edit.cancel': 'Cancelar',
+  'profile.title': 'Seu {product}',
+  'profile.hint': 'O {product} segue isto nesta e em todas as sessões.',
+  'profile.name': 'Como o {product} deve chamar você?',
+  'profile.name.placeholder': 'Seu nome',
+  'profile.instructions': 'Instruções para todas as conversas',
+  'profile.instructions.placeholder': 'Por exemplo: responda em português, seja breve, explique código passo a passo.',
+  'profile.saved': 'Salvo',
 } satisfies Record<MemoryKey, string>
 
 /** The Chinese dictionary. */
@@ -40,6 +54,13 @@ export const zh = {
   'edit': '编辑',
   'edit.save': '保存',
   'edit.cancel': '取消',
+  'profile.title': '你的 {product}',
+  'profile.hint': '{product} 会在本次及每个会话中遵循这些设置。',
+  'profile.name': '{product} 应该怎么称呼你？',
+  'profile.name.placeholder': '你的名字',
+  'profile.instructions': '每次对话的指令',
+  'profile.instructions.placeholder': '例如：用中文回复，回答简短，逐步解释代码。',
+  'profile.saved': '已保存',
 } satisfies Record<MemoryKey, string>
 
 /** The Japanese dictionary. */
@@ -53,6 +74,13 @@ export const ja = {
   'edit': '編集',
   'edit.save': '保存',
   'edit.cancel': 'キャンセル',
+  'profile.title': 'あなたの {product}',
+  'profile.hint': '{product} はこのセッションとすべてのセッションでこれに従います。',
+  'profile.name': '{product} はあなたを何と呼べばよいですか？',
+  'profile.name.placeholder': 'あなたの名前',
+  'profile.instructions': 'すべての会話への指示',
+  'profile.instructions.placeholder': '例：日本語で返信、簡潔に答える、コードは手順ごとに説明する。',
+  'profile.saved': '保存しました',
 } satisfies Record<MemoryKey, string>
 
 /** The Spanish dictionary. */
@@ -66,6 +94,13 @@ export const es = {
   'edit': 'Editar',
   'edit.save': 'Guardar',
   'edit.cancel': 'Cancelar',
+  'profile.title': 'Tu {product}',
+  'profile.hint': '{product} sigue esto en esta y en todas las sesiones.',
+  'profile.name': '¿Cómo debe llamarte {product}?',
+  'profile.name.placeholder': 'Tu nombre',
+  'profile.instructions': 'Instrucciones para todas las conversaciones',
+  'profile.instructions.placeholder': 'Por ejemplo: responde en español, sé breve, explica el código paso a paso.',
+  'profile.saved': 'Guardado',
 } satisfies Record<MemoryKey, string>
 
 /** The French dictionary. */
@@ -79,6 +114,13 @@ export const fr = {
   'edit': 'Modifier',
   'edit.save': 'Enregistrer',
   'edit.cancel': 'Annuler',
+  'profile.title': 'Votre {product}',
+  'profile.hint': '{product} suit ces réglages dans cette session et toutes les autres.',
+  'profile.name': 'Comment {product} doit-il vous appeler ?',
+  'profile.name.placeholder': 'Votre nom',
+  'profile.instructions': 'Instructions pour chaque conversation',
+  'profile.instructions.placeholder': 'Par exemple : réponds en français, sois bref, explique le code étape par étape.',
+  'profile.saved': 'Enregistré',
 } satisfies Record<MemoryKey, string>
 
 /** The German dictionary. */
@@ -92,6 +134,13 @@ export const de = {
   'edit': 'Bearbeiten',
   'edit.save': 'Speichern',
   'edit.cancel': 'Abbrechen',
+  'profile.title': 'Ihr {product}',
+  'profile.hint': '{product} befolgt dies in dieser und jeder Sitzung.',
+  'profile.name': 'Wie soll {product} Sie nennen?',
+  'profile.name.placeholder': 'Ihr Name',
+  'profile.instructions': 'Anweisungen für jedes Gespräch',
+  'profile.instructions.placeholder': 'Zum Beispiel: Antworte auf Deutsch, fasse dich kurz, erkläre Code Schritt für Schritt.',
+  'profile.saved': 'Gespeichert',
 } satisfies Record<MemoryKey, string>
 
 /** The Russian dictionary. */
@@ -105,4 +154,11 @@ export const ru = {
   'edit': 'Изменить',
   'edit.save': 'Сохранить',
   'edit.cancel': 'Отмена',
+  'profile.title': 'Ваш {product}',
+  'profile.hint': '{product} следует этому в этом и каждом сеансе.',
+  'profile.name': 'Как {product} должен к вам обращаться?',
+  'profile.name.placeholder': 'Ваше имя',
+  'profile.instructions': 'Инструкции для каждого разговора',
+  'profile.instructions.placeholder': 'Например: отвечай по-русски, кратко, объясняй код по шагам.',
+  'profile.saved': 'Сохранено',
 } satisfies Record<MemoryKey, string>

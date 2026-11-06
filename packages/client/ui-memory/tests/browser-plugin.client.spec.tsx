@@ -2,24 +2,29 @@
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
-import { IconContextInjectionOutlineMedium } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconContextInjectionOutlineMedium, IconUserOutlineMedium } from '@deepseek-ai/dsh-client-ui-primitives'
 import { apply, inject } from '../src/client/index.ts'
 import { MEMORY_ENTRY_ID } from '../src/memory.ts'
 
-/** Config forms fake: records the requested entry and lets the test serve it. */
+/** Config forms fake: records the requested entry and lets the test serve every watcher of it. */
 class FakeConfigForms {
   readonly requested: string[] = []
-  private register: (() => () => void) | undefined
-  private off: (() => void) | undefined
+  private readonly watchers = new Set<{ register: () => () => void; off?: () => void }>()
   get(entry: string) {
     this.requested.push(entry)
     return { entry }
   }
   whileServed(_namespaces: readonly string[], register: () => () => void): () => void {
-    this.register = register
-    return () => { this.off?.() }
+    const watcher: { register: () => () => void; off?: () => void } = { register }
+    this.watchers.add(watcher)
+    return () => {
+      watcher.off?.()
+      this.watchers.delete(watcher)
+    }
   }
-  serve(): void { this.off = this.register?.() }
+  serve(): void {
+    for (const watcher of this.watchers) watcher.off = watcher.register()
+  }
 }
 
 async function bench() {
@@ -52,8 +57,12 @@ describe('ui-memory browser plugin', () => {
     expect(subject.configForms.requested).toEqual([MEMORY_ENTRY_ID])
     expect(subject.slots.entries('settings.section')).toHaveLength(0)
     subject.configForms.serve()
-    const [entry] = subject.slots.entries('settings.section')
-    expect(entry?.options.id).toBe('memory')
+    expect(subject.slots.entries('settings.section').map(item => item.options.id).sort()).toEqual(['memory', 'profile'])
+    const entry = subject.slots.entries('settings.section').find(item => item.options.id === 'memory')
+    const profile = subject.slots.entries('settings.section').find(item => item.options.id === 'profile')
+    expect(profile?.options.order).toBeLessThan(entry?.options.order ?? 0)
+    expect((profile?.options.label as () => string)()).toBe('profile.title')
+    expect((profile?.inject as () => unknown)()).toEqual({ memory: { entry: MEMORY_ENTRY_ID } })
     expect((entry?.options.label as () => string)()).toBe('title')
     expect((entry?.inject as () => unknown)()).toEqual({ memory: { entry: MEMORY_ENTRY_ID } })
     await fiber.dispose()
@@ -64,9 +73,9 @@ describe('ui-memory browser plugin', () => {
     const subject = await bench()
     const fiber = subject.ctx.plugin({ inject: [...inject], apply })
     await fiber.await()
-    const [icon] = subject.slots.entries('settings.section.icon')
-    expect(icon?.options.id).toBe('memory')
-    expect(icon?.component).toBe(IconContextInjectionOutlineMedium)
+    const icons = subject.slots.entries('settings.section.icon')
+    expect(icons.find(icon => icon.options.id === 'memory')?.component).toBe(IconContextInjectionOutlineMedium)
+    expect(icons.find(icon => icon.options.id === 'profile')?.component).toBe(IconUserOutlineMedium)
     await fiber.dispose()
     expect(subject.slots.entries('settings.section.icon')).toHaveLength(0)
   })

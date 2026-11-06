@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import * as memoryPlugin from '../src/index.ts'
-import { MEMORY_CONTEXT_NAME, MEMORY_CONTEXT_ORDER, memoryContextText } from '../src/memory.ts'
+import {
+  MEMORY_CONTEXT_NAME, MEMORY_CONTEXT_ORDER, memoryContextText, PROFILE_CONTEXT_NAME, PROFILE_CONTEXT_ORDER, profileContextText,
+} from '../src/memory.ts'
 
 const item = (text: string, id = text) => ({ id, text })
+const PROFILE_HEADER = 'The person set these in Settings. They apply to this and every session; follow them unless the person says otherwise in this conversation:'
 const HEADER = 'Memories the person saved in Settings. They apply to this and every session; follow them unless the person says otherwise in this conversation:'
 
 describe('memoryContextText', () => {
@@ -41,12 +44,42 @@ describe('ui-memory Host plugin', () => {
     ctx.set('settings', { configure: (presentation: unknown) => { configured.push(presentation); return () => undefined } })
     ctx.provide('systemPrompt')
     ctx.set('systemPrompt', { context: (entry: (typeof contexts)[number]) => { contexts.push(entry); return () => undefined } })
-    const fiber = ctx.plugin(memoryPlugin, { memories: [item('Prefers short answers')], maxChars: 8000 })
+    const fiber = ctx.plugin(memoryPlugin, { memories: [item('Prefers short answers')], profileName: 'Ana', instructions: 'Be brief.', maxChars: 8000 })
     await fiber.await()
     expect(configured).toEqual([{ auto: false }])
-    expect(contexts).toHaveLength(1)
-    expect(contexts[0]).toMatchObject({ name: MEMORY_CONTEXT_NAME, order: MEMORY_CONTEXT_ORDER, interpolate: false })
-    expect(contexts[0]!.text()).toBe(`${HEADER}\n- Prefers short answers`)
+    expect(contexts.map(entry => entry.name)).toEqual([PROFILE_CONTEXT_NAME, MEMORY_CONTEXT_NAME])
+    expect(contexts[0]).toMatchObject({ order: PROFILE_CONTEXT_ORDER, interpolate: false })
+    expect(contexts[0]!.text()).toBe(`${PROFILE_HEADER}\n- Call them Ana.\n- Their instructions:\nBe brief.`)
+    expect(contexts[1]).toMatchObject({ name: MEMORY_CONTEXT_NAME, order: MEMORY_CONTEXT_ORDER, interpolate: false })
+    expect(contexts[1]!.text()).toBe(`${HEADER}\n- Prefers short answers`)
+    expect(PROFILE_CONTEXT_ORDER).toBeLessThan(MEMORY_CONTEXT_ORDER)
     await fiber.dispose()
+  })
+})
+
+describe('profileContextText', () => {
+  it('renders nothing until a name or instructions are set', () => {
+    expect(profileContextText('  ', '\n', 8000)).toBe('')
+  })
+
+  it('renders the name alone, the instructions alone, or both', () => {
+    expect(profileContextText(' Ana ', '', 8000)).toBe(`${PROFILE_HEADER}\n- Call them Ana.`)
+    expect(profileContextText('', ' Be brief. ', 8000)).toBe(`${PROFILE_HEADER}\n- Their instructions:\nBe brief.`)
+  })
+
+  it('shortens the instructions to fit and says so, keeping the complete text within the bound', () => {
+    const full = profileContextText('Ana', 'x'.repeat(500), 8000)
+    const bound = full.length - 100
+    const text = profileContextText('Ana', 'x'.repeat(500), bound)
+    expect(text.length).toBe(bound)
+    expect(text.startsWith(`${PROFILE_HEADER}\n- Call them Ana.\n- Their instructions:\nxxx`)).toBe(true)
+    expect(text.endsWith('\n(Instructions shortened to fit the limit.)')).toBe(true)
+  })
+
+  it('keeps only the name when not even a shortened excerpt fits, and nothing when the name does not fit', () => {
+    const nameOnly = `${PROFILE_HEADER}\n- Call them Ana.`
+    expect(profileContextText('Ana', 'x'.repeat(500), nameOnly.length + 10)).toBe(nameOnly)
+    expect(profileContextText('', 'x'.repeat(500), nameOnly.length + 10)).toBe('')
+    expect(profileContextText('Ana', '', nameOnly.length - 1)).toBe('')
   })
 })
