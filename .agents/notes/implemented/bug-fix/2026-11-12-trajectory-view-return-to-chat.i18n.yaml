@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-11-12-trajectory-view-return-to-chat.md
-2026-11-12-trajectory-view-return-to-chat.md: 6c8bd5bb872787eebbf0b20ebab8170ad1d30842
-2026-11-12-trajectory-view-return-to-chat.zh.md: 2a7a3695dec3b549808312b749eef4a30bb218ac
+2026-11-12-trajectory-view-return-to-chat.md: 2610a87a90b1a90760fc45ed971da2d827f16018
+2026-11-12-trajectory-view-return-to-chat.zh.md: 0ed13e245b4d53cbadf4af4346c9f06c81a07e63

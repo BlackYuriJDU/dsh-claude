@@ -23,26 +23,41 @@ function resolveActiveView(tabs: readonly ViewTab[], selectedId: string | null):
     ?? tabs.find(view => view.id === DEFAULT_VIEW_ID)
 }
 
+/** Header action entry id of the ui-jobs background-jobs list (the one action kept on Chat). */
+const BACKGROUND_JOBS_ACTION = 'job-list'
+
 /**
  * Renders the session header chrome above the resident conversation scrollport.
  * dshc hides the chrome while the Chat view is active (the conversation starts
  * straight at the transcript); any other active view, such as the Trajectory
  * view a tool row's inspect control opens, shows the view tabs so the user can
  * return to Chat.
- * @returns the hidden header element, or the view tabs while a non-Chat view is active.
+ * @returns on Chat, the hidden header plus the floating background-jobs action;
+ * otherwise the view tabs.
  */
 export function ConversationSessionHeader({
   sessionId, useSession, useSessions, useStore, actions,
   renderSlot, views, open, t,
 }: ConversationSessionHeaderProps) {
-  // dshc: session log, PTC chip, breadcrumbs, and background-jobs action stay
-  // removed; only the view tabs return, and only outside the Chat view.
-  void sessionId; void useSession; void useSessions; void renderSlot; void open; void t
+  // dshc: session log, PTC chip, and breadcrumbs stay removed. On Chat the
+  // header collapses to the background-jobs action, which renders only while
+  // the session has background work (Claude Code lists its background tasks
+  // the same way); the view tabs return outside the Chat view.
+  void sessionId; void useSession; void useSessions; void open; void t
   useSyncExternalStore(views.subscribe, views.version)
   const tabs = views.list()
   const active = resolveActiveView(tabs, useStore(s => s.view))
   if (active === undefined || active.id === DEFAULT_VIEW_ID || tabs.length < 2) {
-    return <header className={clsx(css.header, css.headerHidden)} aria-hidden />
+    return (
+      <>
+        <header className={clsx(css.header, css.headerHidden)} aria-hidden />
+        <div className={css.chatActions}>
+          <div className={css.chatActionsInner}>
+            {renderSlot('conversation.session.header.actions', {}, { only: BACKGROUND_JOBS_ACTION })}
+          </div>
+        </div>
+      </>
+    )
   }
   return (
     <header className={css.header}>

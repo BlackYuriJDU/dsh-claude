@@ -10,7 +10,7 @@ dshc hides the session header chrome so the conversation starts at the transcrip
 
 ## Decision
 
-`ConversationSessionHeader` stays hidden while the Chat view is active and renders the view tabs, with the shared tab styles, whenever another registered view is active. Selecting the Chat tab writes the store's `view` back to `chat`, which hides the header again. Breadcrumbs, the session log, the PTC chip, and the background-jobs action stay removed.
+`ConversationSessionHeader` stays hidden while the Chat view is active and renders the view tabs, with the shared tab styles, whenever another registered view is active. Selecting the Chat tab writes the store's `view` back to `chat`, which hides the header again. Breadcrumbs, the session log, and the PTC chip stay removed; on Chat the header collapses to the background-jobs action alone, floating at the transcript's top-right and rendering only while the session has background work ([usage ring](../feature/2026-11-12-composer-usage-ring.md)).
 
 ## Alternatives considered
 

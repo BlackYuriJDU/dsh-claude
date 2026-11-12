@@ -10,7 +10,7 @@ dshc 隐藏了会话头部的界面元素，使对话直接从 transcript（文�
 
 ## 决策
 
-`ConversationSessionHeader` 在 Chat 视图激活时保持隐藏；只要激活的是其他已注册视图，它就使用共享的标签页样式渲染视图标签页。选择 Chat 标签页会把 store 的 `view` 写回 `chat`，头部随之再次隐藏。面包屑、会话日志、PTC 标签以及后台任务操作仍保持移除。
+`ConversationSessionHeader` 在 Chat 视图激活时保持隐藏；只要激活的是其他已注册视图，它就使用共享的标签页样式渲染视图标签页。选择 Chat 标签页会把 store 的 `view` 写回 `chat`，头部随之再次隐藏。面包屑、会话日志与 PTC 标签仍保持移除；在 Chat 视图中，头部收缩为仅剩后台任务操作，它浮于对话记录右上角，且仅在会话有后台工作时渲染（[用量圆环](../feature/2026-11-12-composer-usage-ring.zh.md)）。
 
 ## 备选方案
 
