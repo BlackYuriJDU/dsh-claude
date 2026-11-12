@@ -21,13 +21,17 @@ const BREAKDOWN = { systemTokens: 120, toolsTokens: 21_500, messageTokens: 477_0
 const segmentClass = css.segment
 if (segmentClass === undefined) throw new Error('segment class missing from ContextMeter.module.css')
 
+/** A conversation snapshot selector over an empty settled history. */
+const noHistory = ((select: (snapshot: { chat: { legacy: { nodes: readonly unknown[] } } }) => unknown) =>
+  select({ chat: { legacy: { nodes: [] } } })) as unknown as ContextMeterProps['useSession']
+
 /** Stub the projection seat: a key-addressed table of whole values. */
 function projections(values: Record<string, unknown>): ContextMeterProps['useProjection'] {
   return (key: string) => values[key]
 }
 
 function meter(values: Record<string, unknown>, translate: ContextMeterProps['t'] = t) {
-  return render(<ContextMeter useProjection={projections(values)} t={translate} />)
+  return render(<ContextMeter useSession={noHistory} useProjection={projections(values)} t={translate} />)
 }
 
 describe('ContextMeter', () => {
@@ -113,19 +117,19 @@ describe('ContextMeter', () => {
       contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 },
       contextBreakdown: BREAKDOWN,
     }
-    const view = render(<ContextMeter useProjection={(key: string) => values[key]} t={t} />)
+    const view = render(<ContextMeter useSession={noHistory} useProjection={(key: string) => values[key]} t={t} />)
     fireEvent.click(view.getByRole('button', { name: '25% of context used' }))
     expect(view.container.querySelector('[role="dialog"]')).not.toBeNull()
 
     values = { contextPressure: { pressureTokens: 32_000 }, contextBreakdown: BREAKDOWN }
-    view.rerender(<ContextMeter useProjection={(key: string) => values[key]} t={t} />)
+    view.rerender(<ContextMeter useSession={noHistory} useProjection={(key: string) => values[key]} t={t} />)
     expect(view.container.textContent).toBe('')
 
     values = {
       contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 },
       contextBreakdown: BREAKDOWN,
     }
-    view.rerender(<ContextMeter useProjection={(key: string) => values[key]} t={t} />)
+    view.rerender(<ContextMeter useSession={noHistory} useProjection={(key: string) => values[key]} t={t} />)
     expect(view.getByRole('button', { name: '25% of context used' }).getAttribute('aria-expanded')).toBe('false')
     expect(view.container.querySelector('[role="dialog"]')).toBeNull()
   })
@@ -150,5 +154,38 @@ describe('ContextMeter', () => {
     openPanel()
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(view.container.querySelector('[role="dialog"]')).toBeNull()
+  })
+
+  it('adds the session figures under the context window, with cache and token bars', () => {
+    const view = meter({
+      contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 },
+      sessionStats: { turns: 3, steps: 7, llmMs: 9_000, toolMs: 1_000, ttftMs: 2_400, ttftSteps: 2, decodeMs: 4_000, decodeTokens: 200 },
+      tokenUsage: { uncachedInputTokens: 1_000, cacheReadTokens: 3_000, cacheWriteTokens: 0, outputTokens: 1_000 },
+    })
+    fireEvent.click(view.getByRole('button', { name: '25% of context used' }))
+    const session = view.getByRole('region', { name: 'Session' })
+    expect(session.textContent).toContain('3 turns · 7 steps')
+    expect(session.textContent).toContain('Cache hit 75%')
+    expect(session.textContent).toContain('Input 4K tok · Output 1K tok')
+    expect(session.textContent).toContain('TTFT avg')
+    expect(session.textContent).toContain('50 tok/s')
+    const fills = [...session.querySelectorAll<HTMLElement>(`.${css.miniFill}`)]
+    expect(fills.map(fill => fill.style.width)).toEqual(['75%', '80%', ''])
+  })
+
+  it('shows a session-only ring while no route capacity is known', () => {
+    const view = meter({ tokenUsage: { uncachedInputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, outputTokens: 12 } })
+    fireEvent.click(view.getByRole('button', { name: 'Session' }))
+    const panel = view.getByRole('dialog', { name: 'Session' })
+    expect(panel.textContent).toContain('Input 0 tok · Output 12 tok')
+    expect(panel.textContent).not.toContain('of context used')
+    expect(panel.textContent).not.toContain('Cache hit')
+  })
+
+  it('folds settled history when the session-stats projection is absent', () => {
+    const missingNodes = ((select: (snapshot: { chat: { legacy: { nodes?: readonly unknown[] } } }) => unknown) =>
+      select({ chat: { legacy: {} } })) as unknown as ContextMeterProps['useSession']
+    const view = render(<ContextMeter useSession={missingNodes} useProjection={projections({})} t={t} />)
+    expect(view.container.textContent).toBe('')
   })
 })
