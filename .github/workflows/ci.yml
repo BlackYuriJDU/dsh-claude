@@ -97,10 +97,12 @@ jobs:
           || vars.DSH_CI_LINUX_RUNNER || 'ubuntu-latest' }}
     name: node 24 / coverage
     env:
-      # Partitioning replaces the instrumented share; this budget gives the
-      # exempt-heavy gate two workers on both hosted and failover runners.
-      DSH_COVERAGE_MAX_WORKERS: '6'
-      DSH_COVERAGE_PARTITIONS: '4'
+      # Partitioning replaces the instrumented share; the budget sizes the
+      # exempt-heavy gate. The defaults keep about three test processes on a
+      # 4-vCPU hosted runner, where real-shell suites lose output races under
+      # oversubscription; larger pools raise both through repository variables.
+      DSH_COVERAGE_MAX_WORKERS: ${{ vars.DSH_CI_COVERAGE_MAX_WORKERS || '3' }}
+      DSH_COVERAGE_PARTITIONS: ${{ vars.DSH_CI_COVERAGE_PARTITIONS || '2' }}
       DSH_GATE_CONCURRENCY: '3'
     steps:
       - uses: actions/checkout@v6
