@@ -2,12 +2,14 @@
 // RoutinesSection behavior: renders one card per routine, toggles enabled,
 // deletes, and adds a new routine through the durable scope. Uses a fake
 // SettingsScope (snapshot cached per write) so no settings service is needed.
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import type { SettingsScope, SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { en as commonEn } from '@deepseek-ai/dsh-client-locale/src/locales/en.ts'
 import { en } from '../src/client/locales.ts'
+// Type-only: pulls the package's LocaleNamespaceMap merge so the `t` seat types.
+import type {} from '../src/client/index.ts'
 import { RoutinesSection } from '../src/client/RoutinesSection.tsx'
 import type { Routine, RoutinesSettings } from '../src/index.ts'
 
@@ -40,7 +42,8 @@ function routine(overrides: Partial<Routine> = {}): Routine {
 
 function mount(initial: RoutinesSettings) {
   const scope = scopeOf(initial)
-  const view = render(<RoutinesSection routines={scope} t={t} />)
+  const view = render(<RoutinesSection routines={scope} t={t} close={() => {}}
+    useSessions={(() => { throw new Error('unused') })} useWorkspaces={(() => { throw new Error('unused') })} />)
   return { view, scope }
 }
 

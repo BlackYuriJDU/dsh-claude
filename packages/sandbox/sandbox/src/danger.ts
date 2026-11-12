@@ -112,14 +112,24 @@ const DANGER_RULES: readonly DangerRule[] = [
     id: 'git-history-discard',
     reason: 'uncommitted-work/history discard (reset --hard / clean -f / checkout -- / branch -D)',
     families: ['bash', 'pwsh'],
-    pattern: /\bgit\s+(?:reset\b[^|;&]*--hard|clean\b[^|;&]*-[a-zA-Z]*f|checkout\b[^|;&]*--\s|branch\b[^|;&]*\s-D\b|restore\b[^|;&]*--worktree)/,
+    pattern: new RegExp(String.raw`\bgit\s+(?:` + [
+      String.raw`reset\b[^|;&]*--hard`,
+      String.raw`clean\b[^|;&]*-[a-zA-Z]*f`,
+      String.raw`checkout\b[^|;&]*--\s`,
+      String.raw`branch\b[^|;&]*\s-D\b`,
+      String.raw`restore\b[^|;&]*--worktree`,
+    ].join('|') + ')'),
   },
   // ── remote code execution ─────────────────────────────────────────────────
   {
     id: 'piped-remote-exec',
     reason: 'piped remote script execution (curl|sh / iex (iwr))',
     families: ['bash', 'pwsh'],
-    pattern: /\b(?:curl|wget)\b[^|;&]*\|\s*(?:sudo\s+)?(?:ba|z|da|f)?sh\b|\biex\b[^|;&]*\b(?:iwr|Invoke-RestMethod)\b|\bInvoke-Expression\b/i,
+    pattern: new RegExp([
+      String.raw`\b(?:curl|wget)\b[^|;&]*\|\s*(?:sudo\s+)?(?:ba|z|da|f)?sh\b`,
+      String.raw`\biex\b[^|;&]*\b(?:iwr|Invoke-RestMethod)\b`,
+      String.raw`\bInvoke-Expression\b`,
+    ].join('|'), 'i'),
   },
   // ── packages and databases ────────────────────────────────────────────────
   {
@@ -194,7 +204,11 @@ export async function approveDangerousOperation<A, C>(
   }
 }
 
-/** Test-only visibility into the rule table (specs assert ids and family scoping). */
+/**
+ * Test-only visibility into the rule table (specs assert ids and family scoping).
+ * @param family - the shell family whose rules to list.
+ * @returns the ids of the rules that apply to that family, in table order.
+ */
 export function dangerRuleIds(family: CommandFamily): readonly string[] {
   return DANGER_RULES.filter(rule => rule.families.includes(family)).map(rule => rule.id)
 }

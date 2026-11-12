@@ -46,7 +46,7 @@ const project = {
 
 /** Static list snapshot for the Projetos modal's selector hook. */
 function listHook(items: readonly unknown[] = []) {
-  return (selector: (state: { items: readonly unknown[] }) => unknown) =>
+  return (selector: (state: { items: readonly unknown[]; archivedSessionIds: readonly unknown[] }) => unknown) =>
     selector({ items, archivedSessionIds: [] })
 }
 
@@ -263,7 +263,7 @@ describe('SidebarRoot shell', () => {
   it('the Design row occupant dispatches the seam on click and mirrors the nav geometry', () => {
     const listener = vi.fn()
     window.addEventListener(SIDEBAR_DESIGN_EVENT, listener)
-    render(<DesignRow t={t} />)
+    render(<DesignRow t={t} wide useSessions={neverHook} useWorkspaces={neverHook} />)
     const row = screen.getByRole('button', { name: en['design.label'] })
     // Nav-row geometry: line icon riding the icon seat, label beside it.
     expect(row.querySelector('svg')).not.toBeNull()
@@ -298,7 +298,7 @@ describe('SidebarRoot shell', () => {
   })
 
   it('renders statically collapsed on a cold start (no crossfade classes)', () => {
-    const b = mountShell({ collapsed: true })
+    mountShell({ collapsed: true })
     // The rail carries the reopen toggle alone; wide chrome never mounts.
     expect(screen.queryByTestId('region')).toBeNull()
     expect(screen.queryByRole('button', { name: en['session.new.label'] })).toBeNull()

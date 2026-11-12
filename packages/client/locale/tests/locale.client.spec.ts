@@ -199,7 +199,7 @@ describe('LocaleRuntime', () => {
     expect(svc.getLocale().active).toBe('en')
     // A home shared with an older build may carry a stale preference ('zh');
     // the cast expresses that out-of-shipped-set value the type forbids today.
-    host.publish({ status: 'ready', value: { preference: 'zh' as LocaleSettings['preference'] }, revision: 1, writable: true })
+    host.publish({ status: 'ready', value: { preference: 'zh' as NonNullable<LocaleSettings['preference']> }, revision: 1, writable: true })
     expect(svc.getLocale().active).toBe('en')
   })
 

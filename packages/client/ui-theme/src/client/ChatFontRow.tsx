@@ -39,7 +39,7 @@ const OPTIONS: readonly { id: ChatFont; labelKey: ThemeKey }[] = [
 export function ChatFontRow({ t, setChatFont, useStore }: ChatFontRowComponentProps) {
   const font = useStore(s => s.chatFont)
   const [open, setOpen] = useState(false)
-  const activeLabel = OPTIONS.find(option => option.id === font)?.labelKey ?? OPTIONS[0]!.labelKey
+  const activeLabel = OPTIONS.find(option => option.id === font)?.labelKey ?? 'chatFont.inter'
 
   return (
     <div className={css.row}>

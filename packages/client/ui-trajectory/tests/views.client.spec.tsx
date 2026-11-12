@@ -207,10 +207,23 @@ function tabsOf(slots: SlotRegistry): ViewTab[] {
 }
 
 /** Mount the strict Session header/body over the ring ledger with outlet-faithful render shares. */
+/** Chat store of the latest mount; the header renders no view tabs, so tests select views through it. */
+let mountedChat: ReturnType<ReturnType<typeof createChatStore>['create']> | undefined
+
+/**
+ * Select a conversation view on the latest mount, as the store action the
+ * tool-row inspect control and the view ring dispatch.
+ * @param view - conversation view id.
+ */
+function showView(view: string): void {
+  act(() => { mountedChat?.actions.setView(view) })
+}
+
 function mount(slots: SlotRegistry, nodes: ConversationSnapshot['nodes'] = NODES) {
   const sessionSnapshot = sessionSnapshots.get(slots) ?? createSnapshotStore(historySnapshot(nodes))
   const useSession = bindSnapshotSelector(sessionSnapshot)
   const chat = createChatStore().create()
+  mountedChat = chat
   const views = {
     list: () => tabsOf(slots),
     subscribe: (fn: () => void) => slots.subscribe('conversation.view', fn),
@@ -349,14 +362,13 @@ describe('plugin registration', () => {
   })
 })
 
-describe('tab switching in ConversationRoot', () => {
-  it('renders two tabs, defaults to chat, and switches to the trajectory ledger', async () => {
+describe('view switching in ConversationRoot', () => {
+  it('defaults to chat and renders the trajectory ledger when the view switches', async () => {
     const b = await bench()
     const view = mount(b.slots)
     expect(screen.getByTestId('chat-body')).toBeTruthy()
-    expect(screen.getAllByRole('tab').map(t => t.textContent)).toEqual(['Chat', 'Trajectory'])
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
     expect(screen.queryByText(/turns ·/)).toBeNull()
     expect(view.container.querySelectorAll('tr[data-turn-start="true"]')).toHaveLength(2)
     expect(screen.queryByRole('columnheader')).toBeNull()
@@ -369,7 +381,7 @@ describe('tab switching in ConversationRoot', () => {
     expect(screen.getByRole('row', { name: /USER/ })).toBeTruthy()
     expect(screen.queryByTestId('chat-body')).toBeNull()
     expect(b.loadOlder).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('tab', { name: 'Chat' }))
+    showView('chat')
     expect(b.loadOlder).not.toHaveBeenCalled()
   })
 
@@ -387,7 +399,7 @@ describe('tab switching in ConversationRoot', () => {
   it('opens a local record inspector and switches payload tabs without opening chat details', async () => {
     const b = await bench()
     mount(b.slots)
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
 
     fireEvent.keyDown(screen.getByRole('row', { name: /TOOL/ }), { key: 'Enter' })
     expect(screen.getByRole('complementary', { name: 'Event details' })).toBeTruthy()
@@ -424,7 +436,7 @@ describe('tab switching in ConversationRoot', () => {
     }
     const b = await bench(historySnapshot(nodes, { requests: [compaction] }))
     const view = mount(b.slots, nodes)
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
 
     expect(screen.getByText('Between turns')).toBeTruthy()
     expect(view.container.textContent).not.toContain('Turn null')
@@ -476,7 +488,7 @@ describe('tab switching in ConversationRoot', () => {
     ]
     const b = await bench(historySnapshot(nodes, { requests: compactions }))
     mount(b.slots, nodes)
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
 
     const firstRequest = screen.getByRole('button', { name: 'Request #2 · Compaction' })
     const secondRequest = screen.getByRole('button', { name: 'Request #4 · Compaction' })
@@ -501,7 +513,7 @@ describe('tab switching in ConversationRoot', () => {
   it('dragging the overview focuses overlapping records without filtering the ledger', async () => {
     const b = await bench()
     mount(b.slots)
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
     const plot = screen.getByLabelText('Timeline overview; drag horizontally to focus events')
     vi.spyOn(plot, 'getBoundingClientRect').mockReturnValue({
       x: 0, y: 0, left: 0, top: 0, right: 100, bottom: 72, width: 100, height: 72,
@@ -533,7 +545,7 @@ describe('tab switching in ConversationRoot', () => {
   it('clicking a timeline block clears the range, selects the record, and opens its inspector', async () => {
     const b = await bench()
     const view = mount(b.slots)
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
     const plot = screen.getByLabelText('Timeline overview; drag horizontally to focus events')
     vi.spyOn(plot, 'getBoundingClientRect').mockReturnValue({
       x: 0, y: 0, left: 0, top: 0, right: 100, bottom: 72, width: 100, height: 72,
@@ -571,7 +583,7 @@ describe('tab switching in ConversationRoot', () => {
   it('empty window keeps the toolbar and reports no timing data', async () => {
     const b = await bench(historySnapshot([]))
     mount(b.slots)
-    fireEvent.click(screen.getByRole('tab', { name: 'Trajectory' }))
+    showView('trajectory')
     expect(screen.getByRole('toolbar', { name: 'Trajectory toolbar' })).toBeTruthy()
     expect(screen.getByText('No timing data')).toBeTruthy()
     expect(screen.getByRole<HTMLButtonElement>('button', {

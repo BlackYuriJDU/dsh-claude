@@ -75,7 +75,7 @@ function SettingsPanel({ rows, groupLabels, renderSlot, activeId, onSelect, onCl
       <div className={css.panel} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <nav className={css.nav}>
           <div className={css.navTitle} id={titleId}>{renderSlot('settings.header', {})}</div>
-          {GROUP_ORDER.map(group => {
+          {GROUP_ORDER.map((group) => {
             const groupRows = rows.filter(row => (row.group ?? 'config') === group)
             if (groupRows.length === 0) return null
             return (

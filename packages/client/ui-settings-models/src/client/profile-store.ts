@@ -13,8 +13,9 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 /** Durable settings namespace for product-wide GUI onboarding facts. */
 export const ONBOARDING_SETTINGS_NAMESPACE = 'ui-onboarding'
 
-/** localStorage mirror keys (read synchronously by hero and sidebar). */
+/** localStorage mirror key for the user name (read synchronously by hero and sidebar). */
 export const USER_NAME_STORE_KEY = 'dshc:user-name'
+/** localStorage mirror key for the user email (read synchronously by the sidebar profile). */
 export const USER_EMAIL_STORE_KEY = 'dshc:user-email'
 
 /** The onboarding section fields this store owns. */
@@ -44,7 +45,7 @@ export interface ProfileOnboardingState {
  */
 export function decodeOnboardingSection(section: unknown): OnboardingProfileSection {
   return typeof section === 'object' && section !== null && !Array.isArray(section)
-    ? section as OnboardingProfileSection
+    ? section
     : {}
 }
 

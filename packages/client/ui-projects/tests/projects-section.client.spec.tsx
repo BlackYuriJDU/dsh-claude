@@ -13,6 +13,8 @@ import type {
 import { ProjectsSection } from '../src/client/ProjectsSection.tsx'
 import type { ProjectsScopeSection } from '../src/client/ProjectsSection.tsx'
 import { en } from '../src/client/locales.ts'
+// Type-only: pulls the package's LocaleNamespaceMap merge so the `t` seat types.
+import type {} from '../src/client/index.ts'
 
 const t = (key: string): string => (en as Record<string, string>)[key] ?? key
 
@@ -29,7 +31,7 @@ function scopeOf(initial: ProjectsScopeSection): SettingsScope<ProjectsScopeSect
     subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener) } },
     set: (_field, next) => {
       writes.push(next)
-      snap = { ...snap, value: { projects: next as ProjectsScopeSection['projects'] } }
+      snap = { ...snap, value: { projects: next as NonNullable<ProjectsScopeSection['projects']> } }
       for (const fn of [...listeners]) fn()
       return Promise.resolve()
     },
@@ -53,6 +55,8 @@ function mount(initial: ProjectsScopeSection, items: readonly WorkspaceView[], p
   const view = render(
     <ProjectsSection
       projects={projects}
+      close={() => {}}
+      useSessions={(() => { throw new Error('unused') })}
       pickFile={pickFile ?? (() => Promise.resolve(null))}
       useWorkspaces={useWorkspaces}
       t={t as never}

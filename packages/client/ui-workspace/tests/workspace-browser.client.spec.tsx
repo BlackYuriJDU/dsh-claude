@@ -542,8 +542,8 @@ describe('WorkspaceBrowser search', () => {
   it('aborts a superseded request and ignores its stale result', async () => {
     vi.useFakeTimers()
     try {
-      const searchSessions = vi.fn(async (query: string) => {
-        await new Promise(resolve => { setTimeout(resolve, 10) })
+      const searchSessions = vi.fn(async (_query: string, _signal: AbortSignal) => {
+        await new Promise((resolve) => { setTimeout(resolve, 10) })
         return { items: [], hasMore: false }
       })
       mount({ searchSessions })
@@ -558,9 +558,9 @@ describe('WorkspaceBrowser search', () => {
       // One request per settled debounce window; the superseded in-flight
       // request ('second') was aborted and its late answer ignored.
       expect(searchSessions).toHaveBeenCalledTimes(3)
-      const [secondQuery, secondSignal] = searchSessions.mock.calls[1] as [string, AbortSignal]
+      const [secondQuery, secondSignal] = searchSessions.mock.calls[1] ?? []
       expect(secondQuery).toBe('second')
-      expect(secondSignal.aborted).toBe(true)
+      expect(secondSignal?.aborted).toBe(true)
       expect(screen.getByRole('tree', { name: 'Search results' })).toBeTruthy()
     } finally {
       vi.useRealTimers()
@@ -570,7 +570,7 @@ describe('WorkspaceBrowser search', () => {
   it('shows the no-sessions empty state and resolves an empty search', async () => {
     vi.useFakeTimers()
     try {
-      const b = mount()
+      mount()
       expect(screen.getByText('No sessions yet')).toBeTruthy()
       fireEvent.click(screen.getByRole('button', { name: 'Search sessions' }))
       fireEvent.change(screen.getByPlaceholderText('Search sessions...'), { target: { value: 'x' } })

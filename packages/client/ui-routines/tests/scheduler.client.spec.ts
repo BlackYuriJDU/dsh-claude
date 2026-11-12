@@ -23,7 +23,7 @@ function makeBench(initial: RoutinesSettings = {}) {
   const settings = {
     get: (ns: string) => (ns === ROUTINES_SETTINGS_NAMESPACE ? state.section : undefined),
     update: vi.fn(async (ns: string, section: object) => {
-      if (ns === ROUTINES_SETTINGS_NAMESPACE) state.section = section as RoutinesSettings
+      if (ns === ROUTINES_SETTINGS_NAMESPACE) state.section = section
       return {}
     }),
   }
@@ -60,7 +60,7 @@ describe('routineIntervalMs', () => {
 
 describe('nextFireDelayMs', () => {
   it('schedules a routine that never ran one interval out (no immediate fire on create)', () => {
-    expect(nextFireDelayMs(routine({ lastRunAt: undefined }), 1_000_000)).toBe(86_400_000)
+    expect(nextFireDelayMs(routine(), 1_000_000)).toBe(86_400_000)
   })
 
   it('computes the remaining delay from the last run', () => {
@@ -76,7 +76,7 @@ describe('nextFireDelayMs', () => {
 
 describe('RoutineScheduler', () => {
   it('arms only enabled routines and fires them through the Agent registry', async () => {
-    const b = makeBench({ routines: [routine({ lastRunAt: undefined }), routine({ id: 'r2', enabled: false })] })
+    const b = makeBench({ routines: [routine(), routine({ id: 'r2', enabled: false })] })
     b.scheduler.reconcile()
     // r1 (daily, never ran) fires after one interval; r2 is disabled.
     await vi.advanceTimersByTimeAsync(86_400_000)
@@ -88,7 +88,7 @@ describe('RoutineScheduler', () => {
   })
 
   it('stamps lastRunAt after a successful fire', async () => {
-    const b = makeBench({ routines: [routine({ lastRunAt: undefined })] })
+    const b = makeBench({ routines: [routine()] })
     b.scheduler.reconcile()
     await vi.advanceTimersByTimeAsync(86_400_000)
     expect(b.settings.update).toHaveBeenCalled()
@@ -97,7 +97,7 @@ describe('RoutineScheduler', () => {
   })
 
   it('re-arms after firing (recurring, not one-shot)', async () => {
-    const b = makeBench({ routines: [routine({ every: 1, unit: 'minutes', lastRunAt: undefined })] })
+    const b = makeBench({ routines: [routine({ every: 1, unit: 'minutes' })] })
     b.scheduler.reconcile()
     await vi.advanceTimersByTimeAsync(60_000)
     expect(b.agents.create).toHaveBeenCalledTimes(1)
@@ -118,7 +118,7 @@ describe('RoutineScheduler', () => {
   it('does not overlap a routine with itself while a fire is in flight', async () => {
     let release: () => void = () => {}
     const gate = new Promise<void>((resolve) => { release = resolve })
-    const b = makeBench({ routines: [routine({ every: 1, unit: 'minutes', lastRunAt: undefined })] })
+    const b = makeBench({ routines: [routine({ every: 1, unit: 'minutes' })] })
     b.agents.create.mockImplementationOnce(async () => {
       await gate
       return {

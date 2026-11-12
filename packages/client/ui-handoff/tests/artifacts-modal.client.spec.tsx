@@ -7,6 +7,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import type { ISessions } from '@deepseek-ai/dsh-client-runtime/client'
 import { ArtifactsModal } from '../src/client/ArtifactsModal.tsx'
 import { en } from '../src/client/locales.ts'
+// Type-only: pulls the package's LocaleNamespaceMap merge so the `t` seat types.
+import type {} from '../src/client/index.tsx'
 
 const t = (key: string, vars?: Record<string, string>): string => {
   let text = (en as Record<string, string>)[key] ?? key
@@ -45,11 +47,17 @@ function sessionsOf(turns: ReadonlyMap<number, unknown>, cwd = '/ws'): ISessions
   } as unknown as ISessions
 }
 
+/** Global hook seats; the modal reads neither. */
+const seats = {
+  useSessions: (() => { throw new Error('unused') }) as never,
+  useWorkspaces: (() => { throw new Error('unused') }) as never,
+}
+
 afterEach(cleanup)
 
 describe('ArtifactsModal', () => {
   it('renders the empty state when nothing was produced', () => {
-    render(<ArtifactsModal sessions={sessionsOf(new Map())} openPath={vi.fn()} t={t as never} />)
+    render(<ArtifactsModal sessions={sessionsOf(new Map())} openPath={vi.fn()} t={t as never} {...seats} />)
     expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
   })
 
@@ -58,7 +66,7 @@ describe('ArtifactsModal', () => {
       [1, turn(['/ws/a.ts', '/ws/a.ts', '/ws/b.ts'])],
       [3, turn(['/ws/c.ts'])],
     ])
-    render(<ArtifactsModal sessions={sessionsOf(turns)} openPath={vi.fn()} t={t as never} />)
+    render(<ArtifactsModal sessions={sessionsOf(turns)} openPath={vi.fn()} t={t as never} {...seats} />)
     const titles = screen.getAllByText(/Turn /).map(node => node.textContent)
     expect(titles).toEqual(['Turn 3', 'Turn 1'])
     // Turn 1 produced a.ts (deduped) and b.ts.
@@ -70,14 +78,14 @@ describe('ArtifactsModal', () => {
   it('opens a produced file through the Host opener resolved against the cwd', () => {
     const openPath = vi.fn()
     const turns = new Map<number, unknown>([[1, turn(['src/a.ts'])]])
-    render(<ArtifactsModal sessions={sessionsOf(turns, '/ws')} openPath={openPath} t={t as never} />)
+    render(<ArtifactsModal sessions={sessionsOf(turns, '/ws')} openPath={openPath} t={t as never} {...seats} />)
     fireEvent.click(screen.getByText('a.ts'))
     expect(openPath).toHaveBeenCalledWith('/ws/src/a.ts')
   })
 
   it('renders nothing produced from turns without deliverables data', () => {
     const turns = new Map<number, unknown>([[1, turn([])]])
-    render(<ArtifactsModal sessions={sessionsOf(turns)} openPath={vi.fn()} t={t as never} />)
+    render(<ArtifactsModal sessions={sessionsOf(turns)} openPath={vi.fn()} t={t as never} {...seats} />)
     expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
   })
 })

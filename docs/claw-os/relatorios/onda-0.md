@@ -104,7 +104,7 @@ Busca em `apps/web`, `apps/cli/config` e `packages/client/*/src`, excluindo test
 - `DESIGN.md`: o frontmatter (`name: Claude-design-analysis`, linha 3) e as linhas 4, 303-531 e 584-585 descrevem a marca da Anthropic (spike-mark, "Try Claude", fontes licenciadas Copernicus/StyreneB).
 - `packages/client/ui-theme/src/styles/claude-design.css:2,568` (nome do arquivo e cabeçalho), `ui-theme/src/styles/fonts.css:2`, `ui-theme/src/theme-settings.ts:6`, `ui-theme/src/boot-theme.ts:12`, `ui-theme/src/client/AppearanceRow.tsx:28`.
 - Comentários "Claude layout"/"Claude-style": `ui-sidebar/src/client/SidebarRoot.tsx:2`, `SidebarRoot.module.css:310`, `ui-workspace/src/client/WorkspaceBrowser.tsx:657`, `WorkspaceBrowser.module.css:41`, `ui-conversation/src/client/skeleton/PlusMenu.tsx:1`, `EmptyHero.tsx:1`.
-- `docs/claude-behavior-research.md` e `docs/claude-behavior-applied.md`.
+- `docs/claw-os/pesquisa/claude-behavior-research.md` e `docs/claw-os/pesquisa/claude-behavior-applied.md` (movidos para `docs/claw-os/pesquisa/` na Onda 0.5).
 
 ## Lista 2 — onde `danger-full-access` é escolhido e o que muda para `workspace-write` (entrada da Onda 1)
 

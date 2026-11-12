@@ -76,12 +76,12 @@ export function ArtifactsModal({ sessions, openPath, t }: ArtifactsModalComponen
   // sessions service (shell.overlay is root-scope, so there is no useSession
   // standard hook — the binding's getSnapshot is the read path).
   const current = useSyncExternalStore(
-    (listener) => sessions.list.subscribe(listener),
+    listener => sessions.list.subscribe(listener),
     () => sessions.list.getSnapshot().current,
   )
   const binding = current === undefined ? undefined : sessions.binding(current)
   const snapshot = useSyncExternalStore(
-    (listener) => binding === undefined ? () => {} : binding.session.subscribe(listener),
+    listener => binding === undefined ? () => {} : binding.session.subscribe(listener),
     () => binding?.session.getSnapshot(),
   )
   const groups = useMemo(

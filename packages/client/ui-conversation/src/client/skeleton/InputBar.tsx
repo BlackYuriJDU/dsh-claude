@@ -133,13 +133,13 @@ export function InputBar({
     try { return window.localStorage.getItem('dshc:memory') !== '0' } catch { return true }
   })
   const toggleWebSearch = useCallback(() => {
-    setWebSearchOn(current => {
+    setWebSearchOn((current) => {
       try { window.localStorage.setItem('dshc:web-search', current ? '0' : '1') } catch { /* storage unavailable */ }
       return !current
     })
   }, [])
   const toggleMemory = useCallback(() => {
-    setMemoryOn(current => {
+    setMemoryOn((current) => {
       try { window.localStorage.setItem('dshc:memory', current ? '0' : '1') } catch { /* storage unavailable */ }
       return !current
     })
@@ -590,9 +590,9 @@ export function InputBar({
         canvas.height = video.videoHeight
         const context = canvas.getContext('2d')
         if (context !== null) context.drawImage(video, 0, 0)
-        stream.getTracks().forEach(track => track.stop())
+        stream.getTracks().forEach((track) =>{  track.stop() })
         if (context === null || canvas.width === 0) return
-        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'))
+        const blob = await new Promise<Blob | null>((resolve) =>{  canvas.toBlob(resolve, 'image/png') })
         if (blob === null) return
         intakeImages([new File([blob], 'captura de tela.png', { type: 'image/png' })])
       } catch {
@@ -870,30 +870,30 @@ export function InputBar({
                 left seats belong to the greeting screen only — a live
                 session's capsule carries the +, the text, mic, send. */}
             {variant === 'hero' && (
-            <div className={css.segmented} role="tablist" aria-label={t('mode.label')}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={composerMode === 'chat'}
-                className={composerMode === 'chat' ? css.segmentActive : css.segment}
-                disabled={locked}
-                onMouseDown={keepFocus}
-                onClick={() => { setComposerMode('chat') }}
-              >
-                {t('mode.chat')}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={composerMode === 'cowork'}
-                className={composerMode === 'cowork' ? css.segmentActive : css.segment}
-                disabled={locked}
-                onMouseDown={keepFocus}
-                onClick={() => { setComposerMode('cowork') }}
-              >
-                {t('mode.cowork')}
-              </button>
-            </div>
+              <div className={css.segmented} role="tablist" aria-label={t('mode.label')}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={composerMode === 'chat'}
+                  className={composerMode === 'chat' ? css.segmentActive : css.segment}
+                  disabled={locked}
+                  onMouseDown={keepFocus}
+                  onClick={() => { setComposerMode('chat') }}
+                >
+                  {t('mode.chat')}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={composerMode === 'cowork'}
+                  className={composerMode === 'cowork' ? css.segmentActive : css.segment}
+                  disabled={locked}
+                  onMouseDown={keepFocus}
+                  onClick={() => { setComposerMode('cowork') }}
+                >
+                  {t('mode.cowork')}
+                </button>
+              </div>
             )}
             {variant === 'hero' && (
               <div className={css.modes}>
@@ -926,26 +926,26 @@ export function InputBar({
               </Tooltip>
             )}
             {(!empty || primaryStops) && (
-            <Tooltip label={primaryLabel} side="top" delayMs={500}>
-              <button
-                type="button"
-                className={css.primary}
-                aria-label={primaryLabel}
-                disabled={primaryStops ? stop === undefined : empty || disabled || machineBusy}
-                onMouseDown={keepFocus}
-                onClick={onPrimary}
-              >
-                {primaryStops ? (
-                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
-                    <rect x="3" y="3" width="10" height="10" rx="3" fill="currentColor" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
-                    <path d="M8.3125 0.980183C8.66767 1.0531 8.97902 1.20418 9.2627 1.43233C9.48724 1.61297 9.73029 1.85793 9.97949 2.10714L14.707 6.83468L13.293 8.24874L9 3.95577V15.0417H7V3.95577L2.70703 8.24874L1.29297 6.83468L6.02051 2.10714C6.26971 1.85793 6.51277 1.61297 6.7373 1.43233C6.97662 1.23986 7.28445 1.04402 7.6875 0.980183C7.8973 0.947006 8.1031 0.95516 8.3125 0.980183Z" fill="currentColor" />
-                  </svg>
-                )}
-              </button>
-            </Tooltip>
+              <Tooltip label={primaryLabel} side="top" delayMs={500}>
+                <button
+                  type="button"
+                  className={css.primary}
+                  aria-label={primaryLabel}
+                  disabled={primaryStops ? stop === undefined : empty || disabled || machineBusy}
+                  onMouseDown={keepFocus}
+                  onClick={onPrimary}
+                >
+                  {primaryStops ? (
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
+                      <rect x="3" y="3" width="10" height="10" rx="3" fill="currentColor" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
+                      <path d="M8.3125 0.980183C8.66767 1.0531 8.97902 1.20418 9.2627 1.43233C9.48724 1.61297 9.73029 1.85793 9.97949 2.10714L14.707 6.83468L13.293 8.24874L9 3.95577V15.0417H7V3.95577L2.70703 8.24874L1.29297 6.83468L6.02051 2.10714C6.26971 1.85793 6.51277 1.61297 6.7373 1.43233C6.97662 1.23986 7.28445 1.04402 7.6875 0.980183C7.8973 0.947006 8.1031 0.95516 8.3125 0.980183Z" fill="currentColor" />
+                    </svg>
+                  )}
+                </button>
+              </Tooltip>
             )}
           </div>
         </div>

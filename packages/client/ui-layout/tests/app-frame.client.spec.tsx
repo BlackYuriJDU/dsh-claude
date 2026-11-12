@@ -2,9 +2,7 @@
 /**
  * AppFrame interaction spec under the four-share props form: real layout
  * store instance (createLayoutStore().create() — the test-sanctioned engine
- * path), a recording renderSlot stub, and a render-prop SessionProvider stub
- * (the real one is framework-wired to the renderer host; its own behavior is
- * ui-renderer's spec territory). Drag sequences (pointer capture + rAF flush)
+ * path) and a recording renderSlot stub. Drag sequences (pointer capture + rAF flush)
  * and the narrow-viewport drawer are the preserved behavior assertions.
  * jsdom has no layout engine, so the frame width comes from a mocked
  * getBoundingClientRect and resizes are driven through the ResizeObserver
@@ -21,19 +19,10 @@ import type {
   SessionId, SessionListState, WorkspaceListState,
 } from '@deepseek-ai/dsh-client-runtime/client'
 
-// Session selection controls for the SessionProvider and useSessions stubs.
+// Session selection controls for the useSessions stub.
 const selectedSession = { current: 's-test' as SessionId | undefined }
 const selectedSessionBlank = { current: false }
 const baselinesReady = { current: true }
-
-// Render-prop contract stub fed through the standard seat prop (the renderer
-// injects the real one in production): session mode runs children(id), empty
-// mode runs the empty branch — the frame must work against exactly this
-// shape. Typed as the seat's own component type so the branded sessionId
-// parameter stays contract-checked.
-const SessionProviderStub: AppFrameProps['SessionProvider'] = ({ children, empty }) =>
-  selectedSession.current === undefined ? <>{empty?.() ?? null}</> : <>{children(selectedSession.current)}</>
-
 
 /** Observer stub: captures the callback so tests can fire resizes manually. */
 let fireResize: (() => void) | null = null
@@ -86,7 +75,6 @@ function mountFrame() {
       renderSlot={renderSlot}
       useSessions={useSessions}
       useWorkspaces={((sel: (s: WorkspaceListState) => unknown) => sel(workspaceState)) as never}
-      SessionProvider={SessionProviderStub}
     />
   )
   const utils = render(element())

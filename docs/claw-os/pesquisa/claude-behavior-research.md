@@ -53,8 +53,7 @@ Do n
 2.   Claude loads interactive UI guidelines.
 3.   Claude begins streaming a `show_widget` tool call.
 4.   Partial HTML fragments arrive.
-5.   Browser renders widget progressively.
-6.
+5.   Browser renders widget progressively. 6.
 
 ### claude artifacts publish share
 * [Publish and share artifacts | Claude Help Center](https://support.claude.com/en/articles/9547008-publish-and-share-artifacts) — # Publish and share artifacts
@@ -96,8 +95,7 @@ Claude will automatically summarize your conversations and create a synthesis of
 
 ### Preflight Checklist
 
- I have searched existing requests and this feature hasn't been requested yet
- This is a single feature request (not multiple features)
+ I have searched existing requests and this feature hasn't been requested yet This is a single feature request (not multiple features)
 
 ### Problem Statement
 
@@ -107,12 +105,7 @@ Currently, Clau
 
 ### claude.ai keyboard shortcuts list
 * [53 Claude Code Shortcuts for Faster Productivity | Charlie Hills 🦩 posted on the topic | LinkedIn](https://www.linkedin.com/posts/charlie-hills_you-are-using-claude-code-the-slow-way-activity-7474763135380430848--49_) — You are using Claude Code the slow way. Here are all 53 shortcuts that fix that: Control & Exit Esc - stop Claude mid-response Esc Esc - clear draft, or open rewind Ctrl+C - interrupt, twice to exit Ctrl+D - exit Claude 
-* [Customize keyboard shortcuts - Claude Code Docs](https://code.claude.com/docs/en/keybindings) — | Shortcut | Reason |
- --- |
-| Ctrl+C | Hardcoded interrupt/cancel |
-| Ctrl+D | Hardcoded exit |
-| Ctrl+M | Claude Code always receives it as Enter |
-| Ctrl+ | Claude Code always receives it as Escape. In terminals that 
+* [Customize keyboard shortcuts - Claude Code Docs](https://code.claude.com/docs/en/keybindings)
 * [Medium](https://medium.com/coding-nexus/12-claude-shortcuts-that-cut-my-workflow-in-half-928550deb4ab) — --
 
 Listen
@@ -139,10 +132,7 @@ The `InlineCitation` compon
 ### claude code blocks copy button UI
 * [Currently there is no easy way to copy a full Claude response in the terminal UI. The web version of Claude has a copy button on every response, but Claude Code lacks this. · Issue #48372 · anthropics/claude-code · GitHub](https://github.com/anthropics/claude-code/issues/48372) — Current behavior:
 
-No visible copy button on responses  
- Cmd+Shift+C copies only the last response  
- Copying earlier responses requires manual mouse selection, which is error-prone for long multi-block answers  
- Reque
+No visible copy button on responses Cmd+Shift+C copies only the last response Copying earlier responses requires manual mouse selection, which is error-prone for long multi-block answers Reque
 * [How to copy text from Claude Code (without the terminal pain)](https://claude-dev.tools/docs/copy-paste) — 3. Every fenced code block in claude-devtools renders as its own component with a copy button. One click puts the block's contents on your clipboard with original indentation preserved, no surrounding prose, and no Markd
 * [[BUG] Cowork: Code block copy button not working · Issue #18286 · anthropics/claude-code · GitHub](https://github.com/anthropics/claude-code/issues/18286) — ### Steps to Reproduce
 
@@ -171,10 +161,7 @@ You can upload files to Claude in several ways:
 
 #### Primary Colors
 
- Claude Orange: `#E67D22` - Keywords, accents, active elements
- Light Orange: `#FFB38A` - Functions, hover states
- Cream: `#F5E6D3` - Primary text, high contrast
- Muted Tan: `#C4A5
+ Claude Orange: `#E67D22` - Keywords, accents, active elements Light Orange: `#FFB38A` - Functions, hover states Cream: `#F5E6D3` - Primary text, high contrast Muted Tan: `#C4A5
 * [Dark Mode Design Claude Code Skill | Impeccable Dark](https://mcpmarket.com/tools/skills/professional-dark-mode-design) — The Dark Mode Design skill enables Claude to move beyond simple color inversion to create sophisticated, high-contrast, and eye-strain-free user interfaces. It provides deep expertise in OKLCH color palettes, surface ele
 * [Claude Brand Color Palette: Hex, RGB, CMYK and UIs](https://mobbin.com/colors/brand/claude) — /
 
@@ -187,9 +174,7 @@ Claude Colors
 Claude is a dynamic platform known for its sleek and minimalistic design. The primary colors used in Claude's branding and interface designs include Crail (#C15F3C), Cloudy (#B1ADA1)
 
 ### claude image upload preview UI
-* [Vision - Claude Platform Docs](https://platform.claude.com/docs/en/build-with-claude/vision) — claude.ai. Upload an image like you would a file, or drag and drop an image directly into the chat window.
- Playground in the Claude Console. Add images directly to any User message block.
- API request. See the following
+* [Vision - Claude Platform Docs](https://platform.claude.com/docs/en/build-with-claude/vision) — claude.ai. Upload an image like you would a file, or drag and drop an image directly into the chat window. Playground in the Claude Console. Add images directly to any User message block. API request. See the following
 * [claude-code-supported-image-upload-types | ClaudeLog](https://www.claudelog.com/faqs/claude-code-supported-image-upload-types) — Use PNG for screenshots and UI elements with text for crisp rendering. JPEG works best for photographs. WebP provides superior compression while maintaining quality.
 
 Custom image
@@ -202,17 +187,15 @@ Image Quality - Use
 ### claude light mode cream background
 * [Claude Mode - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=TheWebDev.claude-mode) — 4 Themes Included🟠 Claude Mode Light Warm cream (`#f5f0e6`) editor background with terracotta frame effect. 🟠 Claude Mode Dark Deep warm darks (`#1f1e1b`) with the same terracotta frame. 🟣 Claude Velvet Light Warm cre
 * [Claude - shadcn.io](https://www.shadcn.io/theme/claude) — Most AI interfaces are cold—clinical blues, sterile whites, the visual language of machines. Claude's design philosophy is different: warm terracotta orange at oklch(0.70 0.14 45) that feels human, cream backgrounds at o
-* [How to Change Color Mode in Claude AI Light & Dark Mode - YouTube](https://www.youtube.com/watch?v=TyEUtyjMt7c) — ✅ How to open the Appearance settings in Claude AI (Settings → Appearance) 
-Claude Help Center
+* [How to Change Color Mode in Claude AI Light & Dark Mode - YouTube](https://www.youtube.com/watch?v=TyEUtyjMt7c) — ✅ How to open the Appearance settings in Claude AI (Settings → Appearance) Claude Help Center
 
-✅ How to choose between Light, Match System, and Dark under “Color mode” 
-Claude Help Center
+✅ How to choose between Light, Match System, and Dark under “Color mode” Claude Help Center
 
 ✅ Tips if the mode doesn’t upd
 
 ### claude serif headlines typography
 * [Professional Typography Guide - Claude Code Skill](https://mcpmarket.com/tools/skills/professional-typography-guide) — The Font Recommendations skill is a comprehensive typography reference designed to help developers and designers make informed visual choices within Claude Code. It features a structured directory of high-quality sans-se
-* [Huh. I didn't notice Claude had serif font. Now that I look at it, it's actually... | Hacker News](https://news.ycombinator.com/item?id=41917027) — |  |  |  |
+* [Huh. I didn't notice Claude had serif font. Now that I look at it, it's actually... | Hacker News](https://news.ycombinator.com/item?id=41917027)
  --- 
 |  |  | paradite on Oct 22, 2024  | parent | context | favorite | on: Computer use, a new Claude 3.5 Sonnet, and Claude ...   Huh. I didn't notice Claude had serif font. Now that I look at it, it's actua
 * [AI Has Come for Serif Fonts | WIRED](https://www.wired.com/story/ai-has-come-for-serif-fonts) — Good ole Claude itself pretty much confirms much of this. Prompted to account for its shift to serif typefaces, the chatbot cites issues of trust, authority, and “literary seriousness,” while also accounting for “heavy b
@@ -220,9 +203,7 @@ Claude Help Center
 ### claude coral terracotta accent color
 * [Terracotta Color Palettes to Fall For | Wayfair](https://www.wayfair.com/sca/ideas-and-advice/guides/terracotta-color-palettes-to-fall-for-T23884) — If you’re drawn to a subtler color palette, consider using terracotta as an accent color against a base of soft taupe, espresso brown, and slate gray. These earthy neutrals will allow the terracotta accents to really shi
 * [My favorite shades of terracotta paint colors from different brands - Cuckoo4Design](https://cuckoo4design.com/my-favorite-shades-of-terracotta-paint-colors-from-different-brands) — The wide variety of terracotta paint colors can range anywhere from deep burnt orange with a touch of brown shades to peach, blush, coral, and pinks with undertones of gray and tan. They are all cozy, rich, and warm eart
-* [Terracotta Color: Hex Code, Palettes & Meaning | Figma](https://www.figma.com/colors/terracotta) — Turquoise (#40E0D0) complements terracotta without overshadowing it.
- Champagne (#F7E6CA) and terracotta are often paired in Spanish Colonial architecture.
- Khaki (#D5C58A) generates a sense of comfort and groundedness w
+* [Terracotta Color: Hex Code, Palettes & Meaning | Figma](https://www.figma.com/colors/terracotta) — Turquoise (#40E0D0) complements terracotta without overshadowing it. Champagne (#F7E6CA) and terracotta are often paired in Spanish Colonial architecture. Khaki (#D5C58A) generates a sense of comfort and groundedness w
 
 ### claude starburst logo meaning
 * [Claude Logo Design: The AI Mark Built To Look Like None Of Its Rivals | DesignRush](https://www.designrush.com/best-designs/logo/claude-logo-design-the-ai-mark-built-to-look-none-of-its-rivals) — The Claude icon is a radiating, off-kilter starburst made of strokes that look drawn by hand instead of plotted on a grid. On the interface it breathes, pulsing outward like something alive rather than rendered. First co
@@ -254,8 +235,7 @@ Show locks and upgrade paths in the picker. Do not silently downgrade on free pl
 Claude Opus 4.6
 
 Highest quality for complex w
-* [Control UI model picker sends bare model IDs instead of provider-qualified refs · Issue #48106 · openclaw/openclaw · GitHub](https://github.com/openclaw/openclaw/issues/48106) — ```
-Failed to set model: GatewayRequestError: model not allowed: openai-codex/claude-opus-4-5 
+* [Control UI model picker sends bare model IDs instead of provider-qualified refs · Issue #48106 · openclaw/openclaw · GitHub](https://github.com/openclaw/openclaw/issues/48106) — ``` Failed to set model: GatewayRequestError: model not allowed: openai-codex/claude-opus-4-5
 ```
 
 ## Root Cause
@@ -431,9 +411,7 @@ Claude models refuse much less on the control AI modificati
 ### 4. Fluency Bias (Overconfidence Illusion)
 
 Claude avoids hedging by default and delivers answers in a fluent, conf
-* [GitHub - conorbronsdon/avoid-ai-writing: Skill that audits and rewrites content to remove AI writing patterns. Use it with your favorite agents including Claude Code, OpenClaw, Codex, and Hermes. · GitHub](https://github.com/conorbronsdon/avoid-ai-writing) — | 12 | Filler phrases | "In order to," "Due to the fact that" | "To," "Because" |
-| 13 | False ranges | "from the Big Bang to dark matter" | List the actual topics |
-| 14 | Parenthetical hedging | "tools (like X and Y)" 
+* [GitHub - conorbronsdon/avoid-ai-writing: Skill that audits and rewrites content to remove AI writing patterns. Use it with your favorite agents including Claude Code, OpenClaw, Codex, and Hermes. · GitHub](https://github.com/conorbronsdon/avoid-ai-writing)
 * [Demands Are All You Need: Prompt Imperativeness Drastically Reduces Hedging In LLMs (n=900, Cohen's d = 2.67) — LessWrong](https://www.lesswrong.com/posts/vBDupg8iPqgdwhFzz/demands-are-all-you-need-prompt-imperativeness-drastically) — We demonstrate that large language models (LLMs) hedge (using uncertain language when responding to queries) frequently when responding to prompts, reducing trust and delaying decision making. We investigated whether pro
 
 ### Claude response formatting rules markdown
@@ -448,10 +426,7 @@ This is a list of instructions, not identity. Claude follo
 Write a blog post about AI and format it using markdown with headers, lists, and emphasisWr
 * [[BUG] Intermittent Markdown Formatting Misalignment · Issue #20827 · anthropics/claude-code · GitHub](https://github.com/anthropics/claude-code/issues/20827) — Behavior:
 
- Short responses tend to render correctly
- Longer responses with multiple formatting elements intermittently break
- Within the same response, some formatting is correct, some is wrong
- Styling appears shifted/
+ Short responses tend to render correctly Longer responses with multiple formatting elements intermittently break Within the same response, some formatting is correct, some is wrong Styling appears shifted/
 
 ### Claude when to use bullet lists
 * [Bulleted Lists 101: When, Why, and How to Use Them](https://clickhelp.com/clickhelp-technical-writing-blog/bulleted-lists-when-why-and-how-to-use-them) — Bulleted lists are useful when summarizing key points, listing steps or benefits, highlighting main takeaways, or organizing content in emails, presentations, and reports. They work best when you need to present informat
@@ -529,13 +504,9 @@ Tieline — product intent gr
 ### Claude copyright reproduction limits
 * [Who Owns Claude's Outputs? Copyright & Rights 2026](https://terms.law/2024/08/24/who-owns-claudes-outputs-and-how-can-they-be-used) — BMG is seeking:
 
- Full disclosure of training data sources and methods
- Injunction preventing use of BMG-controlled lyrics
- Statutory damages of up to $150,000 per work
- Discovery into Claude's model capabilities and lyr
+ Full disclosure of training data sources and methods Injunction preventing use of BMG-controlled lyrics Statutory damages of up to $150,000 per work Discovery into Claude's model capabilities and lyr
 * [Generative Artificial Intelligence and Copyright Law](https://www.congress.gov/crs-product/LSB10922) — "quintessentially transformative" (factor 1), that copying entire books was "reasonably necessary" to train Claude (factor 3), and that Claude does not create copyright-infringing outputs that would "displace demand" for
-* [COPYRIGHT: Who Owns Claude-Generated Content?](https://hyperonomy.com/2026/04/08/copyright-who-owns-claude-generated-content) — You own the outputs under Anthropic’s terms (both consumer and commercial).
- Copyright protection on purely AI-generated text is legally uncertain — but content you meaningfully shape, edit, and structure has stronger hu
+* [COPYRIGHT: Who Owns Claude-Generated Content?](https://hyperonomy.com/2026/04/08/copyright-who-owns-claude-generated-content) — You own the outputs under Anthropic’s terms (both consumer and commercial). Copyright protection on purely AI-generated text is legally uncertain — but content you meaningfully shape, edit, and structure has stronger hu
 
 ### Anthropic ASL safety levels
 * [What is AI Safety? Anthropic's ASL levels explained | Realm Labs posted on the topic | LinkedIn](https://www.linkedin.com/posts/realmlabs-ai_aitrust-trustworthyai-aisafety-activity-7376993949611311104-E6kB) — 📚 𝗔𝗜 𝗧𝗿𝘂𝘀𝘁 𝟭𝟬𝟭 𝟬𝟯 | 𝗪𝗵𝗮𝘁 𝗶𝘀 𝗔𝗜 𝗦𝗮𝗳𝗲𝘁𝘆? AI Safety is the practice of securing AI's positive impacts and mitigating the negative ones, including both small-scale harms and large-scale risks. Anth
@@ -577,8 +548,7 @@ About 70% of the tools section of the
 
 Thinking-mode (meta-workflow)
 
-> interleaved16000  
-> If the thinking\_mode is interleaved or auto, then after function results you should strongly consider outputting a thinking block. Here is an examp
+> interleaved16000 If the thinking\_mode is interleaved or auto, then after function results you should strongly consider outputting a thinking block. Here is an examp
 
 ### Claude TodoWrite when to use
 * [TodoWrite vs Task in Claude Code: Which to Use When](https://www.aibuilderclub.com/blog/claude-code-todowrite-vs-task) — #claude-code#task-management#productivity#developer-tools
@@ -604,14 +574,10 @@ At the start of your task, tell Claude Code to register th
 The principle is simple: think before you build. AI coding assistants are powerful, but that power goes to waste - or worse, causes damage - without a plan.
 
 Claude Code’s Plan Mode is the best implementation
-* [Spec Driven Workflow with Claude Code #3 - Using Plan Mode](https://www.youtube.com/watch?v=CmrmmszC_F4) — agent is responsible for providing that information back to Claude, the main
-agent, who then generates a plan markdown file, which is a robust set of
-instructions for implementing the plan, including code examples, file 
+* [Spec Driven Workflow with Claude Code #3 - Using Plan Mode](https://www.youtube.com/watch?v=CmrmmszC_F4) — agent is responsible for providing that information back to Claude, the main agent, who then generates a plan markdown file, which is a robust set of instructions for implementing the plan, including code examples, file
 
 ### Claude Code permission modes explain
-* [What Are Claude Code Permission Modes?](https://codingnomads.com/claude-code-permission-modes) — Permission modes control how much autonomy Claude has when editing files and running commands.
- The three main modes are `ask`, `acceptEdits`, and `auto`, ranging from most to least restrictive.
- You configure the defaul
+* [What Are Claude Code Permission Modes?](https://codingnomads.com/claude-code-permission-modes) — Permission modes control how much autonomy Claude has when editing files and running commands. The three main modes are `ask`, `acceptEdits`, and `auto`, ranging from most to least restrictive. You configure the defaul
 * [Medium](https://thequantitative.medium.com/why-claude-code-keeps-asking-for-permission-and-how-to-make-it-stop-0c4d687c0031) — Claude Code has a few permission modes. The strongest is `bypassPermissions` — the true "no guardrails, never ask" mode. The critical thing to understand:
 
 > A session’s permission mode is locked in when the session star
@@ -625,8 +591,7 @@ instructions for implementing the plan, including code examples, file
 * [Handling Tool Calls in the Claude Agent SDK - The Complete Loop | Team 400 Blog](https://team400.ai/blog/2026-04-claude-agent-sdk-handle-tool-calls) — The tool\_use\_id must match. Every tool result must reference the exact ID from the corresponding tool\_use block. If you mix up IDs when handling multiple parallel tool calls, Claude won't know which result goes with w
 
 ### Claude Code auto accept edits
-* [Configure permissions - Claude Code Docs](https://code.claude.com/docs/en/permissions) — | `acceptEdits` | Automatically accepts file edits and common filesystem commands such as `mkdir`, `touch`, `mv`, and `cp` for paths in the working directory or `additionalDirectories` |
-| `plan` | Claude reads files and
+* [Configure permissions - Claude Code Docs](https://code.claude.com/docs/en/permissions)
 * [Three more features for Claude Code today: First, auto-accept mode. Press Shift+Tab to toggle on auto-accept for file edits. This reduces friction while keeping you in the driver’s seat—you can tab in/out of auto-accept mode anytime.](https://www.threads.com/@boris_cherny/post/DHWS57syYez/three-more-features-for-claude-code-today-first-auto-accept-mode-press-shifttab-?hl=en) — # Thread
 
 12.8K views
@@ -720,8 +685,7 @@ Run Bash commands with Ctrl+B and r
 * [Best Git Commit Skill for Claude Code (August 2026) | Claude Directory](https://claudedirectory.org/skills/commit) — # Git Commit Skill Create well-formatted git commits following conventional commit standards. ## Usage ``` /commit ``` ## Behavior 1. Analyze staged changes with `git diff --staged` 2. Generate a conventional commit mess
 * [Ask HN: Has Claude Code suddenly started name-dropping Anthropic in commit msgs? | Hacker News](https://news.ycombinator.com/item?id=45329240) — > Are you trained to always name-drop anthropic?
 
-● No, I'm not trained to always name-drop Anthropic. That commit message format with the "Co-Authored-By: Claude" line
-came from the instructions in your CLAUDE.md file, 
+● No, I'm not trained to always name-drop Anthropic. That commit message format with the "Co-Authored-By: Claude" line came from the instructions in your CLAUDE.md file,
 * [claude-code-commits - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=HarisKhan1596.claude-code-commits) — only if you want to  Custom commit rules — Drop a markdown file in your workspace to define your own commit style  Model selection — Switch between Haiku (fast), Sonnet (balanced), or Opus (most capable)  Safe by design 
 
 ### Claude Code testing expectations
@@ -732,27 +696,22 @@ came from the instructions in your CLAUDE.md file,
 
 ### Claude Code comments philosophy minimal
 * [My experience with Claude Code after two weeks of adventures | Hacker News](https://news.ycombinator.com/item?id=44596472) — that I still understand my codebase, requirements, failure modes, etc. My philosophy is that software dev creation speed is certainly important, but durability is even more critical. Currently, it seems like going too de
-* [Claude Code Best Practices · Claude Code Best Practices](https://rosmur.github.io/claudecode-best-practices) — ```
-o3: Generate plan (asks clarifying questions) → Sonnet 4: Read plan, verify, create task list → Sonnet 3.7/4: Execute plan → Sonnet 4: Verify against original plan → o3: Verify against original ask (uncompromising) →
+* [Claude Code Best Practices · Claude Code Best Practices](https://rosmur.github.io/claudecode-best-practices) — ``` o3: Generate plan (asks clarifying questions) → Sonnet 4: Read plan, verify, create task list → Sonnet 3.7/4: Execute plan → Sonnet 4: Verify against original plan → o3: Verify against original ask (uncompromising) →
 * [I Made Claude Code Think Before It Codes. Here's the Prompt. - DEV Community](https://dev.to/_vjk/i-made-claude-code-think-before-it-codes-heres-the-prompt-bf) — Phase 3 enforces TDD. Claude writes failing tests, runs them (they must fail), implements the minimum code to make them pass, then verifies. In that order, every time, no shortcuts. [...] I'm building a Mac app (Drafted)
 
 ### Claude agent memory tool usage
 * [How is Claude-Mem different from Claude's New Memory Tool? : r/ClaudeAI](https://www.reddit.com/r/ClaudeAI/comments/1oegbwo/how_is_claudemem_different_from_claudes_new) — Your Claude-Mem is a comprehensive multi-session persistence system that captures context across different Claude Code sessions. It uses hooks to automatically capture tool usage, process observations through the Claude 
 * [Memory tool - Claude Platform Docs](https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool) — ## Use cases
 
-   Maintain project context across multiple agent sessions
-   Apply lessons from past interactions, decisions, and feedback to new tasks
-   Build up a knowledge base over time
+   Maintain project context across multiple agent sessions Apply lessons from past interactions, decisions, and feedback to new tasks Build up a knowledge base over time
 
 ## How it works
 
 When the m
-* [Agent Memory - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=digitarald.agent-memory) — | Agent Memory A VS Code extension that implements Claude's memory tool for Language Model agents. This extension enables AI agents to store and retrieve information across conversations through a persistent memory file 
+* [Agent Memory - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=digitarald.agent-memory)
 
 ### Claude MCP connectors behavior
-* [[FEATURE] Enable Custom MCP Connectors for Remote Sessions (Claude Code Web) · Issue #22726 · anthropics/claude-code · GitHub](https://github.com/anthropics/claude-code/issues/22726) — Claude Code Web reads/writes asset configurations directly to R2
- No need to switch between Claude.ai chat and Claude Code Web
- Seamless data management while coding
+* [[FEATURE] Enable Custom MCP Connectors for Remote Sessions (Claude Code Web) · Issue #22726 · anthropics/claude-code · GitHub](https://github.com/anthropics/claude-code/issues/22726) — Claude Code Web reads/writes asset configurations directly to R2 No need to switch between Claude.ai chat and Claude Code Web Seamless data management while coding
 
 ## Current Behavior
 
@@ -818,8 +777,7 @@ An experimental browser extension that allows Claude to read, click, and navigat
 ### August 21, 2025
 
 Admin cont
-* [Claude Code Desktop App: The Features That Change How You Work | MindStudio](https://www.mindstudio.ai/blog/claude-code-desktop-app-features) — The Claude Code desktop app now includes a live file structure panel that updates in real time as agents work — giving you spatial awareness of what’s being touched.
- Markdown rendering makes planning outputs, documentat
+* [Claude Code Desktop App: The Features That Change How You Work | MindStudio](https://www.mindstudio.ai/blog/claude-code-desktop-app-features) — The Claude Code desktop app now includes a live file structure panel that updates in real time as agents work — giving you spatial awareness of what’s being touched. Markdown rendering makes planning outputs, documentat
 
 ### claude cowork agentic mode explained
 * [Medium](https://medium.com/data-and-beyond/claude-cowork-the-complete-guide-to-anthropics-ai-desktop-agent-8151c18c7d6f) — Claude Cowork is an agentic AI assistant built into Anthropic’s Claude desktop app. In essence, it turns Claude into a “digital coworker” that can autonomously execute multi-step tasks directly on your computer not just 
@@ -858,9 +816,7 @@ I recommend starting with Claude Pro, so you can get to know the
 ### claude mobile app UI features
 * [GitHub - ceorkm/mobile-app-ui-design: Professional mobile app UI/UX design skill for Claude Code · GitHub](https://github.com/ceorkm/mobile-app-ui-design) — ## Features
 
- Complete Design Process: 5-step framework from context to polish
- Industry-Specific Conventions: Design patterns for 9+ industries (AI, Crypto, Finance, Health, etc.)
- Emotional Design Principles: Peak-End 
+ Complete Design Process: 5-step framework from context to polish Industry-Specific Conventions: Design patterns for 9+ industries (AI, Crypto, Finance, Health, etc.) Emotional Design Principles: Peak-End
 * [Claude Pro Mobile App Features: Complete 2025 Guide](https://aionx.co/claude-ai-reviews/claude-pro-mobile-app-features) — Claude’s mobile apps support comprehensive file interaction capabilities. For uploads, you can attach images (JPEG, PNG, GIF, WebP up to 10MB), PDFs, text files, spreadsheets, and presentations from your device storage o
 * [Design Critique: Claude Mobile App – IXD@Pratt](https://ixd.prattsi.org/2026/02/design-critique-claude-mobile-app) — Input Affordances: Gulf of Execution
 
@@ -913,10 +869,7 @@ It's their answer to OpenAI's ChatGPT Code Interpreter mode: Claude can now chos
 
 This tool is designed for authorized security testing only:
 
- ✅ Penetration testing with proper authorization
- ✅ Bug bounty programs
- ✅ Security research on your own applications
- ✅ Code review and se
+ ✅ Penetration testing with proper authorization ✅ Bug bounty programs ✅ Security research on your own applications ✅ Code review and se
 
 ### claude google drive integration
 * [A practical guide to the Claude Google Drive integration](https://www.eesel.ai/blog/claude-google-drive) — The Claude Google Drive integration is an impressive feature and a great tool for individuals or small teams looking to work smarter with their documents. It makes it much easier to summarize, query, and collaborate on t
@@ -951,8 +904,7 @@ Many developers are building custom MCP servers for thei
 
 ### claude output length setting
 * [Claude Code Concise Output Style: How to Enable It | explainx.ai Blog | explainx.ai](https://explainx.ai/blog/claude-code-concise-output-style-config-august-2026) — Concise output style targets exactly that pattern. Per the announcement, Claude now leads with the result rather than building up to it, and keeps responses short by default. Critically, Anthropic says it "still gives fu
-* [Fixing "Claude hit the maximum length for this conversation."](https://limitededitionjonathan.substack.com/p/ultimate-guide-fixing-claude-hit) — Stage 1: Claude sees just the metadata for all your Skills - maybe 30-50 tokens per Skill total
- Stage 2: When a request matches a Skill’s description, the full SKILL.md loads (Claude recommends keeping these under 500 l
+* [Fixing "Claude hit the maximum length for this conversation."](https://limitededitionjonathan.substack.com/p/ultimate-guide-fixing-claude-hit) — Stage 1: Claude sees just the metadata for all your Skills - maybe 30-50 tokens per Skill total Stage 2: When a request matches a Skill’s description, the full SKILL.md loads (Claude recommends keeping these under 500 l
 * [How do usage and length limits work? | Anthropic Help Center](https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work) — Length limits relate to Claude's context window—the amount of information Claude can work with in a single chat. Think of the context window as Claude's working memory that determines how much content it can process and 
 
 ### claude compare models selector
@@ -977,17 +929,9 @@ Claude’s memory on Max and Pro plans
 Max plan users can now access Claude’s memory capabilities. This feature will roll out to Pro plans gradually over the next two weeks.
 
 ### Oct
-* [Anthropic Claude Model Release Timeline](https://hidekazu-konishi.com/entry/anthropic_claude_model_release_timeline.html) — Anthropic - Claude Haiku 4.5 (2025-10-15)
-   Anthropic - Claude Opus 4.5 (2025-11-24)
-   Anthropic - Claude Opus 4.6 (2026-02-05)
-   Anthropic - Claude Sonnet 4.6 (2026-02-17)
-   Anthropic - Claude Opus 4.7 (2026-04-16)
+* [Anthropic Claude Model Release Timeline](https://hidekazu-konishi.com/entry/anthropic_claude_model_release_timeline.html) — Anthropic - Claude Haiku 4.5 (2025-10-15) Anthropic - Claude Opus 4.5 (2025-11-24) Anthropic - Claude Opus 4.6 (2026-02-05) Anthropic - Claude Sonnet 4.6 (2026-02-17) Anthropic - Claude Opus 4.7 (2026-04-16)
 
-* [Anthropic's Transparency Hub](https://www.anthropic.com/transparency) — |  |  |
- --- |
-| Model description | Claude Haiku 4.5 is our new hybrid reasoning large language model in our small, fast model class. |
-| Benchmarked Capabilities | See our Claude Haiku 4.5 announcement |
-| Acceptable U
+* [Anthropic's Transparency Hub](https://www.anthropic.com/transparency)
 
 ### claude enterprise security features
 * [Is Claude AI Safe? Enterprise Security Guide (2026) - Strac.io](https://www.strac.io/blog/is-claude-ai-safe) — Claude and ChatGPT have comparable enterprise safety features. Both offer encryption, SOC 2 compliance, and enterprise plans with no-training guarantees. Claude's Constitutional AI approach provides an additional layer o
@@ -1015,9 +959,7 @@ With Spokenly's macOS sideload buil
 ### claude changelog new features
 * [Claude Code CLI 2.1.172 changelog: New features ...](https://x.com/ClaudeCodeLog/status/2064817358934266326) — # Claude Code Changelog on X: "Claude Code CLI 2.1.172 changelog: New features: • Added a search bar when browsing a marketplace's plugins in /plugin • Added model attribute to the claude\_code.lines\_of\_code.count OTEL
 * [Claude Updates by Anthropic - August 2026](https://releasebot.io/updates/anthropic/claude) — Claude expands support for the new MCP 2026-07-28 spec, bringing a stateless core, stronger OAuth and OIDC authorization, and versioned extensions for Apps and Tasks. It also highlights new connector features like embedd
-* [Reflections of Claude Code from CHANGELOG](https://dev.to/oikon/reflections-of-claude-code-from-changelog-833) — Claude Code shipped 176 updates in 2025, demonstrating rapid iteration from beta to v2.0
- Context engineering emerged as the unifying theme across major features
- Key milestones: CLAUDE.md memory files, Plan mode, Subage
+* [Reflections of Claude Code from CHANGELOG](https://dev.to/oikon/reflections-of-claude-code-from-changelog-833) — Claude Code shipped 176 updates in 2025, demonstrating rapid iteration from beta to v2.0 Context engineering emerged as the unifying theme across major features Key milestones: CLAUDE.md memory files, Plan mode, Subage
 
 ### claude about page Anthropic mission
 * [Anthropic: Pioneering Safe AI Through Responsible Innovation](https://www.sentisight.ai/anthropic-us-ai-safety-research-company) — “At Anthropic, we build AI to serve humanity’s long-term well-being,” states the company’s mission. This philosophy drives their unique development strategy—one that involves both “bold steps forward and intentional paus
@@ -1039,12 +981,8 @@ Join us
 ### claude screenshot image input
 * [[FEATURE] Support image/screenshot paste in Claude Code terminal · Issue #32005 · anthropics/claude-code · GitHub](https://github.com/anthropics/claude-code/issues/32005) — Add support for image input in Claude Code via:
 
- Ctrl+V paste of clipboard images directly into the prompt
- Drag and drop of image files onto the terminal window
- Inline image preview (thumbnail) before submission so th
-* [How to Paste Screen Captures to Claude Code Editor on macOS | Marv[in]sight](https://www.marvinswift.com/en/programming/paste-capture-image-to-claude-code) — Press ctrl + cmd + shift + 4, then select the area you want to capture.
- After taking the screenshot, switch to Claude code’s editor.
- Press ctrl + v to paste the screenshot.
+ Ctrl+V paste of clipboard images directly into the prompt Drag and drop of image files onto the terminal window Inline image preview (thumbnail) before submission so th
+* [How to Paste Screen Captures to Claude Code Editor on macOS | Marv[in]sight](https://www.marvinswift.com/en/programming/paste-capture-image-to-claude-code) — Press ctrl + cmd + shift + 4, then select the area you want to capture. After taking the screenshot, switch to Claude code’s editor. Press ctrl + v to paste the screenshot.
 
 At this point, you’ll see the text “image” p
 * [How to Send an Image to Claude Code CLI Directly: Best Way to Paste Screenshots in Terminal (2026)](https://www.youtube.com/watch?v=VCGPy_tBcGA) — Sending images and pasting screenshots in Claude Code allows developers to automate repetitive UI tasks, instantly diagnose visual layout errors, extract data from complex charts, and speed up frontend development workfl
@@ -1058,9 +996,7 @@ At this point, you’ll see the text “image” p
 Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines
 * [Brand Guidelines — AI Agent Skill by Anthropic | AgenticSkills](https://agenticskills.io/skills/brand-guidelines) — ### Typography
 
- Headings: Poppins (with Arial fallback)
- Body Text: Lora (with Georgia fallback)
- Note: Fonts should be pre-installed in your environment for best results
+ Headings: Poppins (with Arial fallback) Body Text: Lora (with Georgia fallback) Note: Fonts should be pre-installed in your environment for best results
 
 ## Features
 
@@ -1069,9 +1005,7 @@ Applies Anthropic's official brand colors and typography to any sort of artifact
  Appli
 
 ### claude.ai settings account page
-* [Getting Started with Claude AI | Setup Guide & First Steps](https://university.forwardfuture.ai/lessons/getting-started-with-claude-setup-first-steps) — Creating a Claude account is straightforward through claude.ai using email or Google login
- The Claude interface consists of four main areas: sidebar navigation, chat window, input area, and account settings
- Start new c
+* [Getting Started with Claude AI | Setup Guide & First Steps](https://university.forwardfuture.ai/lessons/getting-started-with-claude-setup-first-steps) — Creating a Claude account is straightforward through claude.ai using email or Google login The Claude interface consists of four main areas: sidebar navigation, chat window, input area, and account settings Start new c
 * [Claude AI login made easy with this straightforward guide to access your account](https://www.claila.com/blog/claude-ai-login) — First things first, if you're trying to find the Claude AI login page, the primary place to go is:
 
 This is the official Anthropic Claude portal where you can sign in, manage your account, and start chatting with Claude.
@@ -1093,16 +1027,13 @@ You can click into your design system and see that it's published and set to def
 
 ### claude profile preferences options
 * [How to Use Claude's Profile Settings to Get Better Responses Every Time - Digital Product Designer + Developer + Technophile](https://johnnybilotta.com/post/claude-profile-settings-guide) — > TL;DR: Claude’s personalization settings (profile preferences, project instructions, and response styles) let you establish persistent context that applies automatically to every conversation. Most users skip this setu
-* [Understanding Claude's personalization features](https://support.claude.com/en/articles/10185728-understanding-claude-s-personalization-features) — Use profile instructions for account-wide settings that affect all your interactions with Claude.
- Use project instructions when you need specific guidance or context for a particular project (paid plans only).
- Use styl
+* [Understanding Claude's personalization features](https://support.claude.com/en/articles/10185728-understanding-claude-s-personalization-features) — Use profile instructions for account-wide settings that affect all your interactions with Claude. Use project instructions when you need specific guidance or context for a particular project (paid plans only). Use styl
 * [Optimal use of Personal Preferences - how can I improve ...](https://www.reddit.com/r/ClaudeAI/comments/1rpv7fp/optimal_use_of_personal_preferences_how_can_i) — I love using Claude however I find it mostly ignores the instructions I provide in the Personal Preferences action within Settings. I'm wondering if I'm
 
 ### claude conversation history UI
 * [GitHub - raine/claude-history: Fuzzy-search Claude Code conversation history · GitHub](https://github.com/raine/claude-history) — `claude-history` is a history browser for Claude Code, the Pi coding agent, and Oh My Pi (OMP). It searches conversations recorded in their local project histories with a built-in terminal UI, then opens the selected tra
-* [Claude Code History](https://marketplace.visualstudio.com/items?itemName=doorsofperception.claude-code-history) — | Claude Code History Browse and search your Claude Code conversation history directly inside VS Code.  Claude Code stores conversations locally but offers no built-in UI to browse them. This extension fills that gap. Fe
-* [Unlocking Your Claude History, Part 1 | by Raymond E Peck III](https://medium.com/@raymondpeck/unlocking-your-claude-history-part-1-f19000c05655) — `claude.ai`
-`~/.claude/projects/`
+* [Claude Code History](https://marketplace.visualstudio.com/items?itemName=doorsofperception.claude-code-history)
+* [Unlocking Your Claude History, Part 1 | by Raymond E Peck III](https://medium.com/@raymondpeck/unlocking-your-claude-history-part-1-f19000c05655) — `claude.ai` `~/.claude/projects/`
 
 This project fixes that: it gives you one local archive containing every Claude Desktop conversation and every Claude Code session, a web UI that shows each session in its entirety with
 

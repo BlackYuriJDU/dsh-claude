@@ -5,14 +5,18 @@
  * TSX compilation and the user-facing memory-list interactions; the scope
  * fake records writes the way the real durable scope would.
  */
-import { describe, expect, it, vi } from 'vitest'
-import { act, cleanup, fireEvent, render } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render } from '@testing-library/react'
 import type {
   SettingsScope, SettingsScopeSnapshot,
 } from '@deepseek-ai/dsh-client-runtime/client'
 import { MemorySection } from '@deepseek-ai/dsh-client-ui-memory/src/client/MemorySection.tsx'
 import type { MemoryScopeSection } from '@deepseek-ai/dsh-client-ui-memory/src/client/MemorySection.tsx'
 import { en } from '@deepseek-ai/dsh-client-ui-memory/src/client/locales.ts'
+// Type-only: pulls the package's LocaleNamespaceMap merge so the `t` seat types.
+import type {} from '@deepseek-ai/dsh-client-ui-memory/src/client/index.ts'
+
+type MemoryItems = NonNullable<MemoryScopeSection['memories']>
 
 /** Minimal SettingsScope fake over a mutable section (snapshot cached per write). */
 function scopeOf(initial: MemoryScopeSection): SettingsScope<MemoryScopeSection> & { writes: unknown[] } {
@@ -27,7 +31,7 @@ function scopeOf(initial: MemoryScopeSection): SettingsScope<MemoryScopeSection>
     subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener) } },
     set: (_field, next) => {
       writes.push(next)
-      snap = { ...snap, value: { memories: next as MemoryScopeSection['memories'] } }
+      snap = { ...snap, value: { memories: next as MemoryItems } }
       for (const fn of [...listeners]) fn()
       return Promise.resolve()
     },
@@ -38,7 +42,8 @@ function scopeOf(initial: MemoryScopeSection): SettingsScope<MemoryScopeSection>
 function mountSection(initial: MemoryScopeSection) {
   const memory = scopeOf(initial)
   const t = ((key: keyof typeof en) => en[key]) as never
-  const utils = render(<MemorySection memory={memory} t={t} />)
+  const utils = render(<MemorySection memory={memory} t={t} close={() => {}}
+    useSessions={(() => { throw new Error('unused') })} useWorkspaces={(() => { throw new Error('unused') })} />)
   return { memory, ...utils }
 }
 

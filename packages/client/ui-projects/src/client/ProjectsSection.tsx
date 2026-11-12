@@ -84,7 +84,7 @@ function ProjectCard(props: {
         value={instructions}
         rows={3}
         placeholder={t('instructions.hint')}
-        onChange={e => { setInstructions(e.target.value) }}
+        onChange={(e) => { setInstructions(e.target.value) }}
         onBlur={commitInstructions}
       />
       <span className={css.fieldLabel}>{t('knowledge')}</span>

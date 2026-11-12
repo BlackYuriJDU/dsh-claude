@@ -45,8 +45,8 @@ export const PROFILE_INSTRUCTIONS_CONTEXT = 'profile:instructions'
 export function profileInstructionsText(instructions: string | undefined): string {
   const trimmed = instructions?.trim() ?? ''
   if (trimmed === '') return ''
-  return `The user's standing instructions, written by them in Settings and`
-    + ` applying to this and every session — honor them unless a direct user`
+  return 'The user\'s standing instructions, written by them in Settings and'
+    + ' applying to this and every session — honor them unless a direct user'
     + ` message supersedes them:\n${trimmed}`
 }
 

@@ -500,7 +500,8 @@ describe('workspace browser rows', () => {
       fireEvent.pointerEnter(screen.getByRole('treeitem').parentElement as HTMLElement)
       act(() => { vi.advanceTimersByTime(500) })
       expect(screen.getByText('Idle')).toBeTruthy()
-      expect(screen.getAllByText('now')).toHaveLength(2)
+      // The row carries no time label; the hover card owns the only one.
+      expect(screen.getAllByText('now')).toHaveLength(1)
     } finally {
       vi.useRealTimers()
     }

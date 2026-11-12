@@ -146,7 +146,7 @@ export function ConversationRoot({
         workspaces: workspaces.items.map(item => ({ id: item.workspaceId, title: item.title })),
         // The slot contract carries plain strings across the UI-domain edge;
         // re-brand at the boundary where the pick re-enters this domain.
-        onPickWorkspace: (workspaceId: string): void => pickWorkspace(workspaceId as WorkspaceId),
+        onPickWorkspace: (workspaceId: string): void =>{  pickWorkspace(workspaceId as WorkspaceId) },
       }
       : {}),
     // Stats band under the card, inside the bar's width column so both

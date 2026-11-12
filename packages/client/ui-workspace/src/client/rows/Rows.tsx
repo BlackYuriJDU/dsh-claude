@@ -340,10 +340,11 @@ export function SearchResultItem({ result, currentId, onOpen, t }: {
 
 /**
  * One top-level 34px session row: status dot (pending user interaction outranks
- * own or descendant activity), title, relative time, and the row actions menu.
+ * own or descendant activity), title, and the row actions menu; the relative
+ * time appears only in the hover card.
  * @param props.node - derived session node.
  * @param props.currentId - selected session id (row highlight).
- * @param props.now - epoch ms for relative-time formatting.
+ * @param props.now - epoch ms for the hover card's relative time.
  * @param props.onOpen - open a session by id.
  * @param props.onRename - open the session rename dialog (id + current title).
  * @param props.onFork - fork a session at its last completed turn.

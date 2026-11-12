@@ -38,8 +38,8 @@ export function ConversationSessionHeader({
   // straight at the transcript, like the reference interface. The element
   // stays as layout chrome so the scrollport's sibling structure is stable
   // across the hero and active phases.
-  void sessionId; void useSession; void useSessions; void useStore; void actions;
-  void renderSlot; void views; void open; void t;
+  void sessionId; void useSession; void useSessions; void useStore; void actions
+  void renderSlot; void views; void open; void t
   return (
     <header
       className={clsx(css.header, css.headerHidden)}

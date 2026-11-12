@@ -187,10 +187,8 @@ export class RoutineScheduler {
       this.timers.delete(routine.id)
       void this.fire(routine.id)
     }, delay)
-    // Never keep the Host process alive for a routine.
-    if (typeof timer === 'object' && timer !== null && 'unref' in timer) {
-      (timer as { unref(): void }).unref()
-    }
+    // Never keep the Host process alive for a routine. `unref` is Node-only.
+    ;(timer as { unref?: () => void }).unref?.()
     this.timers.set(routine.id, timer)
   }
 
@@ -226,6 +224,7 @@ export class RoutineScheduler {
       this.ctx.logger.warn(`routine "${routineId}" fire failed: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
       this.running.delete(routineId)
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- dispose() can run while the fire is awaited.
       if (!this.disposed) this.reconcile()
     }
   }
@@ -267,9 +266,9 @@ export function apply(ctx: Context): void {
   ctx.inject(['agents', 'agentDefaultModel', 'settings'], (scope) => {
     const scheduler = new RoutineScheduler(
       ctx,
-      scope.agents as unknown as AgentsFace,
-      scope.agentDefaultModel as unknown as DefaultModelFace,
-      scope.settings as unknown as SettingsFace,
+      scope.agents,
+      scope.agentDefaultModel,
+      scope.settings,
     )
     scheduler.reconcile()
     const off = scope.on('settings/updated', (ns: unknown, _next: unknown, _prev: unknown, _source: unknown) => {
