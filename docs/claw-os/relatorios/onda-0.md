@@ -71,7 +71,7 @@ Quase tudo é formatação em código do fork: `@stylistic(indent)` em `ui-works
 | 17 | Raciocínio visível | 🟡 [verificar] | ✅ (falta só i18n do título) | P3 |
 | 18 | Editar e ramificar | 🟡 [verificar] | 🟡: branch por turno existe; editar mensagem e linhagem na sidebar não | P1 |
 | 19 | Busca de conversas | 🟡 [verificar] | ✅ (título + conteúdo via Host) | — |
-| 20 | Mobile / responsivo | 🟡 "3 media queries" | 🟡: auto-colapso para trilho de 56px abaixo de 1024px, em JS; sem gaveta nem media query de largura no shell | P0 |
+| 20 | Mobile / responsivo | 🟡 "3 media queries" | 🟡: abaixo de 1024px, trilho de 56px que abre uma gaveta não modal com scrim e Escape (`AppFrame.tsx:111-183`), em JS; sem media query de largura no shell e sem layout de celular (≤ 600px). *Corrigido na Onda 0.5: a primeira versão deste relatório dizia que não havia gaveta.* | P0 |
 | 4 | Artifacts (painel) | 🟡 | 🟡; painel lateral exige slot novo | P0 |
 
 ## Lista 1 — ocorrências visíveis de "Claude", "Anthropic", "DSH Claude" e "DeepSeek Harness Claude" (entrada da Onda 1)

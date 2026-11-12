@@ -559,9 +559,12 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     await ctx.loader.await()
     assertEntriesLoaded(ctx, 'web e2e scaffold')
     if (options.welcomeNoticePending !== true) {
-      await ctx.settings.mutate(settingsNamespace(WELCOME_NOTICE_SETTINGS_NAMESPACE), [{
-        op: 'set', path: [WELCOME_NOTICE_ACK_FIELD], value: WELCOME_NOTICE_VERSION,
-      }])
+      // A stored profile name also completes the dshc profile onboarding step,
+      // whose modal would otherwise cover the shell in every scenario.
+      await ctx.settings.mutate(settingsNamespace(WELCOME_NOTICE_SETTINGS_NAMESPACE), [
+        { op: 'set', path: [WELCOME_NOTICE_ACK_FIELD], value: WELCOME_NOTICE_VERSION },
+        { op: 'set', path: ['userName'], value: 'E2E' },
+      ])
     }
     const boundPort = ctx.get('webServer')?.port
     if (boundPort === undefined) {
