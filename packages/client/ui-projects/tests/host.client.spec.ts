@@ -64,7 +64,8 @@ describe('workspacePathFor', () => {
 
 describe('readKnowledge / projectContextText', () => {
   it('defaults the per-file cap and rejects a non-positive one', () => {
-    expect(Config({}).knowledgeFileMaxChars).toBe(DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
+    // A cordis.yml entry without the field resolves through the schema default.
+    expect(Config({} as Config).knowledgeFileMaxChars).toBe(DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
     expect(Config({ knowledgeFileMaxChars: 5 }).knowledgeFileMaxChars).toBe(5)
     expect(() => Config({ knowledgeFileMaxChars: 0 })).toThrow()
   })
