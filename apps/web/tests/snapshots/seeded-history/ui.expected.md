@@ -1,12 +1,3 @@
-- banner:
-  - navigation "Session hierarchy":
-    - button "Use the read tool twice" [disabled]
-  - button "Session log":
-    - text: Session log
-    - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. 7/25 {{clock}}"
 - button "Copy":
   - img
@@ -44,11 +35,9 @@
   - img
   - text: Context injection AGENTS.md
 - textbox "Message the agent"
-- button "Commands":
+- button "Add":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Dictate"
 - button "Select model, current DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 2 steps LLM {{duration}} · Tool call {{duration}} TTFT avg {{duration}} · {{throughput}} tok/s Cache hit 98% Input 15.8K tok · Output 135 tok
