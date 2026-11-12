@@ -101,7 +101,7 @@ describe.skipIf(MODE === 'record')('web e2e: background job list', () => {
     await row.waitFor({ timeout: 10_000 })
     await expect.poll(() => row.textContent()).toContain(COMMAND)
 
-    const snapshot = await captureStableAria(page, '[class*="menu"]', scaffold.workspaceCwd)
+    const snapshot = await captureStableAria(page, 'ul[aria-label="Background jobs"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(RUNNING_EXPECTED, snapshot, MODE)
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])
@@ -116,7 +116,7 @@ describe.skipIf(MODE === 'record')('web e2e: background job list', () => {
     const idle = page.getByRole('button', { name: '1 background job' })
     await idle.waitFor({ timeout: 20_000 })
 
-    const snapshot = await captureStableAria(page, '[class*="menu"]', scaffold.workspaceCwd)
+    const snapshot = await captureStableAria(page, 'ul[aria-label="Background jobs"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(SETTLED_EXPECTED, snapshot, MODE)
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])
