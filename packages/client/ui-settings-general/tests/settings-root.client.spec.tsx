@@ -2,12 +2,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useEffect, useState } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import type { SettingsRootComponentProps } from '../src/client/shell-contract.ts'
+import type { SettingsRootComponentProps, SettingsSectionRow } from '../src/client/shell-contract.ts'
 import { SettingsRoot } from '../src/client/SettingsRoot.tsx'
 
 afterEach(cleanup)
 
-type Row = { id: string; order: number; label: string }
+type Row = SettingsSectionRow
 type Step = { id: string; order: number }
 
 /** Slot-content stand-ins: the shell renders whatever the seats contribute. */
@@ -191,6 +191,25 @@ describe('SettingsPanel navigation', () => {
     // including one this package never heard of — shares the gear.
     expect(new Set(glyphs.slice(0, 4)).size).toBe(4)
     expect(glyphs[4]).toBe(glyphs[0])
+  })
+
+  it('groups personalize rows apart and renders soon rows as disabled badges', () => {
+    mount({
+      rows: [
+        { id: 'general', order: 0, label: 'General' },
+        { id: 'account', order: 1, label: 'Account' },
+        { id: 'skills', order: 5, label: 'Skills', group: 'personalize' },
+        { id: 'connectors', order: 11, label: 'Connectors', group: 'personalize', soon: true, soonLabel: 'Soon' },
+      ],
+    })
+    openPanel()
+    expect(screen.getByText('Personalize')).toBeTruthy()
+    const soon = screen.getByRole('button', { name: /Connectors/ })
+    expect(soon).toHaveProperty('disabled', true)
+    expect(soon.textContent).toContain('Soon')
+    const glyphs = ['General', 'Account', 'Skills']
+      .map(name => screen.getByRole('button', { name }).querySelector('svg')?.innerHTML)
+    expect(new Set([...glyphs, soon.querySelector('svg')?.innerHTML]).size).toBe(4)
   })
 
   it('switches the rendered section on nav click', () => {
