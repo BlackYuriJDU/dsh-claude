@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import { IconChevronDownOutline14, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ChatFont } from '../theme-settings.ts'
+import { CHAT_FONTS, type ChatFont } from '../theme-settings.ts'
 import type { ThemeKey } from './locales.ts'
 import type { createChatFontRowStore } from './chat-font-store.ts'
 import css from './ChatFontRow.module.css'
@@ -23,13 +23,13 @@ export type ChatFontRowComponentProps =
   PropsRuntime<'settings.general.item'> & PropsStore<ReturnType<typeof createChatFontRowStore>>
   & PropsLocale<'settings.theme'> & ChatFontRowInjected
 
-/** Option order as the menu lists it (default first). */
-const OPTIONS: readonly { id: ChatFont; labelKey: ThemeKey }[] = [
-  { id: 'inter', labelKey: 'chatFont.inter' },
-  { id: 'system', labelKey: 'chatFont.system' },
-  { id: 'serif', labelKey: 'chatFont.serif' },
-  { id: 'mono', labelKey: 'chatFont.mono' },
-]
+/** Dictionary key naming each font; the menu lists `CHAT_FONTS` in order (default first). */
+const LABEL_KEYS: Record<ChatFont, ThemeKey> = {
+  inter: 'chatFont.inter',
+  system: 'chatFont.system',
+  serif: 'chatFont.serif',
+  mono: 'chatFont.mono',
+}
 
 /**
  * Render the Chat-font row.
@@ -39,7 +39,6 @@ const OPTIONS: readonly { id: ChatFont; labelKey: ThemeKey }[] = [
 export function ChatFontRow({ t, setChatFont, useStore }: ChatFontRowComponentProps) {
   const font = useStore(s => s.chatFont)
   const [open, setOpen] = useState(false)
-  const activeLabel = OPTIONS.find(option => option.id === font)?.labelKey ?? 'chatFont.inter'
 
   return (
     <div className={css.row}>
@@ -47,11 +46,11 @@ export function ChatFontRow({ t, setChatFont, useStore }: ChatFontRowComponentPr
       <Menu
         open={open}
         onClose={() => { setOpen(false) }}
-        items={OPTIONS.map(option => ({ id: option.id, label: t(option.labelKey) }))}
+        items={CHAT_FONTS.map(id => ({ id, label: t(LABEL_KEYS[id]) }))}
         selectedId={font}
         onSelect={(id) => {
-          const option = OPTIONS.find(option => option.id === id)
-          if (option !== undefined) setChatFont(option.id)
+          // The menu echoes one of the ids its items were built from.
+          setChatFont(id as ChatFont)
           setOpen(false)
         }}
         align="end"
@@ -64,7 +63,7 @@ export function ChatFontRow({ t, setChatFont, useStore }: ChatFontRowComponentPr
             aria-expanded={open}
             onClick={() => { setOpen(v => !v) }}
           >
-            {t(activeLabel)}
+            {t(LABEL_KEYS[font])}
             <IconChevronDownOutline14 className={css.chevron} />
           </button>
         )}

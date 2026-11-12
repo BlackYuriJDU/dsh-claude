@@ -279,6 +279,26 @@ describe('workspace browser rows', () => {
     expect(screen.queryByRole('menu')).toBeNull()
   })
 
+  it('a draggable workspace row carries its key and reports the drag lifecycle', () => {
+    const drag = { start: vi.fn(), end: vi.fn() }
+    const group: GroupNode = {
+      key: 'project', workspaceId: wid('project'), cwd: '/projects/project', createdAt: 0, label: 'Project',
+      sessionCount: 0, expanded: false, containsCurrent: false, sessions: [],
+    }
+    render(<ProjectRowItem group={group} onToggle={vi.fn()} onCreate={vi.fn()} drag={drag} t={t} />)
+    const row = screen.getByRole('treeitem')
+    expect(row.getAttribute('draggable')).toBe('true')
+    const dataTransfer = { effectAllowed: 'uninitialized', setData: vi.fn() }
+
+    fireEvent.dragStart(row, { dataTransfer })
+    fireEvent.dragEnd(row)
+
+    expect(dataTransfer.effectAllowed).toBe('move')
+    expect(dataTransfer.setData).toHaveBeenCalledWith('text/plain', 'project')
+    expect(drag.start).toHaveBeenCalledOnce()
+    expect(drag.end).toHaveBeenCalledOnce()
+  })
+
   it('workspace hover card shows its details and copies the full directory path', async () => {
     vi.useFakeTimers()
     const writeText = vi.fn(async () => {})
