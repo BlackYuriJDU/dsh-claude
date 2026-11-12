@@ -81,7 +81,7 @@ export function apply(ctx: Context) {
 - Use `tools/post-execute` para transformar o resultado e `tools/result` só para observar.
 
 ### 3.3 Plugin cliente com slot (de `packages/client/ui-deliverables/src/client/index.ts`, resumido)
-```ts
+```ts ignore-check
 export const inject = ['slots', 'locale', 'conversationEvents', 'connection']
 
 export function apply(ctx: ClientContext): void {
@@ -108,7 +108,7 @@ export function apply(ctx: ClientContext): void {
 - **O `/client` exporta só o que o Cordis precisa** (`apply`, `inject`, `Config`). Qualquer outro valor exportado precisa de aprovação.
 
 ### 3.4 Projeção pura (de `packages/session/session-stats/src/projection.ts`, resumido)
-```ts
+```ts ignore-check
 declare module '@deepseek-ai/dsh-session-projection/types' {
   interface SessionProjectionStateMap {
     sessionStats: SessionStatsState
