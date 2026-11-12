@@ -124,7 +124,8 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-message-actions-aria'))
     await page.getByRole('button', { name: /^Select model, current/ })
       .waitFor({ timeout: 10_000 })
-    await page.getByText(/Cache hit \d+%/u).first().waitFor({ timeout: 10_000 })
+    // The session figures live in the usage ring's panel under the composer.
+    await page.getByRole('button', { name: /of context used$|^Session$/u }).waitFor({ timeout: 10_000 })
     // Keep a footer focused so opacity-hidden actions stay in the a11y tree
     // as an active/focused control during the capture.
     await page.getByRole('button', { name: 'Copy' }).first().focus()
@@ -141,10 +142,11 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
       () => scaffold.ctx.agents.list().find(agent => agent.session.header.parentSession === SessionId(SEED_ID)),
       { timeout: 15_000 },
     ).toBeDefined()
+    // The flat Session list holds the seed and its fork.
     await expect.poll(
       () => page.locator('[role="treeitem"]').count(),
       { timeout: 10_000 },
-    ).toBe(3)
+    ).toBe(2)
     await expect.poll(
       () => page.locator('[role="treeitem"][aria-selected="true"]').count(),
       { timeout: 10_000 },
@@ -165,10 +167,11 @@ describe('web e2e: message IconActions and clocks on settled history', () => {
       () => scaffold.ctx.agents.list().filter(agent => agent.session.header.parentSession !== undefined).length,
       { timeout: 15_000 },
     ).toBe(2)
+    // Flat list: the seed plus its two forks.
     await expect.poll(
       () => page.locator('[role="treeitem"]').count(),
       { timeout: 10_000 },
-    ).toBe(4)
+    ).toBe(3)
     await expect.poll(
       () => page.locator('[role="treeitem"][aria-selected="true"]').count(),
       { timeout: 10_000 },
