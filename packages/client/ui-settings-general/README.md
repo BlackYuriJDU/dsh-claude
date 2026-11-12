@@ -12,11 +12,25 @@ The Host half registers `ui-onboarding` in the user-settings seam. The welcome s
 
 ## Model Experience
 
-None, as the plugin renders browser settings UI; nothing here reaches a model request.
+### Standing owner instructions
+
+#### What the model sees
+
+One `profile:instructions` contribution (order 2) in the runtime-context snapshot of every agent session whose stored `ui-onboarding` section has non-blank `instructions`. The trimmed text follows this fixed lead-in; unset or whitespace-only text contributes nothing.
+
+##### Lead-in
+
+```markdown
+The user's standing instructions, written by them in Settings and applying to this and every session — honor them unless a direct user message supersedes them:
+```
+
+#### Token effect
+
+One context block: the fixed lead-in plus the stored instructions. Requests while the instructions are unchanged add nothing new.
 
 #### KV Cache effect
 
-None; this package neither assembles nor sends a provider request.
+The stable system prompt stays byte-identical. Editing the instructions changes the full runtime-context snapshot, which is appended after retained history and preserves the prior cached prefix; unchanged requests reuse the retained snapshot.
 
 ## Known Limitations and Deferred Work
 

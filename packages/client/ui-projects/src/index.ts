@@ -31,13 +31,25 @@ const PROJECTS_SETTINGS_NAMESPACE = 'ui-projects'
 /** Prompt-context name carrying the current session's project content. */
 export const PROJECT_CONTEXT = 'project:content'
 
-/**
- * Hard cap on one knowledge file's contributed characters. Files are read
- * whole and truncated to this budget so a large attachment cannot blow up the
- * prompt; the cap is per file, applied after UTF-8 decoding on a character
- * boundary.
- */
-export const KNOWLEDGE_FILE_MAX_CHARS = 20000
+/** Default for {@link Config.knowledgeFileMaxChars}. */
+export const DEFAULT_KNOWLEDGE_FILE_MAX_CHARS = 20000
+
+/** The projects plugin config. */
+export interface Config {
+  /**
+   * Cap on one knowledge file's contributed characters. Files are read whole
+   * and truncated to this budget so a large attachment cannot blow up the
+   * prompt; the cap is per file, applied after UTF-8 decoding on a character
+   * boundary.
+   */
+  knowledgeFileMaxChars: number
+}
+
+/** Validated {@link Config}; `knowledgeFileMaxChars` must be a positive integer. */
+export const Config: z<Config> = z.object({
+  knowledgeFileMaxChars: z.natural().min(1).default(DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
+    .description('Maximum characters one knowledge file contributes to the project context.'),
+})
 
 /** One knowledge file attached to a project. */
 export interface ProjectKnowledgeFile {
@@ -83,17 +95,18 @@ const ProjectsSettingsSchema: z<ProjectsSettings> = z.object({
  * fails UTF-8 decoding) contributes a one-line notice rather than failing the
  * whole assembly — the model sees the gap and can ask.
  * @param file - the knowledge file descriptor.
+ * @param maxChars - the per-file character budget.
  * @returns the file's (possibly truncated) text, or a bracketed notice.
  */
-export function readKnowledge(file: ProjectKnowledgeFile): string {
+export function readKnowledge(file: ProjectKnowledgeFile, maxChars: number): string {
   let text: string
   try {
     text = readFileSync(file.path, 'utf8')
   } catch {
     return `[Could not read knowledge file "${file.name}" at ${file.path}]`
   }
-  if (text.length > KNOWLEDGE_FILE_MAX_CHARS) {
-    return `${text.slice(0, KNOWLEDGE_FILE_MAX_CHARS)}\n[… truncated to ${KNOWLEDGE_FILE_MAX_CHARS} characters]`
+  if (text.length > maxChars) {
+    return `${text.slice(0, maxChars)}\n[… truncated to ${maxChars} characters]`
   }
   return text
 }
@@ -104,9 +117,10 @@ export function readKnowledge(file: ProjectKnowledgeFile): string {
  * knowledge file is fenced with its name so the model can attribute content
  * to its source.
  * @param entry - the project's durable entry.
+ * @param maxChars - the per-file knowledge character budget.
  * @returns the context text, or '' to contribute nothing.
  */
-export function projectContextText(entry: ProjectEntry | undefined): string {
+export function projectContextText(entry: ProjectEntry | undefined, maxChars: number): string {
   if (entry === undefined) return ''
   const instructions = entry.instructions?.trim() ?? ''
   const files = entry.files ?? []
@@ -117,7 +131,7 @@ export function projectContextText(entry: ProjectEntry | undefined): string {
     )
   }
   if (files.length > 0) {
-    const bodies = files.map(file => `--- ${file.name} ---\n${readKnowledge(file)}`)
+    const bodies = files.map(file => `--- ${file.name} ---\n${readKnowledge(file, maxChars)}`)
     parts.push(`Knowledge files attached to this project:\n\n${bodies.join('\n\n')}`)
   }
   return parts.join('\n\n')
@@ -153,8 +167,9 @@ export function workspacePathFor(cwd: string, paths: readonly string[]): string 
  * project's instructions and knowledge; sessions outside any registered
  * workspace, and workspaces with no project content, contribute nothing.
  * @param ctx - host context carrying settings, systemPrompt, and the workspace registry.
+ * @param config - validated plugin config.
  */
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: Config): void {
   ctx.inject(['settings'], (settingsCtx) => {
     settingsCtx.settings.register(
       settingsNamespace(PROJECTS_SETTINGS_NAMESPACE),
@@ -171,13 +186,14 @@ export function apply(ctx: Context): void {
         if (cwd === undefined) return ''
         const workspaces = scope.workspaceRegistry.list()
         const path = workspacePathFor(cwd, workspaces.map(workspace => workspace.path))
-        if (path === undefined) return ''
         const normalize = (value: string): string => value.replace(/[/\\]+$/, '').replace(/\\/g, '/')
-        const workspace = workspaces.find(candidate => normalize(candidate.path) === path)
+        const workspace = path === undefined
+          ? undefined
+          : workspaces.find(candidate => normalize(candidate.path) === path)
         if (workspace === undefined) return ''
         const section = settings.get(settingsNamespace(PROJECTS_SETTINGS_NAMESPACE)) as ProjectsSettings | undefined
         const entry = section?.projects?.[workspace.id]
-        return projectContextText(entry)
+        return projectContextText(entry, config.knowledgeFileMaxChars)
       },
     })
   })

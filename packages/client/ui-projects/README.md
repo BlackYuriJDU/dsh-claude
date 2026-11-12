@@ -4,7 +4,7 @@ English | [中文](README.zh.md)
 
 Projects plugin: per-workspace instructions and knowledge files. The Node half registers the durable `ui-projects` settings namespace, keyed by workspace id, and contributes the `project:content` prompt context (order 3). At each prompt assembly the context resolves the session's immutable cwd to the registered workspace whose path contains it (the longest matching path prefix wins) and renders that project's instructions and knowledge files. The browser half adds a **Projects** section to Settings with one card per workspace: an instructions text area and a knowledge-file list whose files are picked through the Host.
 
-Knowledge files are read synchronously at assembly time because prompt context providers are synchronous. Each file contributes at most 20,000 characters; a longer file is truncated with a marker, and an unreadable file contributes a one-line notice instead of failing the request.
+Knowledge files are read synchronously at assembly time because prompt context providers are synchronous. Each file contributes at most `knowledgeFileMaxChars` characters (`Config`, default 20,000, a positive integer); a longer file is truncated with a marker, and an unreadable file contributes a one-line notice instead of failing the request.
 
 ## Model Experience
 
@@ -28,7 +28,7 @@ Knowledge files attached to this project:
 
 #### Token effect
 
-Proportional to the project's content: the instructions plus up to 20,000 characters per knowledge file. Requests while the project content and files are unchanged add nothing new.
+Proportional to the project's content: the instructions plus up to `knowledgeFileMaxChars` characters per knowledge file. Requests while the project content and files are unchanged add nothing new.
 
 #### KV Cache effect
 
@@ -37,5 +37,4 @@ The stable system prompt stays byte-identical. Editing the project or changing a
 ## Known Limitations and Deferred Work
 
 - **No retrieval over knowledge files** — every attached file is injected whole (up to the per-file cap) on each changed snapshot; large knowledge sets spend tokens instead of being searched.
-- **The per-file cap is a source constant** — `KNOWLEDGE_FILE_MAX_CHARS` is not yet a `Config` field.
 - **Files are re-read on every assembly** — an edit on disk reaches the model without a settings change, and a deleted file degrades to its notice line.

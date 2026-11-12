@@ -178,6 +178,7 @@ export const en = {
   'bash.failed': 'Failed',
   'bash.stopped': 'Stopped',
   'row.running': 'Running',
+  'row.think': 'Think',
   'row.failed': 'Failed',
   'row.stopped': 'Stopped',
   'queue.count': '{n} queued messages',
@@ -209,6 +210,7 @@ export const en = {
  * reference labels. Keys outside this table fall back to the en dictionary.
  */
 export const pt = {
+  'row.think': 'Raciocínio',
   'placeholder.hero': 'Como posso ajudar você hoje?',
   'placeholder.cowork': 'O que vamos construir?',
   'hero.greeting.morning': 'Bom dia',
