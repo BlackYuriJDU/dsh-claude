@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import clsx from 'clsx'
 import {
-  IconPanelLeftOutline16, IconPlusOutline16, IconSearchOutline16,
+  IconPanelLeftOutline16, IconPlusOutline16, IconProjectOutline16, IconSearchOutline16,
   IconSettingsOutline16, Menu, Modal, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
@@ -49,14 +49,6 @@ const stroke = {
   strokeLinecap: 'round',
   strokeLinejoin: 'round',
 } as const
-
-const IconProjects = (
-  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-    <rect {...stroke} x="2" y="2.5" width="12" height="3.4" rx="0.9" />
-    <path {...stroke} d="M3.2 5.9v6.6A1.5 1.5 0 0 0 4.7 14h6.6a1.5 1.5 0 0 0 1.5-1.5V5.9" />
-    <path {...stroke} d="M6.3 8.6h3.4" />
-  </svg>
-)
 
 /* Filled twin four-point stars (the reference draws them solid). */
 const fill = { fill: 'currentColor', stroke: 'none' } as const
@@ -252,7 +244,7 @@ export function SidebarRoot({
   }, [])
 
   const navRows: readonly { id: string; label: string; icon: ReactNode; open: (() => void) | undefined }[] = [
-    { id: 'projects', label: t('nav.projects'), icon: IconProjects, open: () => { setProjectsOpen(true) } },
+    { id: 'projects', label: t('nav.projects'), icon: <IconProjectOutline16 />, open: () => { setProjectsOpen(true) } },
     { id: 'artifacts', label: t('nav.artifacts'), icon: IconArtifacts, open: () => { window.dispatchEvent(new CustomEvent(SIDEBAR_DESIGN_EVENT)) } },
     { id: 'customize', label: t('nav.customize'), icon: IconCustomize, open: undefined },
   ]

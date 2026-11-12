@@ -95,8 +95,13 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
         >
           <svg
             aria-hidden="true"
-            data-content="33eeb1a9"
+            data-content="a1b5495b"
+            fill="none"
             height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.4"
             viewBox="0 0 16 16"
             width="16"
           />
@@ -336,8 +341,13 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
         >
           <svg
             aria-hidden="true"
-            data-content="33eeb1a9"
+            data-content="a1b5495b"
+            fill="none"
             height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.4"
             viewBox="0 0 16 16"
             width="16"
           />
