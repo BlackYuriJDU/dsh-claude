@@ -83,7 +83,7 @@ export async function connectFreshWorkspace(page: Page, root: string, name = 'wo
   await dialog.getByRole('button', { name: 'Open', exact: true }).click()
   // The pick connected the workspace: the blank session's live composer
   // replaces the locked placeholder and enables.
-  await page.locator('textarea:enabled[placeholder="Describe what you want to build"]')
+  await page.locator('textarea:enabled[placeholder="How can I help you today?"]')
     .waitFor({ timeout: 15_000 })
 }
 
