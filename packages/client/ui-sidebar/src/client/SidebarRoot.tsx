@@ -131,6 +131,7 @@ const AVATAR_COLORS = [
 function avatarColorOf(name: string): string {
   let hash = 0
   for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+  /* v8 ignore next -- the modulo keeps the index inside the palette */
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length] ?? AVATAR_COLORS[0]
 }
 
@@ -384,8 +385,9 @@ export function SidebarRoot({
               onSelect={(id) => {
                 setProfileOpen(false)
                 if (id === 'search') requestSearch()
-                else if (id === 'pt' || id === 'en') locale.set(id)
                 else if (id === 'help') window.open(HELP_URL, '_blank', 'noopener,noreferrer')
+                // Every other selectable row is a Language submenu option.
+                else locale.set(id)
               }}
               onClose={() => { setProfileOpen(false) }}
               align="start"
