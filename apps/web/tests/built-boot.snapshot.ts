@@ -42,19 +42,14 @@ it('boots the built plugin graph and renders a fixture session end to end', asyn
 
   // The sidebar renders from the boot graph: every inject layer activated.
   const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
-  expect(document.querySelector('svg[viewBox="26 0 156 24"]')).not.toBeNull()
+  expect(screen.getByText('DeepSeek Harness Claude')).toBeTruthy()
   expect(screen.queryByText('DSH Local Build')).toBeNull()
-  // The compact layout dropped group session counts; the fixture workspace
-  // group row renders immediately with its sessions beneath it.
-  const fixtureGroup = (await within(tree).findAllByText('fixture'))
-    .map(el => el.closest<HTMLElement>('[role="treeitem"]'))
-    .find(el => el?.getAttribute('aria-expanded') !== null)
-  if (fixtureGroup === undefined) throw new Error('fixture Workspace group missing')
-
+  // The fork's sidebar lists Sessions flat (no Workspace group rows), so the
+  // fixture sessions render directly in the tree.
   // The resident fixture has both a question and an approval; composer routing
   // exposes the question first, and the assembled workspace plugin mirrors that
   // actionable wait instead of the underlying running state.
-  const waitingTitle = await within(tree).findByText('Fixture 历史会话')
+  const waitingTitle = await within(tree).findByText('Fixture history session')
   const waitingRow = waitingTitle.closest<HTMLElement>('[role="treeitem"]')
   if (waitingRow === null) throw new Error('fixture Session title must belong to a tree row')
   expect(waitingRow.querySelector('[data-state="warning"]')).not.toBeNull()
@@ -68,21 +63,22 @@ it('boots the built plugin graph and renders a fixture session end to end', asyn
   }, { timeout: 10_000 })
   // The generated bundle roster mounts the question UI before the approval UI.
   // Skip the resident fixture's three questions, then resolve its approval so
-  // the ordinary composer bar (which owns ContextMeter) resumes.
+  // the ordinary composer bar (and the usage ring under it) resumes.
   for (let index = 0; index < 3; index += 1) {
     fireEvent.click(await screen.findByRole('button', { name: 'Skip this question' }))
   }
   fireEvent.click(await screen.findByRole('button', { name: 'Allow once' }))
 
-  // The fixture mirrors all three token-meter projections, so the assembled
-  // ContextMeter reaches its composition panel instead of only the occupancy
-  // fallback path.
+  // The fixture mirrors all three token-meter projections, so the usage ring
+  // in the row under the composer card reaches its composition panel instead
+  // of only the occupancy fallback path.
   const contextTrigger = await screen.findByRole('button', { name: /of context used/ })
   fireEvent.click(contextTrigger)
   const contextPanel = await screen.findByRole('dialog', { name: 'of context used' })
   within(contextPanel).getByText('System prompt')
   within(contextPanel).getByText('Tools')
   within(contextPanel).getByText('Messages')
+
 
   // The write/edit turns render a real diff card through the assembled graph
   // (the keyed FileMutationRow composing ToolRow + DiffBlock), not just the

@@ -11,6 +11,7 @@ import { CloseLabel, HeaderContent, TriggerContent } from '../src/client/chrome.
 import { GeneralSection } from '../src/client/GeneralSection.tsx'
 import { SettingsDocumentAction } from '../src/client/SettingsDocumentAction.tsx'
 import type { SettingsDocumentActionInjected } from '../src/client/SettingsDocumentAction.tsx'
+import type { SettingsRootInjected } from '../src/client/shell-contract.ts'
 
 // These specs assert the shipped Chinese copy. The lane has no jsdom `window`,
 // so browser-language detection never runs and a fresh LocaleRuntime opens on
@@ -77,6 +78,18 @@ function generalEntry(slots: SlotRegistry) {
 }
 
 describe('ui-settings-general apply', () => {
+  it('hands the shell its group labels and both profile sections the durable onboarding scope', async () => {
+    const b = await bench()
+    b.slots.register({ name: 'root', children: { 'sidebar.settings': { kind: 'single', scope: 'root' } } } as never, () => null)
+    await b.ctx.plugin({ inject: [...inject], apply }).await()
+    const shell = (b.slots.entries('sidebar.settings')[0]!.inject as unknown as () => SettingsRootInjected)()
+    expect(shell.groupLabels()).toEqual({ config: 'Settings', personalize: 'Personalize' })
+    const sections = b.slots.entries('settings.section')
+    const profileOf = (id: string) => (sections.find(e => e.options.id === id)!.inject as unknown as () => { profile: unknown })().profile
+    expect(profileOf('account')).toBeDefined()
+    expect(profileOf('account')).toBe(profileOf('general'))
+  })
+
   it('declares the services it uses', () => {
     expect(inject).toEqual(['slots', 'locale', 'connection', 'settingsScope'])
   })

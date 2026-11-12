@@ -6,7 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import {
-  nextFireDelayMs, ROUTINES_SETTINGS_NAMESPACE, RoutineScheduler, routineIntervalMs,
+  apply, nextFireDelayMs, ROUTINES_SETTINGS_NAMESPACE, RoutineScheduler, routineIntervalMs,
   type Routine, type RoutinesSettings,
 } from '../src/index.ts'
 
@@ -142,5 +142,123 @@ describe('RoutineScheduler', () => {
     b.scheduler.dispose()
     await vi.advanceTimersByTimeAsync(120_000)
     expect(b.agents.create).not.toHaveBeenCalled()
+  })
+})
+
+describe('RoutineScheduler edge paths', () => {
+  it('ignores reconcile after dispose and an empty section', async () => {
+    const empty = makeBench({})
+    empty.scheduler.reconcile()
+    await vi.advanceTimersByTimeAsync(86_400_000)
+    expect(empty.agents.create).not.toHaveBeenCalled()
+    const b = makeBench({ routines: [routine()] })
+    b.scheduler.dispose()
+    b.scheduler.reconcile()
+    await vi.advanceTimersByTimeAsync(86_400_000)
+    expect(b.agents.create).not.toHaveBeenCalled()
+  })
+
+  it('does nothing for an unknown or disabled routine', async () => {
+    const b = makeBench({ routines: [routine({ enabled: false })] })
+    await b.scheduler.fire('missing')
+    await b.scheduler.fire('r1')
+    expect(b.agents.create).not.toHaveBeenCalled()
+  })
+
+  it('runs in the routine workspace when one is set', async () => {
+    const b = makeBench({ routines: [routine({ cwd: '/work/repo' })] })
+    await b.scheduler.fire('r1')
+    expect((b.agents.create.mock.calls[0]![0] as { meta: unknown }).meta).toEqual({ cwd: '/work/repo' })
+  })
+
+  it('logs a failed fire and a failed run stamp instead of throwing', async () => {
+    const b = makeBench({ routines: [routine()] })
+    const warn = vi.spyOn(b.scheduler['ctx'].logger, 'warn').mockImplementation(() => {})
+    b.agents.create.mockRejectedValueOnce(new Error('no model'))
+    await b.scheduler.fire('r1')
+    b.agents.create.mockRejectedValueOnce('plain failure')
+    await b.scheduler.fire('r1')
+    b.settings.update.mockRejectedValueOnce(new Error('disk full'))
+    await b.scheduler.fire('r1')
+    b.settings.update.mockRejectedValueOnce('locked')
+    await b.scheduler.fire('r1')
+    expect(warn.mock.calls.map(call => String(call[0]))).toEqual([
+      'routine "r1" fire failed: no model',
+      'routine "r1" fire failed: plain failure',
+      'routine "r1" run stamp failed: disk full',
+      'routine "r1" run stamp failed: locked',
+    ])
+  })
+
+  it('stamps an empty list when the section vanished mid-fire and skips re-arming after dispose', async () => {
+    const b = makeBench({ routines: [routine()] })
+    b.agents.create.mockImplementationOnce(async () => {
+      b.state.section = {}
+      b.scheduler.dispose()
+      return { agent: { followup: () => {}, whenIdle: () => Promise.resolve() }, dispose: () => Promise.resolve() }
+    })
+    await b.scheduler.fire('r1')
+    expect(b.settings.update).toHaveBeenCalledWith(ROUTINES_SETTINGS_NAMESPACE, { routines: [] })
+  })
+
+  it('reads the wall clock by default', async () => {
+    vi.setSystemTime(10_000_000)
+    // Last ran one interval minus one second ago by the wall clock: due in one second.
+    const due = routine({ lastRunAt: 10_000_000 - 86_400_000 + 1_000 })
+    const create = vi.fn(async () => ({
+      agent: { followup: () => {}, whenIdle: () => Promise.resolve() },
+      dispose: () => Promise.resolve(),
+    }))
+    const scheduler = new RoutineScheduler(
+      new Context(),
+      { create },
+      { currentSelection: () => ({ provider: 'p', model: 'm' }) },
+      { get: () => ({ routines: [due] }), update: async () => ({}) },
+    )
+    scheduler.reconcile()
+    await vi.advanceTimersByTimeAsync(999)
+    expect(create).not.toHaveBeenCalled()
+    await vi.advanceTimersByTimeAsync(1)
+    expect(create).toHaveBeenCalledOnce()
+    scheduler.dispose()
+  })
+})
+
+describe('routines host plugin', () => {
+  it('registers the namespace, re-arms on routine updates, and stops on dispose', async () => {
+    const ctx = new Context()
+    const register = vi.fn(() => () => {})
+    const section: { value: RoutinesSettings } = { value: {} }
+    const settings = {
+      register,
+      get: (ns: string) => (ns === ROUTINES_SETTINGS_NAMESPACE ? section.value : undefined),
+      update: vi.fn(async () => ({})),
+    }
+    const create = vi.fn(async () => ({
+      agent: { followup: () => {}, whenIdle: () => Promise.resolve() },
+      dispose: () => Promise.resolve(),
+    }))
+    ctx.provide('settings', settings)
+    ctx.provide('agents', { create })
+    ctx.provide('agentDefaultModel', { currentSelection: () => ({ provider: 'p', model: 'm' }) })
+    const fiber = ctx.plugin({ apply })
+    await fiber.await()
+    expect(register).toHaveBeenCalledOnce()
+    // The scheduler matches the namespace by string, so the test emits plain names.
+    const emitUpdated = (ns: string): void => {
+      (ctx.emit as (name: string, ...args: unknown[]) => void)('settings/updated', ns, {}, {}, 'host')
+    }
+
+    section.value = { routines: [routine({ every: 1, unit: 'minutes' })] }
+    emitUpdated('other-ns')
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(create).not.toHaveBeenCalled()
+    emitUpdated(ROUTINES_SETTINGS_NAMESPACE)
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(create).toHaveBeenCalledOnce()
+
+    await fiber.dispose()
+    await vi.advanceTimersByTimeAsync(120_000)
+    expect(create).toHaveBeenCalledOnce()
   })
 })

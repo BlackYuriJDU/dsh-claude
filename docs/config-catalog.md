@@ -436,6 +436,25 @@ export interface Config {
 
 Source: [`packages/client/hmr/src/index.ts:31`](../packages/client/hmr/src/index.ts)
 
+<a id="deepseek-aidsh-client-ui-projects"></a>
+
+## `@deepseek-ai/dsh-client-ui-projects`
+
+```ts config-catalog
+/** The projects plugin config. */
+export interface Config {
+  /**
+   * Cap on one knowledge file's contributed characters. Files are read whole
+   * and truncated to this budget so a large attachment cannot blow up the
+   * prompt; the cap is per file, applied after UTF-8 decoding on a character
+   * boundary.
+   */
+  knowledgeFileMaxChars: number
+}
+```
+
+Source: [`packages/client/ui-projects/src/index.ts:38`](../packages/client/ui-projects/src/index.ts)
+
 <a id="deepseek-aidsh-code-runtime-worker-thread"></a>
 
 ## `@deepseek-ai/dsh-code-runtime-worker-thread`
@@ -3248,7 +3267,6 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-model-selection` ([`packages/client/ui-model-selection/src/index.ts`](../packages/client/ui-model-selection/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-permission-presets` ([`packages/client/ui-permission-presets/src/index.ts`](../packages/client/ui-permission-presets/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-plan` ([`packages/client/ui-plan/src/index.ts`](../packages/client/ui-plan/src/index.ts))
-- `@deepseek-ai/dsh-client-ui-projects` ([`packages/client/ui-projects/src/index.ts`](../packages/client/ui-projects/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-reference` ([`packages/client/ui-reference/src/index.ts`](../packages/client/ui-reference/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-renderer` ([`packages/client/ui-renderer/src/index.ts`](../packages/client/ui-renderer/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-routines` — requires `agents` · `agentDefaultModel` · `settings` ([`packages/client/ui-routines/src/index.ts`](../packages/client/ui-routines/src/index.ts))

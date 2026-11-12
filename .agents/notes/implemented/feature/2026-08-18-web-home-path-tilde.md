@@ -34,4 +34,4 @@ POSIX home-rooted Workspace hover paths and leftover Tool path summaries display
 
 ## Testing
 
-Package tests cover `abbreviateHomePath`, `toolRowModel` / `readCardModel` home abbreviation, Workspace hover display versus copy, and `host.describe` schema plus live `homedir()`. Assembled replay `apps/web/tests/home-path-tilde.snapshot.ts` hovers the fixture home-descendant Workspace. Product-GUI PRs still record a real-browser GIF of the hover card.
+Package tests cover `abbreviateHomePath`, `toolRowModel` / `readCardModel` home abbreviation, Workspace hover display versus copy, and `host.describe` schema plus live `homedir()`. The dshc fork lists Sessions flat, so its assembled app renders no Workspace row to hover and carries no assembled replay of the card; the package tests above own the coverage.

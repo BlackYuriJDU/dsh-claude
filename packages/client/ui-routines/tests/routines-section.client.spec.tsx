@@ -98,4 +98,29 @@ describe('RoutinesSection', () => {
     fireEvent.change(view.getByPlaceholderText(en['add.prompt.placeholder']), { target: { value: 'y' } })
     expect(button.disabled).toBe(false)
   })
+
+  it('labels the last run and toggles only the clicked routine', () => {
+    const { view, scope } = mount({
+      routines: [routine({ lastRunAt: Date.UTC(2026, 0, 2, 3, 4) }), routine({ id: 'r2', name: 'Other' })],
+    })
+    expect(view.getByText(/^Last run /)).toBeTruthy()
+    expect(view.getByText(en['neverRan'])).toBeTruthy()
+    fireEvent.click(view.getAllByRole('checkbox')[1]!)
+    const written = scope.getSnapshot().value?.routines
+    expect(written?.map(item => item.enabled)).toEqual([true, false])
+  })
+
+  it('falls back to an interval of one for a non-numeric count and keeps a workspace path', () => {
+    const { view, scope } = mount({})
+    fireEvent.change(view.getByPlaceholderText(en['add.name.placeholder']), { target: { value: 'Sync' } })
+    fireEvent.change(view.getByPlaceholderText(en['add.prompt.placeholder']), { target: { value: 'sync it' } })
+    fireEvent.change(view.getByRole('spinbutton'), { target: { value: '' } })
+    fireEvent.change(view.getByRole('combobox'), { target: { value: 'days' } })
+    fireEvent.change(view.getByPlaceholderText(en['add.cwd.placeholder']), { target: { value: '  /work/repo  ' } })
+    fireEvent.click(view.getByRole('button', { name: en['add'] }))
+    const written = scope.getSnapshot().value?.routines?.[0]
+    expect(written?.every).toBe(1)
+    expect(written?.unit).toBe('days')
+    expect(written?.cwd).toBe('/work/repo')
+  })
 })

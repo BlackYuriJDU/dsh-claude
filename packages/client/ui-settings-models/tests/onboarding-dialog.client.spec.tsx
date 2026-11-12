@@ -7,7 +7,7 @@ import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
 import type { SettingsScope, SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
 import { ProfileOnboarding } from '../src/client/ProfileOnboarding.tsx'
 import type { ProfileOnboardingProps } from '../src/client/ProfileOnboarding.tsx'
-import { ProfileOnboardingStore, type OnboardingProfileSection } from '../src/client/profile-store.ts'
+import { decodeOnboardingSection, ProfileOnboardingStore, type OnboardingProfileSection } from '../src/client/profile-store.ts'
 import { ProviderOnboarding } from '../src/client/ProviderOnboarding.tsx'
 import type { ProviderOnboardingProps } from '../src/client/ProviderOnboarding.tsx'
 import { SettingsDescribeMirror } from '@deepseek-ai/dsh-client-ui-settings/src/client/settings-mirror.ts'
@@ -38,6 +38,8 @@ function scopeDouble(options: {
   mode?: 'host' | 'memory'
   status?: 'ready' | 'loading' | 'unavailable'
   setReject?: string
+  /** Accept writes without the section ever reflecting them. */
+  setIgnored?: boolean
 } = {}) {
   let snapshot: SettingsScopeSnapshot<OnboardingProfileSection> = {
     status: options.status ?? 'ready',
@@ -51,6 +53,7 @@ function scopeDouble(options: {
   const listeners = new Set<() => void>()
   const set = vi.fn((field: string, value: unknown) => {
     if (options.setReject !== undefined) return Promise.reject(new Error(options.setReject))
+    if (options.setIgnored === true) return Promise.resolve()
     snapshot = { ...snapshot, value: { ...snapshot.value, [field]: value } }
     for (const listener of listeners) listener()
     return Promise.resolve()
@@ -262,6 +265,59 @@ describe('ProfileOnboarding', () => {
     await waitFor(() => { expect(h.complete).toHaveBeenCalledOnce() })
     expect(h.set).not.toHaveBeenCalled()
     expect(window.localStorage.getItem('dshc:user-name')).toBe('Arthur')
+  })
+})
+
+describe('ProfileOnboardingStore', () => {
+  it('reads a non-object durable section as empty', () => {
+    expect(decodeOnboardingSection(null)).toEqual({})
+    expect(decodeOnboardingSection(['Arthur'])).toEqual({})
+    expect(decodeOnboardingSection('Arthur')).toEqual({})
+    expect(decodeOnboardingSection({ userName: 'Arthur' })).toEqual({ userName: 'Arthur' })
+  })
+
+  it('reports loading, then asks anyway when the durable section is unavailable', async () => {
+    const loading = new ProfileOnboardingStore(scopeDouble({ status: 'loading' }).scope)
+    await loading.load()
+    expect(loading.store.getSnapshot()).toMatchObject({ status: 'loading', error: null })
+
+    const unavailable = new ProfileOnboardingStore(scopeDouble({ status: 'unavailable', value: { userName: 'Arthur' } }).scope)
+    await unavailable.load()
+    expect(unavailable.store.getSnapshot()).toMatchObject({ status: 'ready', profiled: false })
+  })
+
+  it('refuses a blank name without writing', async () => {
+    const { scope, set } = scopeDouble()
+    expect(await new ProfileOnboardingStore(scope).save('   ', 'a@b.co')).toBe(false)
+    expect(set).not.toHaveBeenCalled()
+  })
+
+  it('writes only the name when the email is left empty', async () => {
+    const { scope, set } = scopeDouble()
+    const store = new ProfileOnboardingStore(scope)
+    await store.load()
+    expect(await store.save(' Arthur ', '  ')).toBe(true)
+    expect(set.mock.calls).toEqual([['userName', 'Arthur']])
+  })
+
+  it('reports an accepted write that the section never reflects', async () => {
+    const store = new ProfileOnboardingStore(scopeDouble({ setIgnored: true }).scope)
+    await store.load()
+    expect(await store.save('Arthur', '')).toBe(false)
+    expect(store.store.getSnapshot()).toMatchObject({ status: 'error', error: 'the profile did not persist' })
+  })
+})
+
+describe('OnboardingModal', () => {
+  it('ignores Escape and renders without an application root to make inert', async () => {
+    document.getElementById('root')?.remove()
+    const h = profileHarness()
+    document.getElementById('root')?.remove()
+    render(<ProfileOnboarding {...h.props} />)
+    await screen.findByRole('dialog')
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.getByRole('dialog')).toBeTruthy()
+    expect(h.complete).not.toHaveBeenCalled()
   })
 })
 

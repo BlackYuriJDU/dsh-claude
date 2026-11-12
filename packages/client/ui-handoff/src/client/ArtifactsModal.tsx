@@ -54,14 +54,7 @@ function aggregateProduced(
     const data = location.data.get('deliverables') as { produced?: readonly { path: string }[] } | undefined
     const produced = data?.produced ?? []
     if (produced.length === 0) continue
-    const paths: string[] = []
-    const seen = new Set<string>()
-    for (const item of produced) {
-      if (seen.has(item.path)) continue
-      seen.add(item.path)
-      paths.push(item.path)
-    }
-    if (paths.length > 0) groups.push({ turn, paths })
+    groups.push({ turn, paths: [...new Set(produced.map(item => item.path))] })
   }
   return groups.sort((a, b) => b.turn - a.turn)
 }

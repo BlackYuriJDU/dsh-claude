@@ -237,7 +237,12 @@ describe('SubagentHeaderLineage', () => {
     expect(screen.queryByRole('tree')).toBeNull()
     await vi.advanceTimersByTimeAsync(1)
     const tree = screen.getByRole('tree')
+    // The timer opened the menu outside act; flush its passive effects so the
+    // placement listeners exist before the viewport moves under the trigger.
+    await act(async () => {})
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({ bottom: 40, left: 30 } as DOMRect)
     fireEvent.resize(window)
+    expect(tree.style.top).toBe('45px')
     fireEvent.mouseLeave(trigger.parentElement!)
     fireEvent.mouseEnter(tree)
     await vi.advanceTimersByTimeAsync(120)

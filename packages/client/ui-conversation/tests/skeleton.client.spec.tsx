@@ -138,6 +138,7 @@ function mount(
   const stop = vi.fn()
   const open = vi.fn()
   const slotCalls: string[] = []
+  const slotOnly = new Map<string, string | undefined>()
   const lineageOwners: ConversationHeaderLineageOwnerProps[] = []
   const viewTabs = options.viewTabs ?? [
     { id: 'chat', label: 'Chat' },
@@ -154,6 +155,7 @@ function mount(
   let barOwner: ComposerBarOwnerProps | undefined
   const renderSlot = ((key: string, owner: object, opts?: { only?: string; fallback?: ReactNode }) => {
     slotCalls.push(key)
+    slotOnly.set(key, opts?.only)
     if (key === 'conversation.input.model' || key === 'conversation.input.plan') {
       seatOwners.push({ key, owner })
     }
@@ -270,7 +272,7 @@ function mount(
   }
   const view = render(<ConversationRoot {...props} />)
   return {
-    view, chat, sink, retargetWorkspace, session, slotCalls, lineageOwners, seatOwners, open,
+    view, chat, sink, retargetWorkspace, session, slotCalls, slotOnly, lineageOwners, seatOwners, open,
     pickerOwner: () => pickerOwner,
     barOwner: () => barOwner,
     rerender: () => { view.rerender(<ConversationRoot {...props} />) },
@@ -362,12 +364,14 @@ describe('ConversationRoot resident composer', () => {
     expect(host?.contains(header)).toBe(false)
     expect(host?.contains(seat)).toBe(true)
     expect(seat?.contains(textarea)).toBe(true)
-    // The header is layout chrome only: hidden, and it dispatches no
-    // lineage/actions/utilities sub-slots.
+    // On Chat the header is hidden layout chrome; of its sub-slots it
+    // dispatches only the background-jobs action, which floats over the
+    // transcript and renders only while the session has background work.
     expect(header?.getAttribute('aria-hidden')).toBe('true')
     expect(b.slotCalls).toContain('conversation.session.header')
     expect(b.slotCalls).not.toContain('conversation.session.header.lineage')
-    expect(b.slotCalls).not.toContain('conversation.session.header.actions')
+    expect(b.slotCalls).toContain('conversation.session.header.actions')
+    expect(b.slotOnly.get('conversation.session.header.actions')).toBe('job-list')
     expect(b.slotCalls).not.toContain('conversation.session.header.utilities')
   })
 

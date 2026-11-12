@@ -42,7 +42,7 @@ jobs:
       ${{ vars.DSH_CI_FAILOVER_LINUX == 'selfhosted'
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || vars.DSH_CI_LINUX_RUNNER || 'ubuntu-latest' }}
     name: node 24 / static
     env:
       DSH_GATE_CONCURRENCY: '8'
@@ -94,7 +94,7 @@ jobs:
       ${{ vars.DSH_CI_FAILOVER_LINUX == 'selfhosted'
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || vars.DSH_CI_LINUX_RUNNER || 'ubuntu-latest' }}
     name: node 24 / coverage
     env:
       # Partitioning replaces the instrumented share; this budget gives the
@@ -156,16 +156,19 @@ jobs:
       ${{ vars.DSH_CI_FAILOVER_LINUX == 'selfhosted'
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "linux", "x64", "vm-backup"]')
-          || 'dsh-ubuntu-24-04-16core' }}
+          || vars.DSH_CI_LINUX_RUNNER || 'ubuntu-latest' }}
     name: node 24 / snapshots and artifacts
     env:
-      DSH_GATE_CONCURRENCY: '8'
+      # Gate and snapshot concurrency follow the runner's CPU count unless the
+      # repository variables size them for a larger pool; an empty value
+      # selects the script's CPU-derived default.
+      DSH_GATE_CONCURRENCY: ${{ vars.DSH_CI_GATE_CONCURRENCY || '' }}
       DSH_NODE_COMPAT_SKIP_TYPECHECK: '1'
       DSH_OXLINT_THREADS: '8'
       DSH_PUBLINT_CONCURRENCY: '8'
       DSH_WEB_SNAPSHOT_WORKERS: '6'
       # Failover halves snapshot concurrency for the shared 64-core VM.
-      DSH_SNAPSHOT_MAX_CONCURRENCY: ${{ vars.DSH_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '12' || '32' }}
+      DSH_SNAPSHOT_MAX_CONCURRENCY: ${{ vars.DSH_CI_FAILOVER_LINUX == 'selfhosted' && github.event.pull_request.user.login != 'dependabot[bot]' && '12' || vars.DSH_CI_SNAPSHOT_MAX_CONCURRENCY || '' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -412,7 +415,7 @@ jobs:
       ${{ vars.DSH_CI_FAILOVER_WINDOWS == 'selfhosted'
           && github.event.pull_request.user.login != 'dependabot[bot]'
           && fromJSON('["self-hosted", "dsh-win-ci", "windows"]')
-          || 'dsh-windows-2025-16core' }}
+          || vars.DSH_CI_WINDOWS_RUNNER || 'windows-latest' }}
     name: windows node 24 / native complete
     timeout-minutes: 120
     env:

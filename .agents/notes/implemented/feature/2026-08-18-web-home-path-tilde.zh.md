@@ -34,4 +34,4 @@ POSIX 家目录下的 Workspace 悬停路径，以及缩短 cwd 后仍落在家�
 
 ## Testing
 
-包测试覆盖 `abbreviateHomePath`、`toolRowModel`／`readCardModel` 的家目录缩写、Workspace 悬停展示与复制，以及 `host.describe` schema 与实时 `homedir()`。组装回放 `apps/web/tests/home-path-tilde.snapshot.ts` 悬停 fixture 中位于家目录下的 Workspace。面向产品 GUI 的 PR 仍需录制悬停卡片的真实浏览器 GIF。
+包测试覆盖 `abbreviateHomePath`、`toolRowModel`／`readCardModel` 的家目录缩写、Workspace 悬停展示与复制，以及 `host.describe` schema 与实时 `homedir()`。dshc 分支以平铺方式列出 Session，其组装应用不渲染可悬停的 Workspace 行，也不再包含该卡片的组装回放；上述包测试承担覆盖。

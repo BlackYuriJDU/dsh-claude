@@ -1,16 +1,21 @@
-/** Composer context-occupancy meter: a ring beside the send button fed by the
- * `contextPressure` projection, with a click-open panel of the heuristic
- * `contextBreakdown` composition (system prompt, tools, conversation).
- * Renders nothing until a provider reports both pressure and a route
- * capacity. */
+/** Composer usage ring: a circle in the row under the composer card whose arc
+ * follows the `contextPressure` occupancy. Clicking it opens one panel with
+ * two sections: the context window (the heuristic `contextBreakdown`
+ * composition of system prompt, tools, and conversation) and the session
+ * (turn and step counts, cache-hit share, input/output tokens, and speed from
+ * the `sessionStats` and `tokenUsage` projections). Renders nothing until the
+ * session reports either a route capacity or recorded activity. */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { UseProjection } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: the `contextPressure` / `contextBreakdown` projection key merges.
 import type {} from '@deepseek-ai/dsh-token-meter/client'
 import { Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ComposerBarProps } from '../contract/slots.ts'
-import { contextOccupancy, formatTokens } from '../chat/StatsLine.tsx'
+import {
+  billedInputTokens, cacheHitPercent, contextOccupancy, deriveStats, formatDuration, formatTokens,
+} from '../chat/StatsLine.tsx'
+import { formatTokensPerSecond } from '../chat/message-chrome.ts'
 import css from './ContextMeter.module.css'
 
 /** Ring geometry: 14px viewBox, 2px stroke. */
@@ -32,18 +37,34 @@ const ROWS = [
 ] as const
 
 export interface ContextMeterProps {
+  /** Conversation snapshot selector; its settled nodes back the session figures without the `sessionStats` unit. */
+  useSession: ComposerBarProps['useSession']
   useProjection: UseProjection
   /** The owning bar's locale seat, passed down as a plain prop. */
   t: ComposerBarProps['t']
 }
 
-export function ContextMeter({ useProjection, t }: ContextMeterProps) {
+export function ContextMeter({ useSession, useProjection, t }: ContextMeterProps) {
   const pressure = useProjection('contextPressure')
   const breakdown = useProjection('contextBreakdown')
+  const usage = useProjection('tokenUsage')
+  const projected = useProjection('sessionStats')
+  const settledNodes = useSession(s => s.chat.legacy.nodes)
+  const stats = useMemo(() => projected ?? deriveStats(settledNodes ?? []), [projected, settledNodes])
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLSpanElement | null>(null)
   const context = contextOccupancy(pressure)
-  const available = context !== null
+  const inputTokens = usage === undefined ? 0 : billedInputTokens(usage)
+  const outputTokens = usage?.outputTokens ?? 0
+  const billed = inputTokens + outputTokens > 0
+  const cacheHit = usage === undefined || !billed ? null : cacheHitPercent(usage)
+  const speeds: string[] = []
+  if (stats.ttftSteps > 0) speeds.push(t('stats.ttftAverage', { duration: formatDuration(stats.ttftMs / stats.ttftSteps) }))
+  if (stats.decodeMs > 0) {
+    speeds.push(t('stats.tokensPerSecond', { throughput: formatTokensPerSecond(stats.decodeTokens / (stats.decodeMs / 1_000)) }))
+  }
+  const hasSession = stats.steps > 0 || billed
+  const available = context !== null || hasSession
 
   // A model switch can temporarily remove capacity while this component stays
   // mounted. Close the now-unavailable panel instead of preserving stale UI.
@@ -69,9 +90,10 @@ export function ContextMeter({ useProjection, t }: ContextMeterProps) {
     }
   }, [available, open])
 
-  if (context === null) return null
-  const percent = context.percent
+  if (!available) return null
+  const percent = context?.percent ?? 0
   const reading = `${percent}%`
+  const triggerLabel = context === null ? t('usage.session') : t('context.aria', { percent: reading })
   const [headBefore = '', headAfter = ''] = t('context.aria', { percent: READING_SLOT })
     .split(READING_SLOT)
     .map(part => part.trim())
@@ -90,11 +112,11 @@ export function ContextMeter({ useProjection, t }: ContextMeterProps) {
 
   return (
     <span ref={rootRef} className={css.root}>
-      <Tooltip label={t('context.aria', { percent: reading })} side="top" delayMs={200} disabled={open}>
+      <Tooltip label={triggerLabel} side="top" delayMs={200} disabled={open}>
         <button
           type="button"
           className={css.trigger}
-          aria-label={t('context.aria', { percent: reading })}
+          aria-label={triggerLabel}
           aria-haspopup="dialog"
           aria-expanded={open}
           onClick={() => { setOpen(!open) }}
@@ -113,38 +135,71 @@ export function ContextMeter({ useProjection, t }: ContextMeterProps) {
         </button>
       </Tooltip>
       {open && (
-        <div className={css.panel} role="dialog" aria-label={t('context.used')}>
-          <div className={css.header}>
-            {/* Empty sides collapse through `.headline:empty` so the locale that
+        <div className={css.panel} role="dialog" aria-label={context === null ? t('usage.session') : t('context.used')}>
+          {context !== null && (<>
+            <div className={css.header}>
+              {/* Empty sides collapse through `.headline:empty` so the locale that
                 needs no leading (or trailing) text spends no header gap. */}
-            <span className={css.headline}>{headBefore}</span>
-            <span className={css.percent}>{reading}</span>
-            <span className={css.headline}>{headAfter}</span>
-            <span className={css.figures}>
-              {`~${formatTokens(context.usedTokens)} / ${formatTokens(context.contextWindow)}`}
-            </span>
-          </div>
-          <div className={css.bar}>
-            {segments.map(segment => (
-              <div
-                key={segment.key}
-                className={segment.color === undefined ? css.segment : `${css.segment} ${segment.color}`}
-                style={{ width: `${segment.width}%` }}
-              />
-            ))}
-          </div>
-          {breakdown !== undefined && (
-            <dl className={css.rows}>
-              {ROWS.map(row => (
-                <div key={row.key} className={css.row}>
-                  <dt>
-                    <span className={`${css.swatch} ${row.color}`} aria-hidden />
-                    {t(row.label)}
-                  </dt>
-                  <dd>{`~${formatTokens(breakdown[row.key])}`}</dd>
-                </div>
+              <span className={css.headline}>{headBefore}</span>
+              <span className={css.percent}>{reading}</span>
+              <span className={css.headline}>{headAfter}</span>
+              <span className={css.figures}>
+                {`~${formatTokens(context.usedTokens)} / ${formatTokens(context.contextWindow)}`}
+              </span>
+            </div>
+            <div className={css.bar}>
+              {segments.map(segment => (
+                <div
+                  key={segment.key}
+                  className={segment.color === undefined ? css.segment : `${css.segment} ${segment.color}`}
+                  style={{ width: `${segment.width}%` }}
+                />
               ))}
-            </dl>
+            </div>
+            {breakdown !== undefined && (
+              <dl className={css.rows}>
+                {ROWS.map(row => (
+                  <div key={row.key} className={css.row}>
+                    <dt>
+                      <span className={`${css.swatch} ${row.color}`} aria-hidden />
+                      {t(row.label)}
+                    </dt>
+                    <dd>{`~${formatTokens(breakdown[row.key])}`}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </>)}
+          {hasSession && (
+            <section className={css.session} aria-label={t('usage.session')}>
+              <div className={css.sectionTitle}>{t('usage.session')}</div>
+              {stats.steps > 0 && (
+                <div className={css.metric}>{t('stats.counts', { turns: stats.turns, steps: stats.steps })}</div>
+              )}
+              {cacheHit !== null && (
+                <div className={css.metric}>
+                  <span className={css.metricLabel}>{t('stats.cacheHit', { percent: cacheHit })}</span>
+                  <div className={css.miniBar} aria-hidden>
+                    <div className={`${css.miniFill} ${css.colorCache}`} style={{ width: `${Number(cacheHit)}%` }} />
+                  </div>
+                </div>
+              )}
+              {billed && (
+                <div className={css.metric}>
+                  <span className={css.metricLabel}>
+                    {t('stats.tokens', { input: formatTokens(inputTokens), output: formatTokens(outputTokens) })}
+                  </span>
+                  <div className={css.miniBar} aria-hidden>
+                    <div
+                      className={`${css.miniFill} ${css.colorInput}`}
+                      style={{ width: `${100 * inputTokens / (inputTokens + outputTokens)}%` }}
+                    />
+                    <div className={`${css.miniFill} ${css.colorOutput}`} style={{ flex: 1 }} />
+                  </div>
+                </div>
+              )}
+              {speeds.length > 0 && <div className={css.metric}>{speeds.join(' · ')}</div>}
+            </section>
           )}
         </div>
       )}

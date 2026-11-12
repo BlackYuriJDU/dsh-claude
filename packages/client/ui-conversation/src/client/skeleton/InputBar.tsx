@@ -29,6 +29,8 @@ import { attachmentErrorText, imageSizeText } from '../image-labels.ts'
 import { ReferenceIcon } from '../reference/ReferenceIcon.tsx'
 import { PlusMenu } from './PlusMenu.tsx'
 import { MicButton } from './MicButton.tsx'
+import { ContextMeter } from './ContextMeter.tsx'
+import { PermissionSelect } from './PermissionSelect.tsx'
 import { isSafariBrowser, repairSafariTextareaLayout } from './safari.ts'
 import css from './InputBar.module.css'
 
@@ -78,7 +80,7 @@ export type InputBarProps = ComposerBarProps
 
 export function InputBar({
   useSession, useInput, inputActions, keyboard, addImages, removeImage, draftImages,
-  resolveSubmitMode, toggleCommandMenu, stop, t,
+  resolveSubmitMode, toggleCommandMenu, stop, command, t,
   renderSlot, useNotices, useLexicon, useMenuLauncher,
   useProjection, sessionId, variant, disabled: inert = false, blocked,
   workspacePickerOpen = false, onRequestWorkspace,
@@ -181,9 +183,9 @@ export function InputBar({
     }, 10)
   }
 
-  // dshc: the Access seat (permission preset chip) was removed — read and
-  // write stay natural and dangerous actions keep asking through the host's
-  // own approval flow.
+  // The Access seat's data: the host-computed permissions projection
+  // (undefined = capability absent → the chip renders nothing).
+  const permissions = useProjection('permissions')
 
   // A continuable child without its live parent cannot accept human input,
   // but its independent Stop below stays available while it runs.
@@ -640,7 +642,12 @@ export function InputBar({
     if (!empty && !disabled && !machineBusy) inputActions.submit()
   }
 
-  // The Access seat: removed in dshc — no permission preset chip.
+  // The Access seat: the projection-fed permission chip in the row under the
+  // card (renders nothing while the permissions key is absent — a
+  // permission-less host or Draft — or while the command face is absent).
+  const accessSelect: ReactNode = command === undefined
+    ? null
+    : <PermissionSelect key={sessionId} value={permissions} locked={locked} command={command} t={t} />
 
   // Mirror-layer decorations: a visible backdrop with transparent textarea
   // text. Claim tokens and references retain the draft's own glyph metrics,
@@ -950,11 +957,14 @@ export function InputBar({
           </div>
         </div>
       </div>
-      {/* Session mode: the model seat lives OUTSIDE the capsule, right-aligned
-          under the card (the reference's compact composer). */}
+      {/* Session mode: the row under the card carries the access mode on the
+          left and the model seat plus the usage ring on the right (the
+          reference's compact composer). */}
       {variant === 'composer' && (
         <div className={css.underRow}>
+          <div className={css.underLeading}>{accessSelect}</div>
           {renderSlot('conversation.input.model', { locked: modelSeatLocked })}
+          <ContextMeter useSession={useSession} useProjection={useProjection} t={t} />
         </div>
       )}
       {footer}

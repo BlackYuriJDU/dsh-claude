@@ -23,28 +23,59 @@ function resolveActiveView(tabs: readonly ViewTab[], selectedId: string | null):
     ?? tabs.find(view => view.id === DEFAULT_VIEW_ID)
 }
 
+/** Header action entry id of the ui-jobs background-jobs list (the one action kept on Chat). */
+const BACKGROUND_JOBS_ACTION = 'job-list'
+
 /**
  * Renders the session header chrome above the resident conversation scrollport.
- * dshc keeps only the layout element (hidden); all chrome lives in the
- * browsing sidebar, like the reference interface.
- * @returns the hidden header element.
+ * dshc hides the chrome while the Chat view is active (the conversation starts
+ * straight at the transcript); any other active view, such as the Trajectory
+ * view a tool row's inspect control opens, shows the view tabs so the user can
+ * return to Chat.
+ * @returns on Chat, the hidden header plus the floating background-jobs action;
+ * otherwise the view tabs.
  */
 export function ConversationSessionHeader({
   sessionId, useSession, useSessions, useStore, actions,
   renderSlot, views, open, t,
 }: ConversationSessionHeaderProps) {
-  // dshc: session header chrome (session log, PTC chip, Chat/Trajectory tabs,
-  // background-jobs action) is removed wholesale — the conversation starts
-  // straight at the transcript, like the reference interface. The element
-  // stays as layout chrome so the scrollport's sibling structure is stable
-  // across the hero and active phases.
-  void sessionId; void useSession; void useSessions; void useStore; void actions
-  void renderSlot; void views; void open; void t
+  // dshc: session log, PTC chip, and breadcrumbs stay removed. On Chat the
+  // header collapses to the background-jobs action, which renders only while
+  // the session has background work (Claude Code lists its background tasks
+  // the same way); the view tabs return outside the Chat view.
+  void sessionId; void useSession; void useSessions; void open; void t
+  useSyncExternalStore(views.subscribe, views.version)
+  const tabs = views.list()
+  const active = resolveActiveView(tabs, useStore(s => s.view))
+  if (active === undefined || active.id === DEFAULT_VIEW_ID || tabs.length < 2) {
+    return (
+      <>
+        <header className={clsx(css.header, css.headerHidden)} aria-hidden />
+        <div className={css.chatActions}>
+          <div className={css.chatActionsInner}>
+            {renderSlot('conversation.session.header.actions', {}, { only: BACKGROUND_JOBS_ACTION })}
+          </div>
+        </div>
+      </>
+    )
+  }
   return (
-    <header
-      className={clsx(css.header, css.headerHidden)}
-      aria-hidden
-    />
+    <header className={css.header}>
+      <div className={css.tabs} role="tablist">
+        {tabs.map(viewTab => (
+          <button
+            key={viewTab.id}
+            type="button"
+            role="tab"
+            aria-selected={viewTab.id === active.id}
+            className={clsx(css.tab, viewTab.id === active.id && css.tabActive)}
+            onClick={() => { actions.setView(viewTab.id) }}
+          >
+            {viewTab.label}
+          </button>
+        ))}
+      </div>
+    </header>
   )
 }
 

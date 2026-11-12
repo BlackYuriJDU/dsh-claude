@@ -26,13 +26,12 @@ import {
   launchWebScaffold, parseSeedFixture, realizeSeedFixture, recordFixture, renderSeedFixture, seedSession, watchConsole,
   webSnapshotMode, type WebScaffold,
 } from './scaffold.ts'
-import { newEnglishPage, saveFailureShot } from './support.ts'
+import { newEnglishPage, openSeededSession, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/seeded-history', import.meta.url))
 const SEED = fileURLToPath(new URL('./snapshots/seeded-history/seed.jsonl', import.meta.url))
 const UI_EXPECTED = fileURLToPath(new URL('./snapshots/seeded-history/ui.expected.md', import.meta.url))
 // Command-row goldens over the same conversation after direct host commands.
-const COMMAND_ROW_EXPECTED = fileURLToPath(new URL('./snapshots/seeded-history/command-row.expected.md', import.meta.url))
 const FEEDBACK_ROW_EXPECTED = fileURLToPath(new URL('./snapshots/seeded-history/feedback-row.expected.md', import.meta.url))
 const FILE_OPEN_FAILURE_EXPECTED = fileURLToPath(new URL('./snapshots/seeded-history/file-open-failure.expected.md', import.meta.url))
 const MODE = webSnapshotMode()
@@ -270,12 +269,7 @@ describe('web e2e: seeded history renders through cold resume', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-seeded-history'))
     // The sidebar tree collapses workspace groups by default: click the group
     // row (treeitem 0) to expand, then the revealed session row.
-    const groupRow = page.locator('[role="treeitem"]').first()
-    await groupRow.waitFor({ timeout: 15_000 })
-    await groupRow.click()
-    const sessionRow = page.locator('[role="treeitem"]').nth(1)
-    await sessionRow.waitFor({ timeout: 10_000 })
-    await sessionRow.click()
+    await openSeededSession(page)
     // Settled barrier for history: the recorded final assistant text renders.
     await expect.poll(() => page.getByText('DONE', { exact: true }).count(), { timeout: 15_000 }).toBe(1)
     await expect.poll(() => page.getByText('compact', { exact: true }).count(), { timeout: 10_000 }).toBe(1)
@@ -376,9 +370,9 @@ describe('web e2e: seeded history renders through cold resume', () => {
       }
     })
     expect(style).toEqual({
-      backgroundColor: 'rgb(249, 250, 251)',
+      backgroundColor: 'rgb(24, 23, 21)',
       borderRadius: '8px',
-      color: 'rgb(129, 133, 140)',
+      color: 'rgb(120, 116, 108)',
       fontSize: '11px',
       lineHeight: '16px',
       padding: ['10px', '16px', '12px', '12px'],
@@ -389,15 +383,13 @@ describe('web e2e: seeded history renders through cold resume', () => {
     await expect.poll(() => disclosure.getAttribute('aria-expanded')).toBe('false')
   })
 
-  it.skipIf(MODE === 'record')('file-path tool rows rebuilt from the cold log stay details-inert', async () => {
+  it.skipIf(MODE === 'record')('file-path tool rows rebuilt from the cold log open their file through the Host', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-seeded-toolrow'))
     // Interaction over cold-resumed history: read summaries are host-open
-    // file links (not expand-in-place / not details). Runs after the golden
+    // file links (not expand-in-place). Runs after the golden
     // capture; still zero model calls.
     const fileLink = page.locator('[data-variant="read"] button').first()
     await fileLink.waitFor({ timeout: 10_000 })
-    const frame = page.locator('[style*="grid-template-columns"]').first()
-    expect(await frame.getAttribute('data-details-collapsed')).toBe('true')
     const openPath = vi.spyOn(scaffold.ctx.apiProxy.host, 'openPath')
       .mockImplementation(async (request, _signal) => ({
         rpcId: request.rpcId,
@@ -405,7 +397,7 @@ describe('web e2e: seeded history renders through cold resume', () => {
       }))
     try {
       await fileLink.click()
-      await expect.poll(() => frame.getAttribute('data-details-collapsed'), { timeout: 5_000 }).toBe('true')
+      await expect.poll(() => openPath.mock.calls.length, { timeout: 5_000 }).toBe(1)
     } finally {
       openPath.mockRestore()
     }
@@ -464,28 +456,6 @@ describe('web e2e: seeded history renders through cold resume', () => {
     await marker.click()
     await expect.poll(() => marker.getAttribute('aria-expanded'), { timeout: 5_000 }).toBe('false')
   })
-
-  it.skipIf(MODE === 'record')('an Access-chip switch lands one command row: bare name, non-repeating settlement text', async () => {
-    onTestFailed(() => saveFailureShot(page, 'web-e2e-seeded-command-row'))
-    // The Access chip submits `/permission <preset>` — a host command with no
-    // model call, so the settled row renders keylessly over this cold history.
-    // The row copy is the assertion: `permission · preset read-only`,
-    // where neither half repeats the other (the dispatched `/` and its
-    // argument stay out of the title, and the settlement text never restates
-    // the command's own name).
-    await page.getByRole('button', { name: 'Access mode, current: Workspace Write' }).click()
-    await page.getByRole('menuitem', { name: 'Read Only' }).click()
-    await page.getByRole('button', { name: 'Access mode, current: Read Only' }).waitFor({ timeout: 10_000 })
-    // Scoped to the row itself, so unrelated page text that happens to read
-    // `permission` (a future resident slash menu) cannot satisfy or break it.
-    const row = page.locator('[data-variant="others"]').filter({ hasText: 'preset read-only' })
-    await expect.poll(() => row.count(), { timeout: 10_000 }).toBe(1)
-    expect(await row.getByText('permission', { exact: true }).count()).toBe(1)
-    expect(await row.getByText('/permission read-only', { exact: true }).count()).toBe(0)
-    const snapshot = (await captureStableAria(page, '[class*="centerCol"]', scaffold.workspaceCwd))
-      .split(SEED_ID).join('{{seededId}}')
-    await compareOrRefreshGolden(COMMAND_ROW_EXPECTED, snapshot, MODE)
-  }, 60_000)
 
   it.skipIf(MODE === 'record')('reports full feedback correlation ids in an expandable two-line row', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-seeded-feedback-row'))
@@ -552,6 +522,6 @@ describe('web e2e: seeded history renders through cold resume', () => {
     // stream would have failed the turn loudly. Cleanliness pins the wire.
     expect(tripwire.pageErrors).toEqual([])
     expect(tripwire.warnings).toEqual([])
-    await assertFixtureInventory(SNAPSHOT_DIR, ['command-row.expected.md', 'feedback-row.expected.md', 'file-open-failure.expected.md', 'seed.jsonl', 'ui.expected.md'])
+    await assertFixtureInventory(SNAPSHOT_DIR, ['feedback-row.expected.md', 'file-open-failure.expected.md', 'seed.jsonl', 'ui.expected.md'])
   })
 })

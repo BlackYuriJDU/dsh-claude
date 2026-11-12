@@ -8,10 +8,12 @@ import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { TestRemote } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply as settingsApply, inject as settingsInject } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { apply, inject, SETTINGS_NS } from '@deepseek-ai/dsh-client-ui-theme/client'
-import type { AppearanceRowInjected, ThemeRuntime } from '@deepseek-ai/dsh-client-ui-theme/client'
+import type { AppearanceRowInjected, ChatFontRowInjected, ThemeRuntime } from '@deepseek-ai/dsh-client-ui-theme/client'
 import { THEME_SETTINGS_NAMESPACE, ThemeSettingsSchema } from '../src/theme-settings.ts'
 import { AppearanceRow } from '../src/client/AppearanceRow.tsx'
 import type { createAppearanceRowStore } from '../src/client/settings-store.ts'
+import { ChatFontRow } from '../src/client/ChatFontRow.tsx'
+import type { createChatFontRowStore } from '../src/client/chat-font-store.ts'
 
 // These specs assert the shipped Chinese copy. The lane has no jsdom `window`,
 // so browser-language detection never runs and a fresh LocaleRuntime opens on
@@ -124,6 +126,30 @@ describe('ui-theme apply', () => {
     expect(instance.getSnapshot().preference).toBe('dark')
     // Dark-only: re-setting the sole preference is a no-op — no Host write.
     expect(b.mutate).not.toHaveBeenCalled()
+  })
+
+  it('registers the chat-font row and routes its writes through the service', async () => {
+    const b = await bench()
+    declareItems(b.slots)
+    await b.ctx.plugin({ inject: [...inject], apply }).await()
+    const theme = b.ctx.get('theme') as ThemeRuntime
+    const entry = b.slots.entries(SLOT).find(e => e.component === ChatFontRow)!
+    expect(entry.options).toMatchObject({ id: 'chat-font', order: 11 })
+    expect(entry.locale).toBe(SETTINGS_NS)
+    const instance = (entry.store as ReturnType<typeof createChatFontRowStore>).create()
+    const face = (entry.inject as unknown as (a: typeof instance.actions) => ChatFontRowInjected)(instance.actions)
+    expect(instance.getSnapshot().chatFont).toBe('inter')
+
+    face.setChatFont('mono')
+    expect(theme.getTheme().chatFont).toBe('mono')
+    expect(instance.getSnapshot().chatFont).toBe('mono')
+    await vi.waitFor(() => { expect(b.mutate).toHaveBeenCalledTimes(1) })
+    expect(JSON.stringify(b.mutate.mock.calls[0]![0])).toContain('"chatFont"')
+    // Re-picking the active font writes nothing.
+    face.setChatFont('mono')
+    await Promise.resolve()
+    expect(b.mutate).toHaveBeenCalledTimes(1)
+    expect(() => { theme.setChatFont('comic-sans') }).toThrow('chat font "comic-sans" is not registered')
   })
 
   it('loads Host settings at boot, refreshes its namespace, and keeps remote browsers process-local', async () => {

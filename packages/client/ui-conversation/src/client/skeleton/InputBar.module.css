@@ -68,11 +68,19 @@ body[data-ds-dark-theme] .segmentActive {
    carries + / mic / send, the model reads below it, right-aligned. */
 .underRow {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 4px;
   width: 100%;
   max-width: var(--dsh-composer-card-max-width);
   padding: 4px 4px 0;
   box-sizing: border-box;
+}
+
+.underLeading {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
 }
 
 .hero {

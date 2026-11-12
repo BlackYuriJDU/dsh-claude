@@ -6,7 +6,7 @@
  * per write, the contract useSyncExternalStore requires).
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import type {
   SettingsScope, SettingsScopeSnapshot, WorkspaceId, WorkspaceListState, WorkspaceView,
 } from '@deepseek-ai/dsh-client-runtime/client'
@@ -112,5 +112,38 @@ describe('ProjectsSection', () => {
     fireEvent.click(view.getByText(en['knowledge.remove']))
     expect(projects.writes).toHaveLength(1)
     expect(projects.writes[0]).toEqual({ 'ws-a': { files: [] } })
+  })
+
+  it('writes nothing when the instructions are unchanged, and clears the saved flag later', () => {
+    vi.useFakeTimers()
+    try {
+      const { projects, view } = mount(
+        { projects: { 'ws-a': { instructions: 'Same' } } },
+        [workspace('ws-a', 'Alpha', '/p/a')],
+      )
+      const textarea = view.getByDisplayValue('Same')
+      fireEvent.blur(textarea)
+      expect(projects.writes).toHaveLength(0)
+      fireEvent.change(textarea, { target: { value: 'Changed' } })
+      fireEvent.blur(textarea)
+      expect(projects.writes).toHaveLength(1)
+      act(() => { vi.advanceTimersByTime(1500) })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('attaches nothing when the picker is cancelled, and names Windows paths by basename', async () => {
+    const pickFile = vi.fn<() => Promise<string | null>>()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce('C:\\docs\\notes.md')
+    const { projects, view } = mount({}, [workspace('ws-a', 'Alpha', '/p/a')], pickFile)
+    fireEvent.click(view.getByText(en['knowledge.add']))
+    await vi.waitFor(() => { expect(pickFile).toHaveBeenCalledTimes(1) })
+    expect(projects.writes).toHaveLength(0)
+    fireEvent.click(view.getByText(en['knowledge.add']))
+    await vi.waitFor(() => { expect(projects.writes).toHaveLength(1) })
+    const written = projects.writes[0] as Record<string, { files: { name: string }[] }>
+    expect(written['ws-a']?.files[0]?.name).toBe('notes.md')
   })
 })

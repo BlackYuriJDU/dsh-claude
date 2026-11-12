@@ -12,11 +12,25 @@
 
 ## 模型体验
 
-无。该插件渲染浏览器设置 UI；这里没有任何内容进入模型请求。
+### 所有者的常驻指令
+
+#### 模型看到的内容
+
+对于存储的 `ui-onboarding` 分区中 `instructions` 非空的每个 agent（智能体）会话，runtime-context 快照中包含一个 `profile:instructions` 贡献（order 2）。去除首尾空白后的文本跟在下面这段固定引导语之后；未设置或只含空白的文本不贡献任何内容。
+
+##### 引导语
+
+```markdown
+The user's standing instructions, written by them in Settings and applying to this and every session — honor them unless a direct user message supersedes them:
+```
+
+#### Token 影响
+
+一个上下文块：固定引导语加上存储的指令。指令未变化时，请求不会新增任何内容。
 
 #### KV Cache 影响
 
-无；该包既不组装也不发送提供方请求。
+稳定的系统提示词保持字节级一致。编辑指令会改变完整的 runtime-context 快照，该快照追加在保留的历史之后，并保留之前已缓存的前缀；未变化的请求复用保留的快照。
 
 ## 已知限制与暂缓事项
 

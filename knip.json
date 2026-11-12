@@ -170,11 +170,13 @@
     },
     "packages/client/ui-handoff": {
       "entry": [
+        "tests/**/*.spec.ts",
         "tests/**/*.spec.tsx"
       ],
       "project": [
         "src/**/*.ts",
         "src/**/*.tsx",
+        "tests/**/*.ts",
         "tests/**/*.tsx"
       ]
     },

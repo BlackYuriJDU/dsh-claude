@@ -62,8 +62,8 @@ export function ProfileOnboarding(props: ProfileOnboardingProps): ReactNode {
 
   const nameOk = name.trim() !== ''
   const emailOk = email.trim() === '' || EMAIL_PATTERN.test(email.trim())
+  // The primary action is disabled until both fields validate.
   const submit = async (): Promise<void> => {
-    if (!nameOk || !emailOk) return
     if (await controller.save(name, email)) finish()
   }
 

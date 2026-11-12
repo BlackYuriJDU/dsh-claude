@@ -8,7 +8,7 @@ import { Session, SessionId } from '@deepseek-ai/dsh-session'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import { SettingsProvider, settingsNamespace, type SettingsNamespace } from '@deepseek-ai/dsh-settings'
 import {
-  KNOWLEDGE_FILE_MAX_CHARS, PROJECT_CONTEXT, apply, projectContextText, readKnowledge, workspacePathFor,
+  Config, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS, PROJECT_CONTEXT, apply, projectContextText, readKnowledge, workspacePathFor,
 } from '../src/index.ts'
 
 /** Mirrors the module-local namespace id in src/index.ts. */
@@ -63,6 +63,24 @@ describe('workspacePathFor', () => {
 })
 
 describe('readKnowledge / projectContextText', () => {
+  it('defaults the per-file cap and rejects a non-positive one', () => {
+    // A cordis.yml entry without the field resolves through the schema default.
+    expect(Config({} as Config).knowledgeFileMaxChars).toBe(DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
+    expect(Config({ knowledgeFileMaxChars: 5 }).knowledgeFileMaxChars).toBe(5)
+    expect(() => Config({ knowledgeFileMaxChars: 0 })).toThrow()
+  })
+
+  it('truncates to the configured cap', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'dsh-projects-cap-'))
+    try {
+      const file = join(dir, 'cap.txt')
+      writeFileSync(file, 'abcdefghij')
+      expect(readKnowledge({ id: 'c', name: 'cap.txt', path: file }, 4)).toBe('abcd\n[… truncated to 4 characters]')
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   let dir: string
   beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'dsh-projects-')) })
   afterEach(() => { rmSync(dir, { recursive: true, force: true }) })
@@ -70,32 +88,36 @@ describe('readKnowledge / projectContextText', () => {
   it('reads a file and truncates past the budget', () => {
     const small = join(dir, 'small.txt')
     writeFileSync(small, 'hello project')
-    expect(readKnowledge({ id: '1', name: 'small.txt', path: small })).toBe('hello project')
+    expect(readKnowledge({ id: '1', name: 'small.txt', path: small }, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)).toBe('hello project')
 
     const big = join(dir, 'big.txt')
-    writeFileSync(big, 'x'.repeat(KNOWLEDGE_FILE_MAX_CHARS + 100))
-    const truncated = readKnowledge({ id: '2', name: 'big.txt', path: big })
+    writeFileSync(big, 'x'.repeat(DEFAULT_KNOWLEDGE_FILE_MAX_CHARS + 100))
+    const truncated = readKnowledge({ id: '2', name: 'big.txt', path: big }, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
     expect(truncated).toContain('truncated')
-    expect(truncated.length).toBeLessThan(KNOWLEDGE_FILE_MAX_CHARS + 200)
+    expect(truncated.length).toBeLessThan(DEFAULT_KNOWLEDGE_FILE_MAX_CHARS + 200)
   })
 
   it('returns a notice for an unreadable file instead of throwing', () => {
-    const text = readKnowledge({ id: '3', name: 'gone.txt', path: join(dir, 'missing.txt') })
+    const text = readKnowledge({ id: '3', name: 'gone.txt', path: join(dir, 'missing.txt') }, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
     expect(text).toContain('Could not read knowledge file')
   })
 
   it('composes instructions and fenced knowledge, empty when blank', () => {
-    expect(projectContextText(undefined)).toBe('')
-    expect(projectContextText({ instructions: '   ' })).toBe('')
+    expect(projectContextText(undefined, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)).toBe('')
+    expect(projectContextText({ instructions: '   ' }, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)).toBe('')
     const file = join(dir, 'notes.md')
     writeFileSync(file, 'project notes body')
     const text = projectContextText({
       instructions: 'Always use strict TypeScript here.',
       files: [{ id: 'f', name: 'notes.md', path: file }],
-    })
+    }, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
     expect(text).toContain('Always use strict TypeScript here.')
     expect(text).toContain('--- notes.md ---')
     expect(text).toContain('project notes body')
+    // Knowledge files without instructions still render.
+    const filesOnly = projectContextText({ files: [{ id: 'f', name: 'notes.md', path: file }] }, DEFAULT_KNOWLEDGE_FILE_MAX_CHARS)
+    expect(filesOnly).not.toContain('Instructions for this project')
+    expect(filesOnly).toContain('project notes body')
   })
 })
 
@@ -104,7 +126,7 @@ describe('ui-projects host', () => {
     const ctx = new Context()
     await ctx.plugin(MemorySettings).await()
     ctx.provide('workspaceRegistry', registryOf([]))
-    const fiber = ctx.plugin({ apply })
+    const fiber = ctx.plugin({ apply, Config })
     await fiber.await()
     expect(ctx.settings.describe().map(row => row.ns)).toContain(
       settingsNamespace(PROJECTS_SETTINGS_NAMESPACE),
@@ -131,7 +153,7 @@ describe('ui-projects host', () => {
         { id: 'ws-a', path: projA },
         { id: 'ws-b', path: projB },
       ]))
-      const fiber = ctx.plugin({ apply })
+      const fiber = ctx.plugin({ apply, Config })
       await fiber.await()
 
       const ns = settingsNamespace(PROJECTS_SETTINGS_NAMESPACE)
@@ -159,6 +181,8 @@ describe('ui-projects host', () => {
       expect(await contextText(join(projA, 'sub'))).toContain('Alpha instructions.')
       // Project B has no entry; a session there contributes nothing.
       expect(await contextText(projB)).toBe('')
+      // A cwd outside every registered workspace contributes nothing.
+      expect(await contextText(dir)).toBe('')
       // An agentless assembly contributes nothing.
       expect((await ctx.systemPrompt.assemble()).contexts.find(c => c.name === PROJECT_CONTEXT)?.text ?? '').toBe('')
 

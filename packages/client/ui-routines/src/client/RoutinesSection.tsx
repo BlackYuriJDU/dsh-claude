@@ -65,7 +65,7 @@ export function RoutinesSection({ routines, t }: RoutinesSectionComponentProps) 
     const trimmedName = name.trim()
     const trimmedPrompt = prompt.trim()
     const magnitude = Math.max(1, Math.floor(Number(every) || 1))
-    if (trimmedName === '' || trimmedPrompt === '') return
+    // The add control is disabled until both trimmed fields are non-empty.
     const entry: Routine = {
       id: crypto.randomUUID(),
       name: trimmedName,

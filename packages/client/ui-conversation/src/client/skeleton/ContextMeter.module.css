@@ -145,3 +145,61 @@
   font-variant-numeric: tabular-nums;
   color: var(--dsw-alias-label-primary);
 }
+
+/* Session section: simplified figures under the context window, separated by
+   a hairline when both sections render. */
+.session {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.header ~ .session,
+.rows ~ .session,
+.bar ~ .session {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--dsw-alias-border-l3);
+}
+
+.sectionTitle {
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricLabel {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.miniBar {
+  display: flex;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--dsw-alias-border-l3);
+}
+
+.miniFill {
+  height: 100%;
+  background: var(--meter-tint);
+}
+
+.colorCache {
+  --meter-tint: var(--dsw-static-blue-450);
+}
+
+.colorInput {
+  --meter-tint: var(--dsw-static-neutral-bluish-400);
+}
+
+.colorOutput {
+  /* The design platform ships no purple static token; violet-400 literal. */
+  --meter-tint: rgb(167, 139, 250);
+}

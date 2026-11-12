@@ -187,6 +187,41 @@ describe('SidebarRoot shell', () => {
     expect(screen.queryByRole('dialog', { name: en['projects.modal.title'] })).toBeNull()
   })
 
+  it('shows Creating while the picker is open and stays put when it is dismissed', async () => {
+    const b = mountShell()
+    let settle!: (path: string | null) => void
+    b.pickDirectory.mockImplementationOnce(() => new Promise<string>((resolve) => { settle = resolve as (path: string | null) => void }))
+    fireEvent.click(screen.getByRole('button', { name: en['nav.projects'] }))
+    fireEvent.click(screen.getByRole('button', { name: en['projects.new'] }))
+    expect(screen.getByRole('button', { name: en['projects.creating'] })).toHaveProperty('disabled', true)
+    await act(async () => { settle(null) })
+    expect(b.create).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: en['projects.new'] })).toBeTruthy()
+    expect(screen.getByRole('dialog', { name: en['projects.modal.title'] })).toBeTruthy()
+  })
+
+  it('reports a project the Host could not create and keeps the modal open', async () => {
+    const b = mountShell()
+    b.create.mockImplementationOnce(() => Promise.reject(new Error('exists')))
+    fireEvent.click(screen.getByRole('button', { name: en['nav.projects'] }))
+    fireEvent.click(screen.getByRole('button', { name: en['projects.new'] }))
+    expect((await screen.findByRole('alert')).textContent).toBe(en['projects.error'])
+    expect(b.connect).not.toHaveBeenCalled()
+  })
+
+  it('connects a listed project and contains Host refusals of connect and open', async () => {
+    const b = mountShell({ items: [project] })
+    b.connect.mockImplementationOnce(() => Promise.reject(new Error('gone')))
+    b.openPath.mockImplementationOnce(() => Promise.reject(new Error('denied')))
+    fireEvent.click(screen.getByRole('button', { name: en['nav.projects'] }))
+    fireEvent.click(screen.getByRole('button', { name: en['projects.openFolder'] }))
+    fireEvent.click(screen.getByRole('button', { name: /projeto/ }))
+    expect(b.openPath).toHaveBeenCalledWith('/home/user/projeto')
+    expect(b.connect).toHaveBeenCalledWith('ws-1')
+    expect(screen.queryByRole('dialog', { name: en['projects.modal.title'] })).toBeNull()
+    await act(async () => {})
+  })
+
   it('opens a project folder through the Host OS', () => {
     const b = mountShell({ items: [project] })
     fireEvent.click(screen.getByRole('button', { name: en['nav.projects'] }))
@@ -236,6 +271,40 @@ describe('SidebarRoot shell', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: en['profile.help'] }))
     expect(open).toHaveBeenCalledWith('https://github.com/BlackYuriJDU/dsh-claude', '_blank', 'noopener,noreferrer')
     open.mockRestore()
+  })
+
+  it('shows the stored avatar image, follows profile updates, and closes the popover on Escape', () => {
+    window.localStorage.setItem('dshc:user-name', 'Arthur')
+    window.localStorage.setItem('dshc:avatar', 'data:image/png;base64,AAAA')
+    mountShell()
+    const avatar = () => document.querySelector('img')
+    expect(avatar()?.getAttribute('src')).toBe('data:image/png;base64,AAAA')
+    window.localStorage.removeItem('dshc:avatar')
+    act(() => { window.dispatchEvent(new Event('dshc:profile-updated')) })
+    expect(avatar()).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Arthur' }))
+    expect(screen.getByRole('menuitem', { name: en['profile.help'] })).toBeTruthy()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('menuitem', { name: en['profile.help'] })).toBeNull()
+  })
+
+  it('falls back to the blank profile when browser storage is denied', () => {
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('denied') })
+    try {
+      mountShell()
+      act(() => { window.dispatchEvent(new Event('dshc:profile-updated')) })
+      expect(document.querySelector('img')).toBeNull()
+      expect(screen.getByRole('button', { name: en['nav.projects'] })).toBeTruthy()
+    } finally {
+      getItem.mockRestore()
+    }
+  })
+
+  it('opens the collapsed sidebar from its rail toggle', () => {
+    const b = mountShell({ collapsed: true })
+    fireEvent.click(screen.getByRole('button', { name: en['toggle.open'] }))
+    expect(b.toggleSidebar).toHaveBeenCalledOnce()
   })
 
   it('the popover search row asks the browsing region for its search box', () => {

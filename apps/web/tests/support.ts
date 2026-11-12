@@ -55,6 +55,18 @@ export function probeFreePort(): Promise<number> {
 }
 
 /**
+ * Open the first seeded Session in the fork's flat sidebar list. The list has
+ * no Workspace group rows to expand; the blank "New Session" placeholder row
+ * is skipped.
+ * @param page - the browser page under test.
+ */
+export async function openSeededSession(page: Page): Promise<void> {
+  const row = page.locator('[role="treeitem"]').filter({ hasNotText: 'New Session' }).first()
+  await row.waitFor({ timeout: 15_000 })
+  await row.click()
+}
+
+/**
  * Drive the hero's workspace picker through the composed directory dialog
  * until the live composer unlocks. A fresh world has no Workspace, so the boot
  * lands in the Workspace-trigger view state (startup auto-selection has nothing to
@@ -83,7 +95,7 @@ export async function connectFreshWorkspace(page: Page, root: string, name = 'wo
   await dialog.getByRole('button', { name: 'Open', exact: true }).click()
   // The pick connected the workspace: the blank session's live composer
   // replaces the locked placeholder and enables.
-  await page.locator('textarea:enabled[placeholder="Describe what you want to build"]')
+  await page.locator('textarea:enabled[placeholder="How can I help you today?"]')
     .waitFor({ timeout: 15_000 })
 }
 

@@ -14,8 +14,8 @@ const icons = Object.fromEntries(
 const iconNames = Object.keys(icons)
 
 describe('ic_ds_ icon set', () => {
-  it('exports the full icon set (46 deepsuite + 20 figma extracts + four product glyphs outside those sets)', () => {
-    expect(iconNames.length).toBe(70)
+  it('exports the full icon set (46 deepsuite + 20 figma extracts + five product glyphs outside those sets)', () => {
+    expect(iconNames.length).toBe(71)
   })
 
   it.each(iconNames)('%s renders an svg with currentColor fills and no hardcoded palette', (name) => {
@@ -60,6 +60,12 @@ describe('CoralBurst', () => {
     expect(svg.getAttribute('viewBox')).toBe('0 0 24 24')
     expect(container.querySelectorAll('path')).toHaveLength(8)
     expect(container.innerHTML).toContain('#cc785c')
+  })
+
+  it('inherits currentColor instead of the brand coral when asked', () => {
+    const { container } = render(<primitives.CoralBurst brandColor={false} />)
+    expect(container.innerHTML).toContain('currentColor')
+    expect(container.innerHTML).not.toContain('#cc785c')
   })
 })
 

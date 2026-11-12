@@ -669,6 +669,15 @@ export const IconFolderClose16 = ({ size = 16, className }: IconProps) => (
   </svg>
 )
 
+/** project_outline_16 (product glyph): archive box with a label slot, drawn as a 1.4px currentColor stroke. */
+export const IconProjectOutline16 = ({ size = 16, className }: IconProps) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <rect x="2" y="2.5" width="12" height="3.4" rx="0.9" />
+    <path d="M3.2 5.9v6.6A1.5 1.5 0 0 0 4.7 14h6.6a1.5 1.5 0 0 0 1.5-1.5V5.9" />
+    <path d="M6.3 8.6h3.4" />
+  </svg>
+)
+
 /** tree_corner_8x10 (figma extract; session-tree "L" connector, stroke geometry pre-expanded) */
 export const IconTreeCorner8x10 = ({ size = 10, className }: IconProps) => (
   <svg width={(size * 8) / 10} height={size} className={className} viewBox="-0.5 0 8.5 10.5" fill="none">

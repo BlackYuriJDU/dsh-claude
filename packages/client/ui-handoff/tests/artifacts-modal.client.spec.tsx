@@ -84,8 +84,36 @@ describe('ArtifactsModal', () => {
   })
 
   it('renders nothing produced from turns without deliverables data', () => {
-    const turns = new Map<number, unknown>([[1, turn([])]])
+    const turns = new Map<number, unknown>([
+      [1, turn([])],
+      [2, { data: { get: () => undefined } }],
+    ])
     render(<ArtifactsModal sessions={sessionsOf(turns)} openPath={vi.fn()} t={t as never} {...seats} />)
+    expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
+  })
+
+  it('labels a bare file name as itself and opens it against the session cwd', () => {
+    const openPath = vi.fn()
+    render(<ArtifactsModal sessions={sessionsOf(new Map([[1, turn(['notes.md'])]]), '/ws')} openPath={openPath} t={t as never} {...seats} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open notes.md' }))
+    expect(openPath).toHaveBeenCalledWith('/ws/notes.md')
+  })
+
+  it('shows the empty state while no session is current', () => {
+    const sessions = {
+      list: { getSnapshot: () => ({ current: undefined, byId: {} }), subscribe: () => () => {} },
+      binding: () => undefined,
+    } as unknown as ISessions
+    render(<ArtifactsModal sessions={sessions} openPath={vi.fn()} t={t as never} {...seats} />)
+    expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
+  })
+
+  it('shows the empty state while the current session has no bound snapshot', () => {
+    const sessions = {
+      list: { getSnapshot: () => ({ current: 's9', byId: {} }), subscribe: () => () => {} },
+      binding: () => undefined,
+    } as unknown as ISessions
+    render(<ArtifactsModal sessions={sessions} openPath={vi.fn()} t={t as never} {...seats} />)
     expect(screen.getByText(en['artifacts.empty'])).toBeTruthy()
   })
 })

@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { act, cleanup } from '@testing-library/react'
+import { act, cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { bootInjections, orderByModuleGraph } from '@deepseek-ai/dsh-client-modules'
 import type { ClientModuleLoaderTarget, WebBootEntry } from '@deepseek-ai/dsh-client-modules/client'
@@ -216,6 +216,32 @@ export function mountAssembledApp(search = '?fixture'): void {
     void entry.run()
     unmount = () => entry.dispose()
   })
+}
+
+/** The fork sidebar's flat Session list (no Workspace group rows). */
+async function sessionTree(): Promise<HTMLElement> {
+  return await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
+}
+
+/**
+ * Open a fixture Session by its title in the flat sidebar list.
+ * @param title - the Session title the fixture transport serves.
+ * @returns the title element that was clicked.
+ */
+export async function openFixtureSessionRow(title = 'Fixture history session'): Promise<HTMLElement> {
+  const row = await within(await sessionTree()).findByText(title)
+  fireEvent.click(row)
+  return row
+}
+
+/**
+ * Start a fresh Session from the sidebar's New session action.
+ * @returns the hero composer textarea of the new Session.
+ */
+export async function startFreshSession(): Promise<HTMLTextAreaElement> {
+  await sessionTree()
+  fireEvent.click(screen.getByRole('button', { name: 'New session' }))
+  return await screen.findByPlaceholderText('How can I help you today?', {}, { timeout: 10_000 }) as HTMLTextAreaElement
 }
 
 /**

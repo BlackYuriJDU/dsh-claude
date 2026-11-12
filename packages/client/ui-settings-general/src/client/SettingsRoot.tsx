@@ -89,11 +89,11 @@ function SettingsPanel({ rows, groupLabels, renderSlot, activeId, onSelect, onCl
                       className={clsx(css.navCell, row.id === active && css.active)}
                       disabled={row.soon || undefined}
                       aria-current={row.id === active ? 'true' : undefined}
-                      onClick={() => { if (!row.soon) onSelect(row.id) }}
+                      onClick={() => { onSelect(row.id) }}
                     >
                       {navIcon(row.id)}
                       <span className={css.navLabel}>{row.label}</span>
-                      {row.soon === true && <span className={css.navSoon}>{row.soonLabel ?? 'Em breve'}</span>}
+                      {row.soon === true && <span className={css.navSoon}>{row.soonLabel}</span>}
                     </button>
                   ))}
                 </div>

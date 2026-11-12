@@ -7,20 +7,11 @@
 // consumes the images — serialized through the real draft-image chain into
 // the commands/execute payload — and clears the composer on success, including
 // when the image is the whole `/plan` task.
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, waitFor } from '@testing-library/react'
 import { expect, it } from 'vitest'
-import { installAssembledBootEnv, mountAssembledApp } from './assembled-boot.ts'
+import { installAssembledBootEnv, mountAssembledApp, startFreshSession } from './assembled-boot.ts'
 
 installAssembledBootEnv()
-
-/** Open a fresh fixture session and return its composer textarea. */
-async function freshComposer(): Promise<HTMLTextAreaElement> {
-  const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
-  const start = tree.querySelector<HTMLButtonElement>('button[aria-label="New session in fixture"]')
-  if (start === null) throw new Error('fixture Workspace new-session action missing')
-  fireEvent.click(start)
-  return await screen.findByPlaceholderText('Describe what you want to build', {}, { timeout: 10_000 }) as HTMLTextAreaElement
-}
 
 /** Paste one tiny PNG into the composer and wait for its rail thumbnail. */
 async function pasteImage(textarea: HTMLTextAreaElement, name: string): Promise<void> {
@@ -40,7 +31,7 @@ async function pasteImage(textarea: HTMLTextAreaElement, name: string): Promise<
 
 it('refuses an image-carrying submit to a non-declaring command and keeps draft and images', async () => {
   mountAssembledApp()
-  const textarea = await freshComposer()
+  const textarea = await startFreshSession()
   await pasteImage(textarea, 'ref.png')
 
   // /echo is a leadingInput fixture command without `input.images`.
@@ -66,7 +57,7 @@ it('refuses an image-carrying submit to a non-declaring command and keeps draft 
 
 it('consumes images through a declaring command and clears the composer on success', async () => {
   mountAssembledApp()
-  const textarea = await freshComposer()
+  const textarea = await startFreshSession()
   await pasteImage(textarea, 'goal-ref.png')
 
   // /goal declares `input.images` in the fixture catalog; the claim submit
@@ -82,7 +73,7 @@ it('consumes images through a declaring command and clears the composer on succe
 
 it('submits a bare /plan with an image as an image-only plan request', async () => {
   mountAssembledApp()
-  const textarea = await freshComposer()
+  const textarea = await startFreshSession()
   await pasteImage(textarea, 'plan-task.png')
 
   fireEvent.change(textarea, { target: { value: '/plan' } })

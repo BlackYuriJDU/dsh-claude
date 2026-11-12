@@ -85,6 +85,7 @@ export const en = {
   'stats.tokensPerSecond': '{throughput} tok/s',
   'stats.cacheHit': 'Cache hit {percent}%',
   'stats.tokens': 'Input {input} tok · Output {output} tok',
+  'usage.session': 'Session',
   'settings.enter.title': 'Enter behavior while busy',
   'settings.enter.description': 'Busy only; Cmd/Ctrl+Enter uses the other behavior',
   'settings.enter.queue': 'Queue',
@@ -178,6 +179,7 @@ export const en = {
   'bash.failed': 'Failed',
   'bash.stopped': 'Stopped',
   'row.running': 'Running',
+  'row.think': 'Think',
   'row.failed': 'Failed',
   'row.stopped': 'Stopped',
   'queue.count': '{n} queued messages',
@@ -209,6 +211,7 @@ export const en = {
  * reference labels. Keys outside this table fall back to the en dictionary.
  */
 export const pt = {
+  'row.think': 'Raciocínio',
   'placeholder.hero': 'Como posso ajudar você hoje?',
   'placeholder.cowork': 'O que vamos construir?',
   'hero.greeting.morning': 'Bom dia',
@@ -231,4 +234,15 @@ export const pt = {
   'hero.chooseWorkspace': 'Escolher workspace',
   'settings.enter.title': 'Comportamento do Enter enquanto ocupado',
   'settings.enter.description': 'Apenas quando ocupado; Cmd/Ctrl+Enter usa o outro comportamento',
+  'context.aria': '{percent} do contexto usado',
+  'context.used': 'do contexto usado',
+  'context.system': 'Prompt de sistema',
+  'context.tools': 'Ferramentas',
+  'context.messages': 'Mensagens',
+  'stats.counts': '{turns} turnos · {steps} passos',
+  'stats.ttftAverage': 'Primeiro token em {duration}',
+  'stats.tokensPerSecond': '{throughput} tok/s',
+  'stats.cacheHit': 'Cache aproveitado {percent}%',
+  'stats.tokens': 'Entrada {input} tok · Saída {output} tok',
+  'usage.session': 'Sessão',
 } satisfies Partial<Record<ConversationKey, string>>

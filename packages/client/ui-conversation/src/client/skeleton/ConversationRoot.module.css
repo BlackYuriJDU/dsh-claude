@@ -54,6 +54,24 @@
   display: none;
 }
 
+/* dshc: on Chat the header collapses to a zero-height strip whose actions
+   float at the top-right of the transcript, so an empty strip spends no space. */
+.chatActions {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  height: 0;
+}
+
+.chatActionsInner {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .titleRow {
   display: flex;
   align-items: center;

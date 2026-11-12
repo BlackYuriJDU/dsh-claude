@@ -2,7 +2,7 @@
 // GitHub, skills, connectors, plugins, web search, memory. Icons are
 // hand-drawn 16px line glyphs matching the reference design.
 
-import { IconPlusOutline16, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconPlusOutline16, IconProjectOutline16, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { MenuEntry, MenuItem } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { MouseEvent } from 'react'
 import type { ComposerBarProps } from '../contract/slots.ts'
@@ -65,15 +65,6 @@ const IconCamera = (
   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
     <path {...stroke} d="M2 5.5A1.5 1.5 0 0 1 3.5 4h1.6l1.2-1.6h3.4L10.9 4h1.6A1.5 1.5 0 0 1 14 5.5v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5v-6Z" />
     <circle {...stroke} cx="8" cy="8.4" r="2.4" />
-  </svg>
-)
-
-/** Archive box — add to project. */
-const IconProject = (
-  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-    <rect {...stroke} x="2" y="2.5" width="12" height="3.4" rx="0.9" />
-    <path {...stroke} d="M3.2 5.9v6.6A1.5 1.5 0 0 0 4.7 14h6.6a1.5 1.5 0 0 0 1.5-1.5V5.9" />
-    <path {...stroke} d="M6.3 8.6h3.4" />
   </svg>
 )
 
@@ -149,7 +140,7 @@ function entriesOf(props: PlusMenuProps): readonly MenuEntry[] {
     { id: 'files', label: <span className={css.label}>{t('menu.addFiles')}<span className={css.hint}>Ctrl U</span></span>, icon: IconFiles },
     { id: 'screenshot', label: t('menu.screenshot'), icon: IconCamera },
     { type: 'separator', id: 'sep-1' },
-    { id: 'project', label: t('menu.addToProject'), icon: IconProject, submenu: projectSubmenu },
+    { id: 'project', label: t('menu.addToProject'), icon: <IconProjectOutline16 />, submenu: projectSubmenu },
     { id: 'github', label: t('menu.github'), icon: IconGitHub, submenu: [soon('gh-connect', t('menu.comingSoon'))] },
     { id: 'skills', label: t('menu.skills'), icon: IconSkills },
     { id: 'connectors', label: t('menu.connectors'), icon: IconConnectors, submenu: [soon('cn-manage', t('menu.comingSoon'))] },
