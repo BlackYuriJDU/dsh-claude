@@ -38,7 +38,7 @@ import {
   webSnapshotMode,
   type WebScaffold,
 } from './scaffold.ts'
-import { newEnglishPage, saveFailureShot } from './support.ts'
+import { newEnglishPage, openSeededSession, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/markdown-wide-table', import.meta.url))
 const GEOMETRY_EXPECTED = fileURLToPath(
@@ -255,12 +255,7 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
     tripwire = watchConsole(page)
     await page.goto(scaffold.baseUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
-    const groupRow = page.locator('[role="treeitem"]').first()
-    await groupRow.waitFor({ timeout: 15_000 })
-    await groupRow.click()
-    const sessionRow = page.locator('[role="treeitem"]').nth(1)
-    await sessionRow.waitFor({ timeout: 10_000 })
-    await sessionRow.click()
+    await openSeededSession(page)
     await page.getByText(TAIL_MARKER, { exact: true }).waitFor({ timeout: 15_000 })
     // Collapse the sidebar and close the details pane for the whole sweep:
     // classic-scrollbar platforms (Linux CI) lose ~15px of layout width,
@@ -425,12 +420,7 @@ describe('web e2e: markdown tables fill the column, wide ones break out and scro
       onTestFailed(() => saveFailureShot(hidpiPage, 'web-e2e-markdown-wide-table-hidpi'))
       await hidpiPage.goto(scaffold.baseUrl, { waitUntil: 'load' })
       await hidpiPage.waitForSelector('[class*="frame"]', { timeout: 30_000 })
-      const groupRow = hidpiPage.locator('[role="treeitem"]').first()
-      await groupRow.waitFor({ timeout: 15_000 })
-      await groupRow.click()
-      const sessionRow = hidpiPage.locator('[role="treeitem"]').nth(1)
-      await sessionRow.waitFor({ timeout: 10_000 })
-      await sessionRow.click()
+      await openSeededSession(hidpiPage)
       await hidpiPage.getByText(TAIL_MARKER, { exact: true }).waitFor({ timeout: 15_000 })
       await hidpiPage.getByRole('button', { name: 'Collapse sidebar', exact: true }).click()
       await closeDetailsPane(hidpiPage)

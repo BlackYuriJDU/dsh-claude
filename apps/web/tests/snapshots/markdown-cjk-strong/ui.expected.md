@@ -1,12 +1,3 @@
-- banner:
-  - navigation "Session hierarchy":
-    - button "CJK strong emphasis" [disabled]
-  - button "Session log":
-    - text: Session log
-    - img
-  - tablist:
-    - tab "Chat" [selected]
-    - tab "Trajectory"
 - text: Render adjacent CJK strong emphasis. {{clock}}
 - button "Copy":
   - img
@@ -46,11 +37,9 @@
   - img
 - text: {{clock}} Ran for {{duration}}
 - textbox "Message the agent"
-- button "Commands":
+- button "Add":
   - img
-- 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Dictate"
 - button "Select model, current DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
-- button "Send message" [disabled]
-- text: 1 turns · 1 steps LLM {{duration}}
