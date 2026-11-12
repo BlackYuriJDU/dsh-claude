@@ -1,7 +1,6 @@
 # Claude behavior — applied & roadmap (síntese da pesquisa)
 
-Fonte: docs/claude-behavior-research.md (102 consultas Tavily, 0 falhas).
-Duas frentes: (A) interface, (B) regras de comportamento do agente.
+Fonte: docs/claude-behavior-research.md (102 consultas Tavily, 0 falhas). Duas frentes: (A) interface, (B) regras de comportamento do agente.
 
 ## A. Interface — aplicado agora
 

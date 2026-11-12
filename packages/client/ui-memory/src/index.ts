@@ -49,8 +49,8 @@ export function memoryContextText(memories: readonly MemoryItem[] | undefined): 
     .filter(text => text !== '')
   if (items.length === 0) return ''
   const lines = items.map(text => `- ${text}`).join('\n')
-  return `The user's memories, saved by them in Settings and applying to this`
-    + ` and every session — honor them unless a direct user message supersedes`
+  return 'The user\'s memories, saved by them in Settings and applying to this'
+    + ' and every session — honor them unless a direct user message supersedes'
     + ` them:\n${lines}`
 }
 

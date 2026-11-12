@@ -37,7 +37,8 @@ const CUBES: readonly { id: ThemePreference; labelKey: ThemeKey; Icon: typeof Ic
  * @returns the row element tree.
  */
 export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentProps) {
-  const preference = useStore(s => s.preference)
+  // setTheme may hold a concrete theme id outside the cube set.
+  const preference: string = useStore(s => s.preference)
   return (
     <div className={css.group}>
       <div className={css.title}>{t('appearance.title')}</div>

@@ -83,7 +83,7 @@ describe('QuestionComposer', () => {
     const scrollRegion = detail.closest('[data-question-scroll]')
     expect(scrollRegion).toBeTruthy()
     expect(scrollRegion?.contains(screen.getByRole('radio', { name: /Shipping engineer/ }))).toBe(true)
-    expect(scrollRegion?.contains(screen.getByRole('button', { name: 'Next', exact: true }))).toBe(false)
+    expect(scrollRegion?.contains(screen.getByRole('button', { name: 'Next' }))).toBe(false)
     fireEvent.keyDown(screen.getByRole('radio', { name: /Shipping engineer/ }), { key: 'Enter' })
     expect(respond).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('radio', { name: /Shipping engineer/ }))
@@ -147,7 +147,7 @@ describe('QuestionComposer', () => {
     const { carrier, respond } = wait()
     render(<QuestionComposer matched={carrier} interactions={[carrier]} {...kit} />)
 
-    expect((screen.getByRole('button', { name: 'Next', exact: true }) as HTMLButtonElement).disabled).toBe(true)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Next' }).disabled).toBe(true)
     fireEvent.click(screen.getByRole('radio', { name: 'Research potential' }))
     expect(screen.getByText('2 / 3')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Skip this question' }))

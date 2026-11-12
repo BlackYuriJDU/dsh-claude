@@ -70,7 +70,7 @@ export function MicButton({ onDictate, disabled, t }: MicButtonProps) {
     const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition
     if (Ctor === undefined) return
     const recognition = new Ctor()
-    recognition.lang = navigator.language?.startsWith('pt') === true ? navigator.language : 'pt-BR'
+    recognition.lang = navigator.language.startsWith('pt') ? navigator.language : 'pt-BR'
     recognition.continuous = true
     recognition.interimResults = false
     recognition.onresult = (event) => {

@@ -47,14 +47,13 @@ const toolResult = (seq: number, callId: string, name: string, args = '{"command
 })
 
 /** Test-owned AppFrame role: declares and renders the resident conversation area. */
-type AppRootProps = PropsRenderSlots<'conversation' | 'details'>
+type AppRootProps = PropsRenderSlots<'conversation'>
 function AppRoot({ renderSlot }: AppRootProps) {
   return <>{renderSlot('conversation', {})}</>
 }
 
 const LAYOUT_CHILDREN = {
   'conversation': { kind: 'single', scope: 'session-maybe' },
-  'details': { kind: 'single', scope: 'session' },
 } as const
 
 /**
@@ -72,7 +71,7 @@ async function bench(nodes: ToolResultNode[]) {
   // ui-theme's Appearance row binds a durable scope through these two.
   runtime.provide('remote', { $on: () => () => {} })
   runtime.provide('settingsScope', { bind: () => stubSettingsScope().scope } as never)
-  const layout = { openDetails: vi.fn(), closeDetails: vi.fn() }
+  const layout = { toggleSidebar: vi.fn() }
   runtime.provide('layout', layout)
   const locale = new LocaleRuntime(runtime.ctx)
   runtime.provide('locale', locale)
@@ -136,18 +135,16 @@ describe('keyed toolview hole through the real machinery', () => {
     const b = await bench([toolResult(3, 'c1', 'read', '{"path":"src/a.ts"}')])
     const view = b.runtime.renderRoot()
     view.getByText('src/a.ts').click()
-    expect(b.layout.openDetails).not.toHaveBeenCalled()
     await vi.waitFor(() => {
       expect(b.runtime.workspaces.calls).toContainEqual({ method: 'openPath', args: ['src/a.ts'] })
     })
     await b.runtime.dispose()
   })
 
-  it('bash summary clicks do not open details or host paths', async () => {
+  it('bash summary clicks do not open host paths', async () => {
     const b = await bench([toolResult(3, 'c1', 'bash')])
     const view = b.runtime.renderRoot()
     view.getByText('Build').click()
-    expect(b.layout.openDetails).not.toHaveBeenCalled()
     expect(b.runtime.workspaces.calls.some(c => c.method === 'openPath')).toBe(false)
     await b.runtime.dispose()
   })
@@ -215,7 +212,7 @@ describe('registrant declaration injection', () => {
     // ui-theme's Appearance row binds a durable scope through these two.
     runtime.provide('remote', { $on: () => () => {} })
     runtime.provide('settingsScope', { bind: () => stubSettingsScope().scope } as never)
-    runtime.provide('layout', { openDetails: vi.fn(), closeDetails: vi.fn() })
+    runtime.provide('layout', { toggleSidebar: vi.fn() })
     const locale = new LocaleRuntime(runtime.ctx)
     runtime.provide('locale', locale)
     runtime.slots.installLocale(locale)

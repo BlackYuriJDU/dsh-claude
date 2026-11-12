@@ -237,7 +237,7 @@ export class LocaleRuntime {
    * one owner). Registration bumps the revision so mounted outlets pick up
    * late-arriving dictionaries.
    * @param ns - a namespace merged into LocaleNamespaceMap.
-   * @param dictionaries keyed by locale id (partial shipments allowed).
+   * @param dicts - dictionaries keyed by locale id (partial shipments allowed).
    * @returns disposer removing every locale registered by this call (idempotent).
    */
   register<N extends keyof LocaleNamespaceMap & string>(ns: N, dicts: Partial<Record<LocaleId, Partial<LocaleDictOf<N>>>>): () => void

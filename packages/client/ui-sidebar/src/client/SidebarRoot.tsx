@@ -139,7 +139,7 @@ const AVATAR_COLORS = [
 function avatarColorOf(name: string): string {
   let hash = 0
   for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length] ?? AVATAR_COLORS[0]
 }
 
 /**
@@ -494,29 +494,29 @@ function ProjectsModal(props: {
       {list.length === 0
         ? <p className={css.modalEmpty}>{t('projects.empty')}</p>
         : (
-            <ul className={css.projectList}>
-              {list.map(project => (
-                <li key={project.workspaceId} className={css.projectItem}>
-                  <button type="button" className={css.projectMain} onClick={() => { connect(project.workspaceId) }}>
-                    <span className={css.projectTitle}>{project.title}</span>
-                    <span className={css.projectPath}>{project.path}</span>
+          <ul className={css.projectList}>
+            {list.map(project => (
+              <li key={project.workspaceId} className={css.projectItem}>
+                <button type="button" className={css.projectMain} onClick={() => { connect(project.workspaceId) }}>
+                  <span className={css.projectTitle}>{project.title}</span>
+                  <span className={css.projectPath}>{project.path}</span>
+                </button>
+                <Tooltip label={t('projects.openFolder')} delayMs={500}>
+                  <button
+                    type="button"
+                    className={css.iconButton}
+                    aria-label={t('projects.openFolder')}
+                    onClick={() => { void workspaces.openPath(project.path).catch(() => {}) }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+                      <path {...stroke} d="M2 5.2A1.2 1.2 0 0 1 3.2 4h3l1.4 1.6h5.2A1.2 1.2 0 0 1 14 6.8v4A1.2 1.2 0 0 1 12.8 12H3.2A1.2 1.2 0 0 1 2 10.8V5.2Z" />
+                    </svg>
                   </button>
-                  <Tooltip label={t('projects.openFolder')} delayMs={500}>
-                    <button
-                      type="button"
-                      className={css.iconButton}
-                      aria-label={t('projects.openFolder')}
-                      onClick={() => { void workspaces.openPath(project.path).catch(() => {}) }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-                        <path {...stroke} d="M2 5.2A1.2 1.2 0 0 1 3.2 4h3l1.4 1.6h5.2A1.2 1.2 0 0 1 14 6.8v4A1.2 1.2 0 0 1 12.8 12H3.2A1.2 1.2 0 0 1 2 10.8V5.2Z" />
-                      </svg>
-                    </button>
-                  </Tooltip>
-                </li>
-              ))}
-            </ul>
-          )}
+                </Tooltip>
+              </li>
+            ))}
+          </ul>
+        )}
       {error === null ? null : <p className={css.modalError} role="alert">{error}</p>}
       <div className={css.modalActions}>
         <button type="button" className={css.modalPrimary} disabled={creating} onClick={() => { void createProject() }}>

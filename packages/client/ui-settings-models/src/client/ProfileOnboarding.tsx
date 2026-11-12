@@ -74,7 +74,7 @@ export function ProfileOnboarding(props: ProfileOnboardingProps): ReactNode {
           <span className={css.fieldLabel}>{t('profileName')}</span>
           <Input
             value={name}
-            onChange={event => { setName(event.target.value) }}
+            onChange={(event) => { setName(event.target.value) }}
             placeholder=""
             autoFocus
           />
@@ -84,7 +84,7 @@ export function ProfileOnboarding(props: ProfileOnboardingProps): ReactNode {
           <Input
             type="email"
             value={email}
-            onChange={event => { setEmail(event.target.value) }}
+            onChange={(event) => { setEmail(event.target.value) }}
             placeholder="voce@exemplo.com"
           />
         </label>

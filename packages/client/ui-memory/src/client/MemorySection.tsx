@@ -87,7 +87,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
                         className={css.editField}
                         value={editText}
                         rows={3}
-                        onChange={e => { setEditText(e.target.value) }}
+                        onChange={(e) => { setEditText(e.target.value) }}
                       />
                       <span className={css.itemActions}>
                         <button type="button" className={css.linkButton} onClick={commitEdit}>
@@ -127,7 +127,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
           value={draft}
           rows={2}
           placeholder={t('add.placeholder')}
-          onChange={e => { setDraft(e.target.value) }}
+          onChange={(e) => { setDraft(e.target.value) }}
         />
         <div className={css.addActions}>
           <button

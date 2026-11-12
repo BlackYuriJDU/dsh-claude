@@ -88,7 +88,7 @@ function snapshotWith(
 }
 
 /** Test-owned AppFrame role: declares and renders the resident conversation area. */
-type AppRootProps = PropsRenderSlots<'conversation' | 'details'>
+type AppRootProps = PropsRenderSlots<'conversation'>
 function AppRoot({ renderSlot }: AppRootProps) {
   return <>{renderSlot('conversation', {})}</>
 }
@@ -113,7 +113,7 @@ async function bench(snapshot: ConversationSnapshot) {
     phase: 'ready', subagentsByParent: {}, jobsBySession: {}, currentAddress: undefined,
   })
   const scoped = { send: vi.fn(async () => {}), cancel: vi.fn(async () => {}) }
-  const layout = { openDetails: vi.fn(), closeDetails: vi.fn() }
+  const layout = { toggleSidebar: vi.fn() }
   // Provide-channel contributions land in this bundle the way the runtime
   // materializes them; the renderer host serves it through provideInfo.
   const provided: { hooks: Record<string, unknown>; props: Record<string, unknown> } = { hooks: {}, props: {} }
@@ -172,7 +172,6 @@ async function bench(snapshot: ConversationSnapshot) {
     name: 'root',
     children: {
       'conversation': { kind: 'single', scope: 'session-maybe' },
-      'details': { kind: 'single', scope: 'session' },
     },
   }, AppRoot)
 
@@ -263,7 +262,7 @@ describe('run_code sub-calls through the real chat machinery', () => {
     expect(nested).not.toBeNull()
   })
 
-  it('a file sub-row click opens the host path; bash sub-rows do not open details', async () => {
+  it('a file sub-row click opens the host path; a bash sub-row click opens nothing', async () => {
     const parent = 'call-64'
     const subCalls = [
       subCall(11, parent, 1, 'read', { path: 'notes/demo.txt' }, 'ok'),
@@ -272,12 +271,11 @@ describe('run_code sub-calls through the real chat machinery', () => {
     const b = await bench(snapshotWith([codeResult(10, parent)], subCalls))
     const view = mountApp(b.slots)
     view.getByText('notes/demo.txt').click()
-    expect(b.layout.openDetails).not.toHaveBeenCalled()
     await vi.waitFor(() => {
       expect(b.workspaces.openPath).toHaveBeenCalledWith('notes/demo.txt')
     })
     view.getByText('List notes').click()
-    expect(b.layout.openDetails).not.toHaveBeenCalled()
+    expect(b.workspaces.openPath).toHaveBeenCalledOnce()
   })
 
   it('a RUNNING run_code call nests its so-far dispatches under the spinner row', async () => {

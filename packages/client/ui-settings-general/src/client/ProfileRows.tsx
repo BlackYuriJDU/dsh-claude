@@ -59,16 +59,16 @@ export function ownerAvatarSet(dataUrl: string): void {
 export function avatarDataUrlOf(file: File, edge = 128): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader()
-    reader.onerror = () => resolve('')
+    reader.onerror = () =>{  resolve('') }
     reader.onload = () => {
       const image = new Image()
-      image.onerror = () => resolve('')
+      image.onerror = () =>{  resolve('') }
       image.onload = () => {
         const canvas = document.createElement('canvas')
         canvas.width = edge
         canvas.height = edge
         const ctx = canvas.getContext('2d')
-        if (ctx === null) return resolve('')
+        if (ctx === null) {  resolve(''); return }
         // Cover the square: center-crop the longer side.
         const scale = Math.max(edge / image.width, edge / image.height)
         const width = image.width * scale
@@ -76,7 +76,8 @@ export function avatarDataUrlOf(file: File, edge = 128): Promise<string> {
         ctx.drawImage(image, (edge - width) / 2, (edge - height) / 2, width, height)
         resolve(canvas.toDataURL('image/png'))
       }
-      image.src = String(reader.result)
+      if (typeof reader.result !== 'string') { resolve(''); return }
+      image.src = reader.result
     }
     reader.readAsDataURL(file)
   })
@@ -156,7 +157,7 @@ export function ProfileRows({ profile, t }: {
               const file = e.target.files?.[0]
               e.target.value = ''
               if (file === undefined) return
-              void avatarDataUrlOf(file).then(dataUrl => {
+              void avatarDataUrlOf(file).then((dataUrl) => {
                 if (dataUrl !== '') ownerAvatarSet(dataUrl)
               })
             }}
@@ -176,9 +177,9 @@ export function ProfileRows({ profile, t }: {
         <input
           className={css.textField}
           value={fullName}
-          onChange={e => { setFullName(e.target.value) }}
+          onChange={(e) => { setFullName(e.target.value) }}
           onBlur={commitFullName}
-          onKeyDown={e => { if (e.key === 'Enter') commitFullName() }}
+          onKeyDown={(e) => { if (e.key === 'Enter') commitFullName() }}
         />
       </div>
       <div className={css.row}>
@@ -186,9 +187,9 @@ export function ProfileRows({ profile, t }: {
         <input
           className={css.textField}
           value={displayName}
-          onChange={e => { setDisplayName(e.target.value) }}
+          onChange={(e) => { setDisplayName(e.target.value) }}
           onBlur={commitDisplayName}
-          onKeyDown={e => { if (e.key === 'Enter') commitDisplayName() }}
+          onKeyDown={(e) => { if (e.key === 'Enter') commitDisplayName() }}
         />
       </div>
       <div className={css.row}>
@@ -197,7 +198,7 @@ export function ProfileRows({ profile, t }: {
           className={css.instructionsField}
           value={instructions}
           rows={4}
-          onChange={e => { setInstructions(e.target.value) }}
+          onChange={(e) => { setInstructions(e.target.value) }}
           onBlur={commitInstructions}
         />
         <span className={css.hint}>{t('profile.instructions.hint')}</span>

@@ -97,7 +97,7 @@ describe('classifyDangerousCommand', () => {
 
 /** A scripted approval seam returning one outcome (and recording the request). */
 function approverOf(outcome: EscalationOutcome): {
-  approver: EscalationApproval<object, string>['approver']
+  approver: EscalationApproval['approver']
   requests: Array<{ reason?: string; toolName: string }>
 } {
   const requests: Array<{ reason?: string; toolName: string }> = []
@@ -115,7 +115,7 @@ function approverOf(outcome: EscalationOutcome): {
 const MATCH: DangerousCommandMatch = { id: 'recursive-delete', reason: 'recursive delete (rm -r / --recursive)' }
 const AGENT = { id: 'agent' } as never
 
-function approvalOf(approver: EscalationApproval<object, string>['approver']): EscalationApproval<object, string> {
+function approvalOf(approver: EscalationApproval['approver']): EscalationApproval {
   return { approver, agent: AGENT, callId: 'call-1', toolName: 'bash' }
 }
 

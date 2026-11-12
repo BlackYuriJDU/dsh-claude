@@ -242,11 +242,14 @@ export class ThemeRuntime {
     const section = this.host.getSnapshot().value
     if (section === undefined) return
     let moved = false
-    if (this.preference !== section.preference) {
+    // setTheme may hold a concrete theme id outside the persisted preference set.
+    const current: string = this.preference
+    if (current !== section.preference) {
       this.preference = section.preference
       moved = true
     }
-    if (section.chatFont !== undefined && section.chatFont !== this.chatFont) {
+    // The schema defaults chatFont, so a validated section always carries it.
+    if (section.chatFont !== this.chatFont) {
       this.chatFont = section.chatFont
       moved = true
     }

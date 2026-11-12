@@ -653,174 +653,174 @@ export function WorkspaceBrowser({
   return (
     <div className={clsx(css.root, !wide && css.rail)}>
       {!wide ? null : (
-      <>
-      {/* Projetos: section header + workspace rows (Claude layout). */}
-      <div className={css.sectionHeader}>
-        <span className={css.sectionLabel}>{t('section.projects')}</span>
-        {directoryFlowAvailable && (
-          <Tooltip label={t('workspace.add')} side="bottom" delayMs={500}>
-            <button
-              ref={wsPlusRef}
-              type="button"
-              className={css.iconButton}
-              aria-label={t('workspace.add')}
-              onClick={() => {
-                setWsPickerOpen(v => !v)
-              }}
-            >
-              <IconProjectAddOutline16 size={15} />
-            </button>
-          </Tooltip>
-        )}
-      </div>
-      <div className={css.projectList}>
-        {workspaces.map(item => (
-          <button
-            key={item.workspaceId}
-            type="button"
-            className={css.projectItem}
-            onClick={() => { startSession(item.workspaceId) }}
-          >
-            <span className={css.projectItemIcon} aria-hidden>
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.6l1.4 1.6h5A1.5 1.5 0 0 1 14 6.1v5.4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5v-7Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <span className={css.projectItemName}>{item.title}</span>
-          </button>
-        ))}
-        {workspaces.length === 0 && (
-          <div className={css.pinHint}>
-            <span className={css.pinHintIcon} aria-hidden>
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                <path d="M9.8 1.9l4.3 4.3-2.2 2.2-.5-.2c-.8-.3-1.8-.1-2.5.6L5.6 12 3.9 10.3l3.2-3.2c.7-.7.9-1.7.6-2.5l-.2-.5 2.3-2.2Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                <path d="M5 11L1.8 14.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              </svg>
-            </span>
-            <span>{t('projects.pinHint')}</span>
+        <>
+          {/* Projetos: section header + workspace rows (Claude layout). */}
+          <div className={css.sectionHeader}>
+            <span className={css.sectionLabel}>{t('section.projects')}</span>
+            {directoryFlowAvailable && (
+              <Tooltip label={t('workspace.add')} side="bottom" delayMs={500}>
+                <button
+                  ref={wsPlusRef}
+                  type="button"
+                  className={css.iconButton}
+                  aria-label={t('workspace.add')}
+                  onClick={() => {
+                    setWsPickerOpen(v => !v)
+                  }}
+                >
+                  <IconProjectAddOutline16 size={15} />
+                </button>
+              </Tooltip>
+            )}
           </div>
-        )}
-      </div>
-      <WorkspacePickFlow
-        t={t}
-        open={wsPickerOpen}
-        anchorRef={wsPlusRef}
-        useWorkspaces={useWorkspaces}
-        createWorkspace={createWorkspace}
-        useDirectoryFlow={useDirectoryFlow}
-        renderDirectoryFlow={owner => renderSlot('sidebar.workspaces.directoryFlow', owner)}
-        addOnly
-        side="right"
-        onPick={(workspaceId) => {
-          setWsPickerOpen(false)
-          startSession(workspaceId)
-        }}
-        onClose={() => { setWsPickerOpen(false) }}
-      />
-
-      {/* Conversas e tarefas: section header with search + sort toggle. */}
-      <div className={css.sectionHeader}>
-        <span className={css.sectionLabel}>{t('section.conversations')}</span>
-        <div className={css.headerActions}>
-          <div
-            ref={searchRoot}
-            className={clsx(css.search, searchExpanded && css.searchExpanded)}
-            onClick={() => {
-              setWsPickerOpen(false)
-              setSearchExpanded(true)
-              searchInput.current?.focus()
-            }}
-          >
-            <Tooltip label={t('search')} side="bottom" delayMs={500} disabled={searchExpanded}>
+          <div className={css.projectList}>
+            {workspaces.map(item => (
               <button
+                key={item.workspaceId}
                 type="button"
-                className={css.searchButton}
-                aria-label={t('search.sessions.aria')}
-                aria-expanded={searchExpanded}
+                className={css.projectItem}
+                onClick={() => { startSession(item.workspaceId) }}
+              >
+                <span className={css.projectItemIcon} aria-hidden>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.6l1.4 1.6h5A1.5 1.5 0 0 1 14 6.1v5.4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5v-7Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className={css.projectItemName}>{item.title}</span>
+              </button>
+            ))}
+            {workspaces.length === 0 && (
+              <div className={css.pinHint}>
+                <span className={css.pinHintIcon} aria-hidden>
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <path d="M9.8 1.9l4.3 4.3-2.2 2.2-.5-.2c-.8-.3-1.8-.1-2.5.6L5.6 12 3.9 10.3l3.2-3.2c.7-.7.9-1.7.6-2.5l-.2-.5 2.3-2.2Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                    <path d="M5 11L1.8 14.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <span>{t('projects.pinHint')}</span>
+              </div>
+            )}
+          </div>
+          <WorkspacePickFlow
+            t={t}
+            open={wsPickerOpen}
+            anchorRef={wsPlusRef}
+            useWorkspaces={useWorkspaces}
+            createWorkspace={createWorkspace}
+            useDirectoryFlow={useDirectoryFlow}
+            renderDirectoryFlow={owner => renderSlot('sidebar.workspaces.directoryFlow', owner)}
+            addOnly
+            side="right"
+            onPick={(workspaceId) => {
+              setWsPickerOpen(false)
+              startSession(workspaceId)
+            }}
+            onClose={() => { setWsPickerOpen(false) }}
+          />
+
+          {/* Conversas e tarefas: section header with search + sort toggle. */}
+          <div className={css.sectionHeader}>
+            <span className={css.sectionLabel}>{t('section.conversations')}</span>
+            <div className={css.headerActions}>
+              <div
+                ref={searchRoot}
+                className={clsx(css.search, searchExpanded && css.searchExpanded)}
                 onClick={() => {
                   setWsPickerOpen(false)
                   setSearchExpanded(true)
+                  searchInput.current?.focus()
                 }}
               >
-                <IconSearchOutline16 size={searchExpanded ? 11 : 14} />
-              </button>
-            </Tooltip>
-            <input
-              ref={searchInput}
-              className={css.searchInput}
-              type="text"
-              placeholder={t('search.placeholder')}
-              maxLength={SEARCH_QUERY_MAX_CODE_UNITS}
-              value={query}
-              tabIndex={searchExpanded ? 0 : -1}
-              onChange={(e) => { setQuery(sanitizeSearchQuery(e.target.value)) }}
-              onKeyDown={(e) => {
-                if (e.key !== 'Escape') return
-                setQuery('')
-                setSearchExpanded(false)
-              }}
-            />
-            {searchExpanded && (
-              <button
-                type="button"
-                className={css.clearButton}
-                aria-label={t('search.clear')}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setQuery('')
-                  setSearchExpanded(false)
-                }}
-              >
-                <IconCloseFill14 />
-              </button>
-            )}
+                <Tooltip label={t('search')} side="bottom" delayMs={500} disabled={searchExpanded}>
+                  <button
+                    type="button"
+                    className={css.searchButton}
+                    aria-label={t('search.sessions.aria')}
+                    aria-expanded={searchExpanded}
+                    onClick={() => {
+                      setWsPickerOpen(false)
+                      setSearchExpanded(true)
+                    }}
+                  >
+                    <IconSearchOutline16 size={searchExpanded ? 11 : 14} />
+                  </button>
+                </Tooltip>
+                <input
+                  ref={searchInput}
+                  className={css.searchInput}
+                  type="text"
+                  placeholder={t('search.placeholder')}
+                  maxLength={SEARCH_QUERY_MAX_CODE_UNITS}
+                  value={query}
+                  tabIndex={searchExpanded ? 0 : -1}
+                  onChange={(e) => { setQuery(sanitizeSearchQuery(e.target.value)) }}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Escape') return
+                    setQuery('')
+                    setSearchExpanded(false)
+                  }}
+                />
+                {searchExpanded && (
+                  <button
+                    type="button"
+                    className={css.clearButton}
+                    aria-label={t('search.clear')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setQuery('')
+                      setSearchExpanded(false)
+                    }}
+                  >
+                    <IconCloseFill14 />
+                  </button>
+                )}
+              </div>
+              <Tooltip label={t('viewOptions.label')} side="bottom" delayMs={500}>
+                <button
+                  type="button"
+                  className={css.iconButton}
+                  aria-label={t('viewOptions.label')}
+                  onClick={() => { actions.setOrderBy(orderBy === 'updated' ? 'manual' : 'updated') }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+                    <path d="M5 2.8v10.4M5 13.2 2.6 10.8M5 13.2l2.4-2.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M11 13.2V2.8M11 2.8 8.6 5.2M11 2.8l2.4 2.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </Tooltip>
+            </div>
           </div>
-          <Tooltip label={t('viewOptions.label')} side="bottom" delayMs={500}>
-            <button
-              type="button"
-              className={css.iconButton}
-              aria-label={t('viewOptions.label')}
-              onClick={() => { actions.setOrderBy(orderBy === 'updated' ? 'manual' : 'updated') }}
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
-                <path d="M5 2.8v10.4M5 13.2 2.6 10.8M5 13.2l2.4-2.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M11 13.2V2.8M11 2.8 8.6 5.2M11 2.8l2.4 2.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </Tooltip>
-        </div>
-      </div>
 
-      {/* The flat conversations list; search results take over while querying. */}
-      <div className={css.listArea}>
-        {normalizedQuery !== ''
-          ? (
-            <SearchResults
-              useSessions={useSessions}
-              open={open}
-              workspaces={workspaces}
-              archivedSessionIds={archivedSessionIds}
-              query={normalizedQuery}
-              remote={remoteSearch}
-              resultLimit={searchResultLimit}
-              t={t}
-            />
-          )
-          : (
-            <FlatList
-              useSessions={useSessions} open={open} forkSession={forkSession}
-              onSessionRename={onSessionRename} onSessionArchive={onSessionArchive}
-              archivedSessionIds={archivedSessionIds}
-              orderBy={orderBy}
-              sessionOrderByAccount={sessionOrderByAccount}
-              sessionUpdatedAtByAccount={sessionUpdatedAtByAccount}
-              syncSessionOrderAccount={actions.syncSessionOrderAccount}
-              setSessionOrder={actions.setSessionOrder}
-              t={t}
-            />
-          )}
-      </div>
-      </>
+          {/* The flat conversations list; search results take over while querying. */}
+          <div className={css.listArea}>
+            {normalizedQuery !== ''
+              ? (
+                <SearchResults
+                  useSessions={useSessions}
+                  open={open}
+                  workspaces={workspaces}
+                  archivedSessionIds={archivedSessionIds}
+                  query={normalizedQuery}
+                  remote={remoteSearch}
+                  resultLimit={searchResultLimit}
+                  t={t}
+                />
+              )
+              : (
+                <FlatList
+                  useSessions={useSessions} open={open} forkSession={forkSession}
+                  onSessionRename={onSessionRename} onSessionArchive={onSessionArchive}
+                  archivedSessionIds={archivedSessionIds}
+                  orderBy={orderBy}
+                  sessionOrderByAccount={sessionOrderByAccount}
+                  sessionUpdatedAtByAccount={sessionUpdatedAtByAccount}
+                  syncSessionOrderAccount={actions.syncSessionOrderAccount}
+                  setSessionOrder={actions.setSessionOrder}
+                  t={t}
+                />
+              )}
+          </div>
+        </>
       )}
 
       <Modal

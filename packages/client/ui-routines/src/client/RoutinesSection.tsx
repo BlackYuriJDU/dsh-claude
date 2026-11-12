@@ -126,7 +126,7 @@ export function RoutinesSection({ routines, t }: RoutinesSectionComponentProps) 
             className={css.textField}
             value={name}
             placeholder={t('add.name.placeholder')}
-            onChange={e => { setName(e.target.value) }}
+            onChange={(e) => { setName(e.target.value) }}
           />
         </div>
         <textarea
@@ -134,7 +134,7 @@ export function RoutinesSection({ routines, t }: RoutinesSectionComponentProps) 
           value={prompt}
           rows={3}
           placeholder={t('add.prompt.placeholder')}
-          onChange={e => { setPrompt(e.target.value) }}
+          onChange={(e) => { setPrompt(e.target.value) }}
         />
         <div className={css.addRow}>
           <span className={css.cardSchedule}>{t('add.every')}</span>
@@ -143,12 +143,12 @@ export function RoutinesSection({ routines, t }: RoutinesSectionComponentProps) 
             type="number"
             min={1}
             value={every}
-            onChange={e => { setEvery(e.target.value) }}
+            onChange={(e) => { setEvery(e.target.value) }}
           />
           <select
             className={css.selectField}
             value={unit}
-            onChange={e => { setUnit(e.target.value as RoutineIntervalUnit) }}
+            onChange={(e) => { setUnit(e.target.value as RoutineIntervalUnit) }}
           >
             <option value="minutes">{t('add.unit.minutes')}</option>
             <option value="hours">{t('add.unit.hours')}</option>
@@ -160,7 +160,7 @@ export function RoutinesSection({ routines, t }: RoutinesSectionComponentProps) 
             className={css.textField}
             value={cwd}
             placeholder={t('add.cwd.placeholder')}
-            onChange={e => { setCwd(e.target.value) }}
+            onChange={(e) => { setCwd(e.target.value) }}
           />
         </div>
         <button

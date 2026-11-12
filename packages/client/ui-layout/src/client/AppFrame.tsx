@@ -117,7 +117,8 @@ export function AppFrame({
   const sidebarRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     if (!drawerOpen) return
-    const panel = sidebarRef.current!
+    const panel = sidebarRef.current
+    if (panel === null) return
     panel.focus()
     return () => {
       // The expanded control can disappear when the rail returns. Keep focus
