@@ -36,8 +36,9 @@ const CUBES: readonly { id: ThemePreference; labelKey: ThemeKey; Icon: typeof Ic
  * @param props - composed slot props.
  * @returns the row element tree.
  */
-export function AppearanceRow({ t, setTheme }: AppearanceRowComponentProps) {
-  // Dark-only: the single cube is always the active preference.
+export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentProps) {
+  // setTheme may hold a concrete theme id outside the cube set.
+  const preference: string = useStore(s => s.preference)
   return (
     <div className={css.group}>
       <div className={css.title}>{t('appearance.title')}</div>
@@ -46,8 +47,8 @@ export function AppearanceRow({ t, setTheme }: AppearanceRowComponentProps) {
           <button
             key={id}
             type="button"
-            className={clsx(css.themeCube, css.selected)}
-            aria-pressed
+            className={clsx(css.themeCube, preference === id && css.selected)}
+            aria-pressed={preference === id}
             onClick={() => { setTheme(id) }}
           >
             <Icon />

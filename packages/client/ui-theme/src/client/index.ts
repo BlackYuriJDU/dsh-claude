@@ -240,10 +240,20 @@ export class ThemeRuntime {
   /** Adopt the scope's accepted durable preference without writing it back. */
   private adopt(): void {
     const section = this.host.getSnapshot().value
-    // The preference is dark-only, so a durable section can move only the chat font.
-    if (section === undefined || section.chatFont === this.chatFont) return
-    this.chatFont = section.chatFont
-    this.publish()
+    if (section === undefined) return
+    let moved = false
+    // setTheme may hold a concrete theme id outside the persisted preference set.
+    const current: string = this.preference
+    if (current !== section.preference) {
+      this.preference = section.preference
+      moved = true
+    }
+    // The schema defaults chatFont, so a validated section always carries it.
+    if (section.chatFont !== this.chatFont) {
+      this.chatFont = section.chatFont
+      moved = true
+    }
+    if (moved) this.publish()
   }
 
   /**
