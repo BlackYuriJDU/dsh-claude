@@ -14,6 +14,9 @@ permissions:
 jobs:
   policy:
     name: Issue policy
+    # The trusted policy validates against the upstream organization's issues
+    # and reviewers; forks have neither, so the job skips there.
+    if: ${{ github.repository_owner == 'deepseek-harness' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out trusted policy
