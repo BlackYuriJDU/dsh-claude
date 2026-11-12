@@ -100,6 +100,9 @@ interface DeepSeekDefaultsServer {
 }
 
 /** Serve one deterministic DeepSeek-compatible response while retaining its request body. */
+/** Gap between the defaults server's SSE writes; the fixture's idle timeout is 1000ms. */
+const KEEP_ALIVE_GAP_MS = 400
+
 async function deepseekDefaultsServer(): Promise<DeepSeekDefaultsServer> {
   const requests: JsonObject[] = []
   const server = createServer((request: IncomingMessage, response: ServerResponse) => {
@@ -109,11 +112,14 @@ async function deepseekDefaultsServer(): Promise<DeepSeekDefaultsServer> {
     request.on('end', () => {
       requests.push(JSON.parse(body) as JsonObject)
       response.writeHead(200, { 'content-type': 'text/event-stream' })
+      // Four 400ms gaps outlast the 1000ms idle timeout in total, so only the
+      // comments keep the stream alive; each gap leaves a 600ms margin for a
+      // loaded runner's event-loop stalls.
       let keepAlives = 3
       const write = (): void => {
         if (keepAlives-- > 0) {
           response.write(': keep-alive\n\n')
-          setTimeout(write, 60)
+          setTimeout(write, KEEP_ALIVE_GAP_MS)
           return
         }
         response.end([
@@ -123,7 +129,7 @@ async function deepseekDefaultsServer(): Promise<DeepSeekDefaultsServer> {
           '',
         ].join('\n\n'))
       }
-      setTimeout(write, 60)
+      setTimeout(write, KEEP_ALIVE_GAP_MS)
     })
   })
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
