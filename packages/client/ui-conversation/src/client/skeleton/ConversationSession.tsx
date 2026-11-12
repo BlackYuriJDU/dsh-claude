@@ -25,26 +25,42 @@ function resolveActiveView(tabs: readonly ViewTab[], selectedId: string | null):
 
 /**
  * Renders the session header chrome above the resident conversation scrollport.
- * dshc keeps only the layout element (hidden); all chrome lives in the
- * browsing sidebar, like the reference interface.
- * @returns the hidden header element.
+ * dshc hides the chrome while the Chat view is active (the conversation starts
+ * straight at the transcript); any other active view, such as the Trajectory
+ * view a tool row's inspect control opens, shows the view tabs so the user can
+ * return to Chat.
+ * @returns the hidden header element, or the view tabs while a non-Chat view is active.
  */
 export function ConversationSessionHeader({
   sessionId, useSession, useSessions, useStore, actions,
   renderSlot, views, open, t,
 }: ConversationSessionHeaderProps) {
-  // dshc: session header chrome (session log, PTC chip, Chat/Trajectory tabs,
-  // background-jobs action) is removed wholesale — the conversation starts
-  // straight at the transcript, like the reference interface. The element
-  // stays as layout chrome so the scrollport's sibling structure is stable
-  // across the hero and active phases.
-  void sessionId; void useSession; void useSessions; void useStore; void actions
-  void renderSlot; void views; void open; void t
+  // dshc: session log, PTC chip, breadcrumbs, and background-jobs action stay
+  // removed; only the view tabs return, and only outside the Chat view.
+  void sessionId; void useSession; void useSessions; void renderSlot; void open; void t
+  useSyncExternalStore(views.subscribe, views.version)
+  const tabs = views.list()
+  const active = resolveActiveView(tabs, useStore(s => s.view))
+  if (active === undefined || active.id === DEFAULT_VIEW_ID || tabs.length < 2) {
+    return <header className={clsx(css.header, css.headerHidden)} aria-hidden />
+  }
   return (
-    <header
-      className={clsx(css.header, css.headerHidden)}
-      aria-hidden
-    />
+    <header className={css.header}>
+      <div className={css.tabs} role="tablist">
+        {tabs.map(viewTab => (
+          <button
+            key={viewTab.id}
+            type="button"
+            role="tab"
+            aria-selected={viewTab.id === active.id}
+            className={clsx(css.tab, viewTab.id === active.id && css.tabActive)}
+            onClick={() => { actions.setView(viewTab.id) }}
+          >
+            {viewTab.label}
+          </button>
+        ))}
+      </div>
+    </header>
   )
 }
 

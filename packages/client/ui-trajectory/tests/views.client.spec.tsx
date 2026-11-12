@@ -207,7 +207,7 @@ function tabsOf(slots: SlotRegistry): ViewTab[] {
 }
 
 /** Mount the strict Session header/body over the ring ledger with outlet-faithful render shares. */
-/** Chat store of the latest mount; the header renders no view tabs, so tests select views through it. */
+/** Chat store of the latest mount; the header shows no view tabs on Chat, so tests select views through it. */
 let mountedChat: ReturnType<ReturnType<typeof createChatStore>['create']> | undefined
 
 /**
@@ -363,12 +363,17 @@ describe('plugin registration', () => {
 })
 
 describe('view switching in ConversationRoot', () => {
-  it('defaults to chat and renders the trajectory ledger when the view switches', async () => {
+  it('hides the view tabs on chat, shows them on trajectory, and returns to chat from the tab', async () => {
     const b = await bench()
     const view = mount(b.slots)
     expect(screen.getByTestId('chat-body')).toBeTruthy()
+    // Chat hides the header chrome, so no tab is reachable there.
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
 
+    // The tool-row inspect control selects Trajectory through the store.
     showView('trajectory')
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual(['Chat', 'Trajectory'])
+    expect(screen.getByRole('tab', { name: 'Trajectory' }).getAttribute('aria-selected')).toBe('true')
     expect(screen.queryByText(/turns ·/)).toBeNull()
     expect(view.container.querySelectorAll('tr[data-turn-start="true"]')).toHaveLength(2)
     expect(screen.queryByRole('columnheader')).toBeNull()
@@ -381,7 +386,9 @@ describe('view switching in ConversationRoot', () => {
     expect(screen.getByRole('row', { name: /USER/ })).toBeTruthy()
     expect(screen.queryByTestId('chat-body')).toBeNull()
     expect(b.loadOlder).not.toHaveBeenCalled()
-    showView('chat')
+    fireEvent.click(screen.getByRole('tab', { name: 'Chat' }))
+    expect(screen.getByTestId('chat-body')).toBeTruthy()
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(b.loadOlder).not.toHaveBeenCalled()
   })
 
