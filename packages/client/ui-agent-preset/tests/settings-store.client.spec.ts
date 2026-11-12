@@ -329,6 +329,21 @@ describe('the new-session chip controller', () => {
     expect(controller.store.getSnapshot().current).toBe('minimal')
   })
 
+  it('raises the introduce cue for a stage from another screen until the chip acknowledges it', async () => {
+    const controller = chip(ROSTER, undefined)
+    await controller.load()
+    const published: boolean[] = []
+    controller.store.subscribe(() => { published.push(controller.store.getSnapshot().introduce) })
+
+    controller.stage('minimal', true)
+    controller.introduced()
+    controller.introduced()
+
+    // The second acknowledgement finds no cue and publishes nothing.
+    expect(published).toEqual([true, false])
+    expect(controller.store.getSnapshot()).toMatchObject({ current: 'minimal', introduce: false })
+  })
+
   it('applies the stage to the blank session the flow lands on', async () => {
     const writes: Recorded[] = []
     const current = { id: 's1', blank: true, agentPreset: 'standard' }

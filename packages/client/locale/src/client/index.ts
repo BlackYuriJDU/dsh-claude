@@ -11,7 +11,7 @@
  * string-typed. The rule fires on the narrow-map view, not real redundancy. */
 import type { Context } from '@deepseek-ai/cordis'
 import {
-  type BoundActions, type LocaleDictOf, type LocaleNamespaceMap, type Translate, type TranslateNS,
+  type LocaleDictOf, type LocaleNamespaceMap, type Translate, type TranslateNS,
 } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ClientContext, SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: the ctx.settingsScope Context merge and the settings slot types.
@@ -23,8 +23,6 @@ import {
 } from '../locale-settings.ts'
 import { en, type CommonKey } from '../locales/index.ts'
 import { en as settingsEn, type SettingsLocaleKey } from '../locales/settings.ts'
-import type { LanguageRowInjected } from './LanguageRow.tsx'
-import { createLanguageRowStore } from './settings-store.ts'
 
 export type { LanguageRowComponentProps, LanguageRowInjected } from './LanguageRow.tsx'
 export type { LanguageOptionRow, LanguageRowState } from './settings-store.ts'
@@ -384,8 +382,9 @@ export const inject = ['slots', 'connection', 'remote', 'settingsScope']
 
 /**
  * Client plugin body: provide the locale service with base dictionaries and
- * register the feature-owned Language preference row into the General
- * section's item slot (a feature owns its settings surface).
+ * keep the document `lang` attribute equal to the active locale. The language
+ * switch lives in the profile popover; `LanguageRow` stays exported for hosts
+ * that mount it themselves.
  * @param ctx - client cordis context.
  */
 export function apply(ctx: ClientContext): void {
@@ -397,34 +396,9 @@ export function apply(ctx: ClientContext): void {
   // The service IS the LocaleFace (bind + getSnapshot/subscribe): install it
   // so the render machinery can synthesize the `t` standard seat.
   ctx.slots.installLocale(locale)
-
-  const store = createLanguageRowStore()
-  let bound: BoundActions<typeof store> | undefined
-  const sync = (snapshot: LocaleSnapshot): void => {
-    syncDocumentLanguage(snapshot.active)
-    bound?.sync(
-      snapshot.active,
-      snapshot.locales.map(l => ({ id: l.id, label: l.label })),
-      snapshot.revision,
-    )
-  }
-  ctx.on('locale/change', sync)
+  ctx.on('locale/change', (snapshot: LocaleSnapshot) => { syncDocumentLanguage(snapshot.active) })
   // The served markup declares one language; the resolved locale may differ
   // (browser detection, or a stored preference adopted after activation), so
   // state it once at activation rather than waiting for the first change.
   syncDocumentLanguage(locale.getLocale().active)
-  // dshc: the General-section Language row left the reworked General block —
-  // the language switch lives in the profile popover's Idioma submenu (and
-  // the row component stays exported for its specs). The store keeps syncing
-  // so the exported row's reactive contract stays true if it ever returns.
-  const injected = (actions: BoundActions<typeof store>): LanguageRowInjected => {
-    bound = actions
-    // Re-sync from the getter so no event is lost between registration and
-    // first render (the store's revision guard drops stale duplicates).
-    sync(locale.getLocale())
-    return {
-      setLocale: (id) => { locale.setLocale(id) },
-    }
-  }
-  void injected
 }
