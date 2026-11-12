@@ -61,7 +61,7 @@ As quatro decisões do pacote continuam valendo: **D1** React 18, **D2** fork le
 
 | # | Decisão | Opções | Recomendação |
 |---|---|---|---|
-| **D5** | Como fazer o CI rodar no fork | (a) trocar o fallback de `runs-on` para `ubuntu-latest`; (b) criar uma variável de repositório `DSH_CI_RUNNER` com fallback `ubuntu-latest`; (c) self-hosted | **(b)**: um ajuste no YAML, sem perder o caminho do upstream. Em repositório público, os runners `ubuntu-latest` são gratuitos. |
+| **D5** | Como fazer o CI rodar no fork | (a) trocar o fallback de `runs-on` para `ubuntu-latest`; (b) variáveis de repositório `DSH_CI_LINUX_RUNNER` / `DSH_CI_WINDOWS_RUNNER` com fallback `ubuntu-latest` / `windows-latest`; (c) self-hosted | **(b), aplicada** (patch P1, commit `f7a91e898`). Em repositório público, os runners `ubuntu-latest` são gratuitos. |
 | **D6** | Tema | manter só escuro / voltar claro + escuro | **Claro + escuro, com "Sistema" como padrão.** A identidade "warm canvas" é clara por natureza, e o claude.ai oferece os dois. |
 | **D7** | Idioma da UI | en com pt pontual (hoje) / pt-BR completo com en de fallback | **pt-BR completo** nos pacotes que o usuário vê; `en` continua como fonte das chaves e fallback (o gate de paridade en/pt já garante isso). |
 
@@ -143,19 +143,19 @@ Cada item: **o quê → onde → como → por quê → testes → pronto quando*
 
 ### Onda 0.6 (nova): CI vivo e dívidas encontradas na Onda 0.5
 
-**0.6.1 · CI que roda no fork (D5)**
+**0.6.1 · CI que roda no fork (D5)** — ✅ feito (patch P1, `f7a91e898`). Pendências: medir a primeira execução (reduzir `DSH_GATE_CONCURRENCY` para 4 se faltar memória), proteger ou apagar a branch `master` do fork e atualizar os comentários "enterprise pools" do `ci.yml`. Detalhes em `pesquisa/analise-patches-p1-p2-p3.md`.
 - **Onde:** `.github/workflows/ci.yml` e `ci-master.yml`, expressões `runs-on`.
-- **Como:** trocar o literal `'dsh-ubuntu-24-04-16core'` por `vars.DSH_CI_RUNNER || 'ubuntu-latest'` (e o equivalente do Windows por `windows-latest`). Medir a duração do job de cobertura em `ubuntu-latest`. Se passar de 60 minutos, ligar o particionamento que o repositório já tem (`COVERAGE_PARTITIONS_ENV` em `scripts/coverage-partitions.ts`).
+- **Como:** trocar o literal `'dsh-ubuntu-24-04-16core'` por `vars.DSH_CI_LINUX_RUNNER || 'ubuntu-latest'` (e o equivalente do Windows por `windows-latest`). Medir a duração do job de cobertura em `ubuntu-latest`. Se passar de 60 minutos, ligar o particionamento que o repositório já tem (`COVERAGE_PARTITIONS_ENV` em `scripts/coverage-partitions.ts`).
 - **Por quê:** hoje nenhum PR do fork tem sinal de CI. O `node 22.19` também falhava porque o `build` quebrava, o que a Onda 0.5 corrige.
 - **Pronto quando:** um PR mostra "all checks passed".
 
-**0.6.2 · Bug: preso na visão Trajectory**
+**0.6.2 · Bug: preso na visão Trajectory** — ✅ feito (`8ca55dc41`: as abas aparecem fora do Chat).
 - **Onde:** `ui-conversation/src/client/skeleton/ConversationSession.tsx` (`hideChrome = true`) e `apply.ts:390` (`inspectCall`).
 - **Como (recomendado):** mostrar a barra de visões quando a visão ativa não é o chat, ou pôr um botão "Voltar ao chat" na toolbar da Trajectory. Alternativa: esconder o botão "inspecionar" dos tool rows enquanto as abas estiverem ocultas.
 - **Por quê:** hoje um clique leva a uma tela sem saída; só trocar de sessão resolve.
 - **Testes:** teste de componente (clicar em inspecionar → voltar ao chat) e snapshot de interface.
 
-**0.6.3 · Dívidas pequenas**
+**0.6.3 · Dívidas pequenas** — ✅ feito em parte (`c570f9289`): `knowledgeFileMaxChars` virou `Config`, o título "Think" foi localizado e o README do `ui-settings-general` passou a documentar o contexto de modelo. Ficam o modal de provedor que volta e o modo `?fixture`.
 - `KNOWLEDGE_FILE_MAX_CHARS` vira campo de `Config` do `ui-projects` (regra "No hardcoded tunables").
 - O título "Think" do `ReasoningRow` entra no dicionário (en/pt).
 - O `ui-settings-general` registra um contexto de prompt (`profile:instructions`), mas está na allowlist como "nothing model-facing": corrigir o README e a allowlist.
@@ -163,7 +163,7 @@ Cada item: **o quê → onde → como → por quê → testes → pronto quando*
 - O modal "Adicione um provedor" reaparece depois de "Not now": persistir a dispensa (por sessão do navegador ou no `ui-onboarding`).
 - O modo `?fixture` não passa do onboarding: o `FixtureApiClient` precisa aceitar a escrita do perfil, para que demos e screenshots funcionem sem Host.
 
-**0.6.4 · Cobertura de 100% nos pacotes do fork**
+**0.6.4 · Cobertura de 100% nos pacotes do fork** — 🟡 em andamento: `ui-memory`, `ui-projects` e `ui-routines` chegaram a 100%.
 - **O quê:** 478 pontos não cobertos em cerca de 30 arquivos que o fork adicionou ou alterou (lista em `relatorios/onda-0.5.md`, nota 3).
 - **Como:** um spec por arquivo, no padrão dos vizinhos: `browser-plugin.client.spec.tsx` para os `client/index` (registro, locale e dispose do fiber); specs de componente com `@testing-library/react` para `ProfileRows`, `ChatFontRow`, `RoutinesSection`, `ArtifactsModal` e `SidebarRoot`; testes de store para `profile-store` e `chat-font-store`; testes do scheduler com timers falsos para `ui-routines/src/index.ts`. A lógica que hoje está dentro de componentes (por exemplo, o recorte de avatar do `ProfileRows`) vai para funções puras testáveis.
 - **Por quê:** é o único gate do CI ainda vermelho, e ele fica visível assim que a 0.6.1 ligar os runners.
@@ -256,6 +256,7 @@ Cada item: **o quê → onde → como → por quê → testes → pronto quando*
 - A sidebar mostra a linhagem (ícone de ramo e "ramificado de …") a partir do header da sessão filha. Hoje `tree.ts` não projeta a linhagem.
 
 ### Onda 8: Conectores e Reflect (G10, G11)
+- **Base pronta (patches do dono, revisados):** P2 (`examples/mcp-connectors`: Playwright, Microsoft 365 e Google Workspace) e P3 (`examples/skills-knowledge-work`: `security-review`, `deep-research` e o catálogo `knowledge-work-plugins`). Os dois entram como PRs separados **com as correções** de `pesquisa/analise-patches-p1-p2-p3.md` §3–§4 (registro no `verify-cordis-config`, par zh, falha alta com variável ausente, `subagent` sem `job_output`, login do ms365 pelo terminal, `dsh` no lugar de `dshc`).
 - Tela de conectores no lugar do placeholder "em breve" do `ui-settings-general`: catálogo de servidores MCP, status e credenciais via `credentials`.
 - Reflect: uma rotina do `ui-routines` propõe memórias; o usuário aprova no `ui-memory`.
 
