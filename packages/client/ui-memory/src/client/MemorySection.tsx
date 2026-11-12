@@ -42,10 +42,9 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
     void memory.set('memories', [...next])
   }
 
+  // The add control is disabled while the trimmed draft is empty.
   const add = (): void => {
-    const text = draft.trim()
-    if (text === '') return
-    write([...memories, { id: crypto.randomUUID(), text }])
+    write([...memories, { id: crypto.randomUUID(), text: draft.trim() }])
     setDraft('')
   }
 
@@ -59,14 +58,13 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
     setEditText(item.text)
   }
 
-  const commitEdit = (): void => {
-    if (editingId === null) return
+  const commitEdit = (id: string): void => {
     const text = editText.trim()
     if (text === '') {
-      remove(editingId)
+      remove(id)
       return
     }
-    write(memories.map(item => (item.id === editingId ? { ...item, text } : item)))
+    write(memories.map(item => (item.id === id ? { ...item, text } : item)))
     setEditingId(null)
   }
 
@@ -90,7 +88,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
                         onChange={(e) => { setEditText(e.target.value) }}
                       />
                       <span className={css.itemActions}>
-                        <button type="button" className={css.linkButton} onClick={commitEdit}>
+                        <button type="button" className={css.linkButton} onClick={() => { commitEdit(item.id) }}>
                           {t('edit.save')}
                         </button>
                         <button type="button" className={css.linkButton} onClick={() => { setEditingId(null) }}>

@@ -108,4 +108,28 @@ describe('MemorySection', () => {
     expect(memory.writes).toEqual([[]])
     cleanup()
   })
+
+  it('edits one memory among several and leaves the others untouched', () => {
+    const { memory, getAllByText, getByDisplayValue } = mountSection({
+      memories: [{ id: 'm1', text: 'primeira' }, { id: 'm2', text: 'segunda' }],
+    })
+    fireEvent.click(getAllByText(en['edit'])[1]!)
+    fireEvent.change(getByDisplayValue('segunda'), { target: { value: 'segunda editada' } })
+    fireEvent.click(getAllByText(en['edit.save'])[0]!)
+    expect(memory.writes).toEqual([[{ id: 'm1', text: 'primeira' }, { id: 'm2', text: 'segunda editada' }]])
+    cleanup()
+  })
+
+  it('opens the editor on double click and cancels without writing', () => {
+    const { memory, getByText, queryByDisplayValue } = mountSection({
+      memories: [{ id: 'm1', text: 'duplo clique' }],
+    })
+    fireEvent.doubleClick(getByText('duplo clique'))
+    expect(queryByDisplayValue('duplo clique')).toBeTruthy()
+    fireEvent.click(getByText(en['edit.cancel']))
+    expect(queryByDisplayValue('duplo clique')).toBeNull()
+    expect(getByText('duplo clique')).toBeTruthy()
+    expect(memory.writes).toEqual([])
+    cleanup()
+  })
 })

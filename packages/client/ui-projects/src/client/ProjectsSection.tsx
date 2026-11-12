@@ -31,7 +31,7 @@ export type ProjectsSectionComponentProps =
 
 /** Basename of a host path (both separators accepted). */
 function basenameOf(path: string): string {
-  return path.replace(/[/\\]+$/, '').split(/[/\\]/).pop() ?? path
+  return path.replace(/[/\\]+$/, '').replace(/^.*[/\\]/, '')
 }
 
 /**
