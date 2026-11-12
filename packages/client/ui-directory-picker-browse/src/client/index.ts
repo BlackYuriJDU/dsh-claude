@@ -27,8 +27,9 @@ export const inject = ['slots', 'workspaces', 'locale']
  */
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => {
-    // The dictionary lands alone: a rival owner of the namespace rejects the
-    // registration and the disposer rolls it back.
+    // The dictionaries land as a unit: if a later registration hits a rival
+    // owner of the namespace, the earlier ones roll back before the throw, so
+    // a failed activation never squats the namespace's other locale.
     const disposers: (() => void)[] = []
     const dictionaries: [locale: string, dict: Record<string, string>][] = [
       ['en', {
@@ -45,6 +46,21 @@ export function apply(ctx: ClientContext): void {
         'browser.loading': 'Loading…',
         'browser.truncated': 'Too many folders to list; only the beginning is shown.',
         'browser.showHidden': 'Show hidden files',
+      }],
+      ['pt', {
+        'browser.title': 'Selecionar pasta do workspace',
+        'browser.home': 'Início',
+        'browser.newFolder': 'Nova pasta',
+        'browser.folderName': 'Nome da pasta',
+        'browser.createIn': 'Nova pasta em "{name}"',
+        'browser.untitledFolder': 'Pasta sem título',
+        'browser.create': 'Criar',
+        'browser.cancel': 'Cancelar',
+        'browser.open': 'Abrir',
+        'browser.editPath': 'Editar caminho',
+        'browser.loading': 'Carregando…',
+        'browser.truncated': 'Pastas demais para listar; só o começo aparece.',
+        'browser.showHidden': 'Mostrar arquivos ocultos',
       }],
     ]
     try {

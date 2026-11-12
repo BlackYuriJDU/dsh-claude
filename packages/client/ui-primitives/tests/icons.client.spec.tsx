@@ -61,6 +61,12 @@ describe('CoralBurst', () => {
     expect(container.querySelectorAll('path')).toHaveLength(8)
     expect(container.innerHTML).toContain('#cc785c')
   })
+
+  it('inherits currentColor instead of the brand coral when asked', () => {
+    const { container } = render(<primitives.CoralBurst brandColor={false} />)
+    expect(container.innerHTML).toContain('currentColor')
+    expect(container.innerHTML).not.toContain('#cc785c')
+  })
 })
 
 describe('BrandWordmark', () => {

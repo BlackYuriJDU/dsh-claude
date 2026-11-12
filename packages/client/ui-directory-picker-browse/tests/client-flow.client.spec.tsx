@@ -138,11 +138,11 @@ describe('directory-picker-browse client half', () => {
     }
   })
 
-  it('rolls back the dictionary when a rival already owns the namespace slot', async () => {
+  it('rolls back every dictionary when a rival already owns one locale of the namespace', async () => {
     const b = await bench()
     b.declare()
     const locale = b.ctx.get('locale') as LocaleRuntime
-    const disposeRival = locale.register('directory-browser', 'en', { 'browser.title': 'rival' })
+    const disposeRival = locale.register('directory-browser', 'pt', { 'browser.title': 'rival' })
     const rejections: unknown[] = []
     const onUnhandled = (reason: unknown): void => { rejections.push(reason) }
     // cordis re-raises the apply throw as a late rejection (installFailLoud's contract).
@@ -150,11 +150,13 @@ describe('directory-picker-browse client half', () => {
     try {
       const fiber = b.ctx.plugin({ inject: [...inject], apply })
       await expect(fiber.await()).rejects.toThrow(/already has locale/)
-      // The registration rolled back with the failure: once the rival leaves,
-      // a fresh registrant owns the namespace again.
+      // The en dictionary registered before the pt collision rolled back with
+      // the failure, and the rival keeps its locale until it leaves.
+      const disposeEn = locale.register('directory-browser', 'en', { 'browser.title': 'second owner' })
+      disposeEn()
       disposeRival()
-      const disposeAfter = locale.register('directory-browser', 'en', { 'browser.title': 'second owner' })
-      disposeAfter()
+      const disposePt = locale.register('directory-browser', 'pt', { 'browser.title': 'second owner' })
+      disposePt()
     } finally {
       await new Promise(resolve => setTimeout(resolve, 0))
       process.off('unhandledRejection', onUnhandled)
@@ -170,6 +172,9 @@ describe('directory-picker-browse client half', () => {
     expect(injected.t('browser.title')).toBe('Select Workspace Directory')
     expect(injected.t('browser.newFolder')).toBe('New folder')
     expect(injected.t('browser.showHidden')).toBe('Show hidden files')
+    ;(b.ctx.get('locale') as LocaleRuntime).setLocale('pt')
+    const translated = (entry.inject as () => { t: (key: string) => string })()
+    expect(translated.t('browser.title')).toBe('Selecionar pasta do workspace')
   })
 
   it('drives the injected browse calls through the hole entry', async () => {
