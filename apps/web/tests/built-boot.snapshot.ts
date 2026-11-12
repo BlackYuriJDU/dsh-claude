@@ -63,11 +63,21 @@ it('boots the built plugin graph and renders a fixture session end to end', asyn
   }, { timeout: 10_000 })
   // The generated bundle roster mounts the question UI before the approval UI.
   // Skip the resident fixture's three questions, then resolve its approval so
-  // the ordinary composer bar resumes.
+  // the ordinary composer bar (and the usage ring under it) resumes.
   for (let index = 0; index < 3; index += 1) {
     fireEvent.click(await screen.findByRole('button', { name: 'Skip this question' }))
   }
   fireEvent.click(await screen.findByRole('button', { name: 'Allow once' }))
+
+  // The fixture mirrors all three token-meter projections, so the usage ring
+  // in the row under the composer card reaches its composition panel instead
+  // of only the occupancy fallback path.
+  const contextTrigger = await screen.findByRole('button', { name: /of context used/ })
+  fireEvent.click(contextTrigger)
+  const contextPanel = await screen.findByRole('dialog', { name: 'of context used' })
+  within(contextPanel).getByText('System prompt')
+  within(contextPanel).getByText('Tools')
+  within(contextPanel).getByText('Messages')
 
 
   // The write/edit turns render a real diff card through the assembled graph

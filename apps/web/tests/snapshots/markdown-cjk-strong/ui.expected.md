@@ -40,6 +40,8 @@
 - button "Add":
   - img
 - button "Dictate"
+- 'button "Access mode, current: Full access"': Full access
 - button "Select model, current DeepSeek-V4-Flash":
   - text: DeepSeek-V4-Flash
   - img
+- button "Session"
