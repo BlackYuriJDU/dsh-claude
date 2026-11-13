@@ -322,6 +322,9 @@ describe('HtmlBody design comments', () => {
     const post = vi.spyOn(frame.contentWindow!, 'postMessage')
     const toggle = screen.getByRole('button', { name: en['comment'] })
     expect(toggle.getAttribute('aria-pressed')).toBe('false')
+    // The page's own scripts can post a report while comment mode is off.
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: report, source: frame.contentWindow })) })
+    expect(p.comment).not.toHaveBeenCalled()
     fireEvent.click(toggle)
     expect(toggle.getAttribute('aria-pressed')).toBe('true')
     await waitFor(() => { expect(post).toHaveBeenCalledWith({ type: COMMENT_MODE_MESSAGE, on: true }, '*') })

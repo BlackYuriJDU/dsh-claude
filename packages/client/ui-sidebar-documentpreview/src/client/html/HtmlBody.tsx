@@ -49,9 +49,11 @@ function HtmlFrame({
 }: FrameInput & { t: HtmlBodyProps['t'] }): ReactNode {
   const [frame, setFrame] = useState<FrameState>()
   const iframe = useRef<HTMLIFrameElement>(null)
-  // Only this frame's own window may report, and every report is validated:
-  // the page's scripts can post too, so a report never does more than suggest draft text.
+  // Only this frame's own window may report, only in comment mode, and every
+  // report is validated: the page's scripts can post too, so a report never
+  // does more than suggest draft text.
   useEffect(() => {
+    if (!commenting) return
     const listen = (event: MessageEvent): void => {
       if (event.source === null || event.source !== iframe.current?.contentWindow) return
       const comment = parseHtmlComment(event.data)
@@ -59,7 +61,7 @@ function HtmlFrame({
     }
     window.addEventListener('message', listen)
     return () => { window.removeEventListener('message', listen) }
-  }, [onComment])
+  }, [commenting, onComment])
   const sendMode = (): void => {
     iframe.current?.contentWindow?.postMessage({ type: COMMENT_MODE_MESSAGE, on: commenting }, '*')
   }
