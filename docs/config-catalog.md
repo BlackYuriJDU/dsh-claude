@@ -619,7 +619,7 @@ export interface Config {
 
 - `inject`: `settings` · `systemPrompt`
 - `refs`: `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/client/ui-memory/src/index.ts:24`](../packages/client/ui-memory/src/index.ts)
+- `source`: [`packages/client/ui-memory/src/index.ts:20`](../packages/client/ui-memory/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config. */
@@ -671,7 +671,7 @@ export interface Config {
 
 - `inject`: `settings` · `systemPrompt` · `workspaceRegistry` · `workingDirectory`
 - `refs`: `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/client/ui-projects/src/index.ts:23`](../packages/client/ui-projects/src/index.ts)
+- `source`: [`packages/client/ui-projects/src/index.ts:21`](../packages/client/ui-projects/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config. */
@@ -5056,7 +5056,7 @@ export interface Config {
 
 - `inject`: `web`
 - `refs`: `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/web/web-search-searxng/src/index.ts:36`](../packages/web/web-search-searxng/src/index.ts)
+- `source`: [`packages/web/web-search-searxng/src/index.ts:27`](../packages/web/web-search-searxng/src/index.ts)
 
 ```ts config-catalog
 /**
