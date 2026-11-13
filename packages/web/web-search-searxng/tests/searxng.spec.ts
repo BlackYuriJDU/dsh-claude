@@ -172,6 +172,31 @@ describe('SearxngSearchProvider error handling', () => {
       .rejects.toThrow(expect.objectContaining({ code: 'WEB_ABORTED' }))
   })
 
+  it('maps a fetch rejected with the caller\'s own abort reason to WEB_ABORTED', async () => {
+    const controller = new AbortController()
+    const reason = new Error('turn interrupted')
+    vi.stubGlobal('fetch', vi.fn(() => { controller.abort(reason); return Promise.reject(reason) }))
+    await expect(new SearxngSearchProvider(options).search({ query: 'q' }, controller.signal))
+      .rejects.toThrow(expect.objectContaining({ code: 'WEB_ABORTED', cause: reason }))
+  })
+
+  it('maps a body read rejected with the caller\'s own abort reason to WEB_ABORTED', async () => {
+    const controller = new AbortController()
+    const reason = new Error('turn interrupted')
+    const body = new ReadableStream({ start(stream) { controller.abort(reason); stream.error(reason) } })
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(body)))
+    await expect(new SearxngSearchProvider(options).search({ query: 'q' }, controller.signal))
+      .rejects.toThrow(expect.objectContaining({ code: 'WEB_ABORTED', cause: reason }))
+  })
+
+  it('releases the body of an error response before failing', async () => {
+    const cancel = vi.fn()
+    const body = new ReadableStream({ cancel })
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(body, { status: 403 })))
+    await expect(new SearxngSearchProvider(options).search({ query: 'q' })).rejects.toThrow(expect.objectContaining({ code: 'WEB_PROVIDER_ERROR' }))
+    expect(cancel).toHaveBeenCalledOnce()
+  })
+
   it('maps an unparseable success body to WEB_PROVIDER_ERROR', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('<html>not json</html>', { status: 200 })))
     await expect(new SearxngSearchProvider(options).search({ query: 'q' }))

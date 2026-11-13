@@ -134,13 +134,15 @@ export class SearxngSearchProvider implements WebSearchProvider {
         ...signal !== undefined ? { signal } : {},
       })
     } catch (error: unknown) {
-      if (isAbortError(error)) throw new WebError('SearXNG search aborted', 'WEB_ABORTED', { cause: error })
+      if (isAbort(error, signal)) throw new WebError('SearXNG search aborted', 'WEB_ABORTED', { cause: error })
       throw new WebError(`SearXNG search request failed: ${String(error)}`, 'WEB_PROVIDER_ERROR', { cause: error })
     }
 
     if (!response.ok) {
       // 403 is SearXNG's answer when the instance does not enable the JSON format.
       const hint = response.status === 403 ? '; enable `json` under `search.formats` in the instance settings' : ''
+      // An unread body holds its connection until garbage collection.
+      await response.body?.cancel()
       throw new WebError(`SearXNG API error (HTTP ${String(response.status)})${hint}`, 'WEB_PROVIDER_ERROR')
     }
 
@@ -148,7 +150,7 @@ export class SearxngSearchProvider implements WebSearchProvider {
       const payload = await response.json() as SearxngSearchResponse
       return mapSearxngResponse(payload)
     } catch (error: unknown) {
-      if (isAbortError(error)) throw new WebError('SearXNG search aborted', 'WEB_ABORTED', { cause: error })
+      if (isAbort(error, signal)) throw new WebError('SearXNG search aborted', 'WEB_ABORTED', { cause: error })
       throw new WebError(`SearXNG returned an unprocessable response body: ${String(error)}`, 'WEB_PROVIDER_ERROR', { cause: error })
     }
   }
@@ -161,7 +163,10 @@ function isHttpUrl(baseURL: string): boolean {
   return protocol === 'http:' || protocol === 'https:'
 }
 
-/** True for a fetch/`AbortSignal` abort, surfaced as `WEB_ABORTED`. */
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === 'AbortError'
+/**
+ * True for a cancelled search, surfaced as `WEB_ABORTED`: the caller's signal
+ * fired, whatever reason `fetch` rejected with, or `fetch` reported an abort.
+ */
+function isAbort(error: unknown, signal: AbortSignal | undefined): boolean {
+  return signal?.aborted === true || error instanceof DOMException && error.name === 'AbortError'
 }
