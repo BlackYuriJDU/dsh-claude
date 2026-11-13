@@ -69,6 +69,24 @@ Falhas do `test` que vinham da migração:
 - **`issue-policy.yml` sem a condição da festive.** O teste `keeps trusted preflight before token minting and required policy unconditional` do upstream proíbe `if:` no job e no preflight. Voltar ao texto do upstream elimina uma divergência; o fork desabilita o workflow em vez de editá-lo.
 - **`docs/dshc/` fora do pareamento de tradução** (`scripts/translation-pairing.manifest.json`), como a M1 prevê para os documentos do DSHC.
 
+## M1: porte da linha 0.1.1
+
+Cada item da tabela M1 do Plano v3, conferido no 0.2.2 com a festive:
+
+| Item | Situação no 0.2.2 | Decisão |
+|---|---|---|
+| `docs/claw-os/*` | não existia | Portado para `docs/dshc/`, com "claw-os" trocado por "DSHC", junto do Plano v3 e do estudo de melhorias. Os checks de referências de commit e de caminhos de pacote pulam `docs/dshc/`, como pulam as Agent Notes arquivadas, porque estes registros citam commits da linha anterior e caminhos planejados. Os blocos de código propostos no estudo são `ts ignore-check` |
+| `conversation-column-overflow.e2e.ts` | já existe em `apps/web/tests/` | Nada a portar |
+| Anel de uso | O `ContextMeter` do upstream fica abaixo do card do composer: anel com a porcentagem e painel com a barra de composição do contexto (system prompt, ferramentas, conversa) | Mantido o do upstream. A seção de sessão da linha antiga (tokens, cache, entrada e saída, velocidade) não foi portada, porque exigiria alterar o `ContextMeter` do upstream. Os mesmos números por turno estão na aba Statistics do `experimental/client-ui-stats` (ver N8 e N9 do estudo) |
+| Seletor de acesso sob o composer | `ui-permission-presets` ocupa o slot `conversation.input.permission` e vem no bundle Web | Nada a portar |
+| `ui-routines` | `ui-schedule` agenda instruções recorrentes (`every`, `daily`, `weekly`, `cron`, `rrule`) | Descartado |
+| `ui-handoff` | `ui-sidebar-right`, `deliverables` e `documentpreview` | Descartado |
+| Perfil e conta do `ui-settings-general` | "Your {product}" do `ui-memory` (nome e instruções) e o launcher de conta | Descartado |
+| `ChatFontRow` | `ui-theme` tem `textFontFamily` configurável, e a camada DSHC aplica a fonte escolhida às respostas | Descartado |
+| `knowledgeFileMaxChars` | `ui-projects` já tem `maxFileChars` e `maxTotalChars` como `Config` | Nada a reaplicar |
+| Trajectory sem volta | O header só esconde as abas numa sessão em branco (`hideChrome` vem de `blank` em `ConversationHeader.tsx`) | O defeito não existe no 0.2.2 |
+| MCP de busca DuckDuckGo, instruções no prompt, gaveta compacta, remoção do `zh`, P1 e workflows de issue | — | Descartados, como o plano prevê |
+
 ## Próximo passo
 
-Terminar o `test` e o `test:snapshot` locais, deixar o CI da PR #17 verde nos checks que dependem do código e então seguir para a M1 (porte da linha 0.1.1).
+M2: refazer a matriz de paridade sobre o 0.2.2, aplicar a errata, medir o layout em 1280, 1024, 768 e 390 px e escrever o relatório de inventário.
