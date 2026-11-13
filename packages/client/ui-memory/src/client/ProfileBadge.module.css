@@ -7,6 +7,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
+  corner-shape: round;
   background: var(--dsw-alias-label-secondary);
   color: var(--dsw-alias-bg-base);
   font-size: 11px;
