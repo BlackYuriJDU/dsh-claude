@@ -10,7 +10,9 @@
  * `#1F1E1D`) and its brand fill `#C6613F` with hover `#D97757`. Tokens the
  * guidelines do not name (hover washes, code blocks, bubbles, scrollbars) are
  * derived from those values and keep the base palette's light/dark contrast
- * direction.
+ * direction. Text, icon, and focus-ring tokens are adjusted in lightness only
+ * until they reach WCAG AA on every surface of the layer; the contrast spec
+ * enforces it.
  *
  * @module @deepseek-ai/dsh-client-ui-brand-dshc/client/tokens
  */
@@ -22,6 +24,13 @@ export const DSHC_CLAY = '#c6613f'
 
 /** Brand hover (the app's clay), lighter than the resting fill in both schemes. */
 export const DSHC_CLAY_HOVER = '#d97757'
+
+/**
+ * Link and accent text: the clay hue darkened in light and lightened in dark
+ * until it reaches 4.5:1 on every surface the layer defines; the fill stays
+ * {@link DSHC_CLAY}.
+ */
+export const DSHC_LINK = Object.freeze({ light: '#ab4926', dark: '#ec8868' })
 
 /** Theme-service layer id; one layer per source, so re-applying replaces it. */
 export const DSHC_TOKEN_SOURCE = '@deepseek-ai/dsh-client-ui-brand-dshc'
@@ -64,15 +73,15 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-label-primary-bluish': { light: '#141413', dark: '#faf9f5' },
   '--dsw-alias-label-primary-dimmed': { light: '#3d3d3a', dark: '#e8e6dc' },
   '--dsw-alias-label-secondary': { light: '#3d3d3a', dark: '#c2c0b6' },
-  '--dsw-alias-label-tertiary': { light: '#73726c', dark: '#9c9a92' },
-  '--dsw-alias-label-caption': { light: '#73726c', dark: '#9c9a92' },
+  '--dsw-alias-label-tertiary': { light: '#686761', dark: '#a5a39b' },
+  '--dsw-alias-label-caption': { light: '#686761', dark: '#a5a39b' },
   '--dsw-alias-label-dimmed': { light: 'rgba(115, 114, 108, 0.5)', dark: 'rgba(156, 154, 146, 0.5)' },
   '--dsw-alias-label-primary-foreground': { light: '#ffffff', dark: '#141413' },
   '--dsw-alias-label-primary-inverted': { light: '#ffffff', dark: '#141413' },
   '--dsw-alias-label-document-preview': { light: '#3d3d3a', dark: '#c2c0b6' },
   '--dsw-alias-menu-icon': { light: '#3d3d3a', dark: '#c2c0b6' },
-  '--dsw-alias-link': { light: DSHC_CLAY, dark: DSHC_CLAY_HOVER },
-  '--dsw-alias-label-deep-diving': { light: DSHC_CLAY, dark: DSHC_CLAY_HOVER },
+  '--dsw-alias-link': DSHC_LINK,
+  '--dsw-alias-label-deep-diving': DSHC_LINK,
   '--dsw-alias-label-deep-diving-shimmer': {
     light: `color-mix(in srgb, ${DSHC_CLAY} 40%, #faf9f5)`,
     dark: `color-mix(in srgb, ${DSHC_CLAY_HOVER} 45%, #262624)`,
@@ -128,19 +137,20 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--dsw-alias-scrollbar-hover-l1': { light: '#c2c0b6', dark: '#5a5955' },
   '--dsw-alias-scrollbar-hover-l2': { light: '#c2c0b6', dark: '#62615c' },
 
-  // States: the guidelines' danger, success, and warning pairs. Business
-  // accents color text (the active tab, links, selected rows), so they use a
-  // deeper clay than the fill to keep WCAG AA (4.5:1) on every surface.
-  '--dsw-alias-state-error-primary': { light: '#a73d39', dark: '#cd5c58' },
+  // States: the guidelines' danger, success, and warning pairs, with the
+  // primary (text) step adjusted in lightness only until it reaches 4.5:1 on
+  // every surface above. Business accents color text and the focus ring (the
+  // active tab, links, selected rows), so they use a deeper clay than the fill.
+  '--dsw-alias-state-error-primary': { light: '#a73d39', dark: '#f6817b' },
   '--dsw-alias-state-error-secondary': { light: '#b53333', dark: '#dd5353' },
-  '--dsw-alias-state-success-primary': { light: '#437426', dark: '#599130' },
+  '--dsw-alias-state-success-primary': { light: '#427325', dark: '#78b252' },
   '--dsw-alias-state-success-secondary': { light: '#265b19', dark: '#7ab948' },
   '--dsw-alias-state-success-tertiary': { light: '#e9f1dc', dark: '#1b4614' },
-  '--dsw-alias-state-warn-primary': { light: '#805c1f', dark: '#a87829' },
+  '--dsw-alias-state-warn-primary': { light: '#805c1f', dark: '#cc9a4f' },
   '--dsw-alias-state-warn-secondary': { light: '#a87829', dark: '#d1a041' },
   '--dsw-alias-state-warn-label': { light: '#5a4815', dark: '#d1a041' },
   '--dsw-alias-state-warn-tertiary': { light: '#f6eedf', dark: '#483a0f' },
-  '--dsw-alias-state-business-primary': { light: '#ad5230', dark: '#e08b6d' },
+  '--dsw-alias-state-business-primary': { light: '#a64c2a', dark: '#e38d6f' },
   '--dsw-alias-state-business-tertiary': { light: '#f7e7df', dark: '#4a2c21' },
 
   // Empty-state illustrations: warm neutrals at the lightness of the base sheet's bluish ones.
@@ -160,7 +170,7 @@ export const DSHC_TOKENS: ThemeTokenOverrides = Object.freeze({
   '--shiki-token-function': { light: '#6b4fa3', dark: '#c5b0f0' },
   '--shiki-token-string-expression': { light: '#3f6b26', dark: '#b9d49a' },
   '--shiki-token-punctuation': { light: '#4a4945', dark: '#c2c0b6' },
-  '--shiki-token-link': { light: '#ad5230', dark: '#e08b6d' },
+  '--shiki-token-link': { light: '#a64c2a', dark: '#e38d6f' },
 
   // Toasts and tooltips stay dark on the light canvas.
   '--dsw-alias-toast-bg': { light: '#262624', dark: '#3a3a37' },
