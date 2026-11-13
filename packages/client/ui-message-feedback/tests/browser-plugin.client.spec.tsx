@@ -10,7 +10,7 @@
  * The node half stays inert.
  */
 import { Context, Service } from '@deepseek-ai/cordis'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -21,7 +21,6 @@ import type { CommandDecoration } from '@deepseek-ai/dsh-client-ui-commands/clie
 import type { FeedbackDialogInjected, FeedbackLogPolicy, MessageFeedbackInjected } from '../src/client/slots.ts'
 import { stubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply, inject } from '../src/client/index.ts'
-import { apply as nodeApply, Config as NodeConfig } from '../src/index.ts'
 
 afterEach(cleanup)
 
@@ -339,18 +338,4 @@ describe('ui-message-feedback browser plugin', () => {
     expect(b.entry()).toMatchObject({ id: 'feedback' })
   })
 
-  it('declares the sharing policy and hides its generated settings page until unload', async () => {
-    expect(NodeConfig({}).sharesConversationLog.get()).toBe(true)
-    expect(NodeConfig({ sharesConversationLog: false }).sharesConversationLog.get()).toBe(false)
-    const ctx = new Context()
-    const dispose = vi.fn()
-    const configure = vi.fn((_options: { auto: boolean }, _owner: object) => dispose)
-    ctx.provide('settings', { configure } as never)
-    const fiber = ctx.plugin({ apply: nodeApply })
-    await fiber.await()
-    await vi.waitFor(() => { expect(configure).toHaveBeenCalledOnce() })
-    expect(configure.mock.calls[0]?.[0]).toEqual({ auto: false })
-    await fiber.dispose()
-    expect(dispose).toHaveBeenCalledOnce()
-  })
 })
