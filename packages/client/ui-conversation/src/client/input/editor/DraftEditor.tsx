@@ -46,6 +46,9 @@ export function DraftEditor({
           // The placeholder was the textarea's accessible name; a div's
           // data attribute is not, so the label restores it.
           aria-label={ariaLabel}
+          // As the Workspace trigger the surface is a menu button, not a textbox.
+          role={workspaceTrigger ? 'button' : undefined}
+          aria-multiline={workspaceTrigger ? undefined : true}
           aria-haspopup={workspaceTrigger ? 'menu' : undefined}
           aria-expanded={workspaceTrigger ? workspacePickerOpen : undefined}
           tabIndex={workspaceTrigger ? 0 : undefined}

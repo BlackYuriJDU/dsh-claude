@@ -201,6 +201,13 @@
   caret-color: var(--dsw-alias-state-business-primary);
 }
 
+/* As the Workspace trigger the surface takes keyboard focus, so it shows the
+   standard ring; as a textbox the caret is the focus cue. */
+.input[role='button']:focus-visible {
+  outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: 2px;
+}
+
 /* Lexical paragraphs are <p> blocks: strip the UA margins so the surface
    keeps the textarea's line rhythm. */
 .input p {

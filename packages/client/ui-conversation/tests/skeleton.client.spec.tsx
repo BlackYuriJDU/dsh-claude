@@ -513,7 +513,9 @@ describe('ConversationRoot resident composer', () => {
       summaryBlank: true,
       composerBlock: { reason: 'select a model first' },
     })
-    const box = b.view.getByRole('textbox')
+    // Without a Workspace the surface is the Workspace menu's button, not a textbox.
+    const box = b.view.getByRole('button', { name: zh['placeholder.workspace'] })
+    expect(b.view.queryByRole('textbox')).toBeNull()
     expect(box.getAttribute('aria-disabled')).not.toBe('true')
     expect(box.getAttribute('contenteditable')).not.toBe('true')
     expect(box.getAttribute('aria-haspopup')).toBe('menu')
