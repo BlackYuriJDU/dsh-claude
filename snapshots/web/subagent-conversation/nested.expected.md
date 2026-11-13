@@ -1,4 +1,4 @@
-- banner:
+- main:
   - navigation "Session hierarchy":
     - button "Ask a research subagent to"
     - text: /
@@ -11,11 +11,11 @@
     - tab "Chat" [selected]
     - tab "Trajectory"
   - button "More conversation views"
-- text: Give one concrete event sourcing example. {{clock}}
-- button "Copy"
-- status: Completed
-- button "Completed in {{duration}}" [disabled]
-- textbox "Message or run a task, / commands, @ files or sessions"
-- button "Add files or run commands"
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Send message" [disabled]
+  - text: Give one concrete event sourcing example. {{clock}}
+  - button "Copy"
+  - status: Completed
+  - button "Completed in {{duration}}" [disabled]
+  - textbox "Message or run a task, / commands, @ files or sessions"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Workspace Write"': Workspace Write
+  - button "Send message" [disabled]

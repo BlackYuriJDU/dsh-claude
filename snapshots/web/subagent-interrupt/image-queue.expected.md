@@ -1,4 +1,4 @@
-- banner:
+- main:
   - navigation "Session hierarchy":
     - button "Ask a research subagent to"
     - text: /
@@ -10,45 +10,45 @@
     - tab "Chat" [selected]
     - tab "Trajectory"
   - button "More conversation views"
-- navigation "Turn navigation":
-  - button "Jump to turn 1"
-  - button "Jump to turn 2"
-- text: Explain event sourcing in one sentence.Your final answer is delivered automatically if your parent is still online. Include the result and relevant evidence in that answer; the parent does not receive your full transcript, tool output, or reasoning. If your last action is a message to your parent, the completion notice omits your final answer; include the result and relevant evidence in that message. {{clock}}
-- button "Copy"
-- status: Stopped
-- button "Stopped" [disabled] [expanded]
-- button "Injected context"
-- paragraph: partial
-- text: Stopped
-- button "Copy"
-- button "Good response"
-- button "Bad response"
-- button "Branch into a new conversation"
-- text: {{clock}} Keep working until I stop you again. {{clock}}
-- button "Copy"
-- paragraph: partial
-- status: Deep diving
-- text: Deep diving for {{duration}} ···
-- button "3 queued messages" [expanded]
-- list:
-  - listitem:
-    - text: Start that queued work now.
-    - button "Edit queued message"
-    - button "Remove queued message"
-    - button "Steer queued message"
-  - listitem:
-    - text: Explain the same idea for a human reader.
-    - button "Edit queued message"
-    - button "Remove queued message"
-    - button "Steer queued message"
-  - listitem:
-    - img "Queued message image"
-    - button "Edit queued message" [disabled]
-    - button "Remove queued message"
-    - button "Steer queued message"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
-- button "Add files or run commands"
-- 'button "Access mode, current: Custom"': Custom
-- button "Stop generating"
-- button "Send message" [disabled]
-- button "1 turns 1 steps"
+  - navigation "Turn navigation":
+    - button "Jump to turn 1"
+    - button "Jump to turn 2"
+  - text: Explain event sourcing in one sentence.Your final answer is delivered automatically if your parent is still online. Include the result and relevant evidence in that answer; the parent does not receive your full transcript, tool output, or reasoning. If your last action is a message to your parent, the completion notice omits your final answer; include the result and relevant evidence in that message. {{clock}}
+  - button "Copy"
+  - status: Stopped
+  - button "Stopped" [disabled] [expanded]
+  - button "Injected context"
+  - paragraph: partial
+  - text: Stopped
+  - button "Copy"
+  - button "Good response"
+  - button "Bad response"
+  - button "Branch into a new conversation"
+  - text: {{clock}} Keep working until I stop you again. {{clock}}
+  - button "Copy"
+  - paragraph: partial
+  - status: Deep diving
+  - text: Deep diving for {{duration}} ···
+  - button "3 queued messages" [expanded]
+  - list:
+    - listitem:
+      - text: Start that queued work now.
+      - button "Edit queued message"
+      - button "Remove queued message"
+      - button "Steer queued message"
+    - listitem:
+      - text: Explain the same idea for a human reader.
+      - button "Edit queued message"
+      - button "Remove queued message"
+      - button "Steer queued message"
+    - listitem:
+      - img "Queued message image"
+      - button "Edit queued message" [disabled]
+      - button "Remove queued message"
+      - button "Steer queued message"
+  - textbox "Cmd/Ctrl+Enter steers all queued messages"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Custom"': Custom
+  - button "Stop generating"
+  - button "Send message" [disabled]
+  - button "1 turns 1 steps"

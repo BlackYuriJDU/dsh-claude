@@ -1,4 +1,4 @@
-- banner:
+- main:
   - navigation "Session hierarchy": Stream one TypeScript fence for
   - text: Standard mode
   - button "More actions"
@@ -7,22 +7,22 @@
     - tab "Chat" [selected]
     - tab "Trajectory"
   - button "More conversation views"
-- text: Stream one TypeScript fence for the highlighting snapshot. {{clock}}
-- button "Copy"
-- button "Context injection runtime-context"
-- button "Context injection skill-catalog"
-- button "Context injection time-context"
-- text: ts
-- button "Wrap lines" [pressed]
-- button "Copy"
-- code: "const first: number = 1 const second = \"two\" let tail"
-- status: Deep diving
-- text: Deep diving for {{duration}} ···
-- textbox "Message or run a task, / commands, @ files or sessions"
-- button "Add files or run commands"
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current streaming-fence-highlight-test/streaming-fence": streaming-fence-highlight-test/streaming-fence
-- button "Stop generating"
+  - text: Stream one TypeScript fence for the highlighting snapshot. {{clock}}
+  - button "Copy"
+  - button "Context injection runtime-context"
+  - button "Context injection skill-catalog"
+  - button "Context injection time-context"
+  - text: ts
+  - button "Wrap lines" [pressed]
+  - button "Copy"
+  - code: "const first: number = 1 const second = \"two\" let tail"
+  - status: Deep diving
+  - text: Deep diving for {{duration}} ···
+  - textbox "Message or run a task, / commands, @ files or sessions"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Workspace Write"': Workspace Write
+  - button "Select model, current streaming-fence-highlight-test/streaming-fence": streaming-fence-highlight-test/streaming-fence
+  - button "Stop generating"
 
 ---
 

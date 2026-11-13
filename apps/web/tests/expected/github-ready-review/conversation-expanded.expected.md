@@ -8,7 +8,7 @@
 
 ---
 
-- banner:
+- main:
   - navigation "Session hierarchy": Review deepseek-ai/deepseek-harness#314
   - text: Standard mode
   - button "More actions"
@@ -17,24 +17,24 @@
     - tab "Chat" [selected]
     - tab "Trajectory"
   - button "More conversation views"
-- button "GitHub event received {{clock}}":
-  - text: GitHub event received
-  - time: {{clock}}
-- status: Completed
-- button "Completed in {{duration}}" [expanded]
-- button "Injected context" [expanded]
-- button "Context injection runtime-context"
-- button "Context injection skill-catalog"
-- button "Context injection time-context"
-- paragraph: "Review complete: no actionable findings."
-- button "Copy"
-- button "Good response"
-- button "Bad response"
-- button "Branch into a new conversation"
-- text: {{clock}}
-- textbox "Message or run a task, / commands, @ files or sessions"
-- button "Add files or run commands"
-- 'button "Access mode, current: Read Only"': Read Only
-- button "Select model, current github-webhook-review-test/reply": github-webhook-review-test/reply
-- button "Send message" [disabled]
-- button "1 turns 1 steps"
+  - button "GitHub event received {{clock}}":
+    - text: GitHub event received
+    - time: {{clock}}
+  - status: Completed
+  - button "Completed in {{duration}}" [expanded]
+  - button "Injected context" [expanded]
+  - button "Context injection runtime-context"
+  - button "Context injection skill-catalog"
+  - button "Context injection time-context"
+  - paragraph: "Review complete: no actionable findings."
+  - button "Copy"
+  - button "Good response"
+  - button "Bad response"
+  - button "Branch into a new conversation"
+  - text: {{clock}}
+  - textbox "Message or run a task, / commands, @ files or sessions"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Read Only"': Read Only
+  - button "Select model, current github-webhook-review-test/reply": github-webhook-review-test/reply
+  - button "Send message" [disabled]
+  - button "1 turns 1 steps"

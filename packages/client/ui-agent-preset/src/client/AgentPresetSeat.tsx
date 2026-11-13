@@ -225,8 +225,9 @@ export function AgentPresetSeat({
                   tabIndex={checked || index === 0 && !options.some(other => other.id === state.current) ? 0 : -1}
                   className={css.segment}
                   title={text.description ?? t('noDescription')}
-                  disabled={state.busy}
-                  onClick={() => { if (!checked) void select(option.id) }}
+                  // aria-disabled, not disabled: a disabled button drops the focus the keys just moved.
+                  aria-disabled={state.busy || undefined}
+                  onClick={() => { if (!checked && !state.busy) void select(option.id) }}
                 >
                   {text.name}
                 </button>

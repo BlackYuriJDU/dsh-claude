@@ -175,7 +175,7 @@ describe('Open in Session menus', () => {
     await openSeed(page, scaffold.authenticatedUrl)
     await page.setViewportSize({ width: device.width, height: device.height })
     const more = page.getByRole('button', { name: 'More actions', exact: true })
-    expect(await page.getByRole('banner').locator('[data-open-target="directory"]').count()).toBe(0)
+    expect(await page.locator('header:has([data-slot="conversation.session.header.actions"]) [data-open-target="directory"]').count()).toBe(0)
     if (device.touch) await more.tap(); else await more.click()
     const parent = page.getByRole('menuitem', { name: 'Open in', exact: true })
     await parent.waitFor()

@@ -458,9 +458,17 @@ describe('the segmented seat', () => {
     await waitFor(() => { expect(select).toHaveBeenCalledWith('mine') })
   })
 
-  it('disables the radios while a switch is in flight and keeps the menu for other presentations', () => {
-    renderSeat({ busy: true }, undefined, undefined, true, 'segmented')
-    for (const radio of screen.getAllByRole('radio')) expect(radio).toHaveProperty('disabled', true)
+  it('marks the radios aria-disabled while a switch is in flight, keeps them focusable, and keeps the menu for other presentations', () => {
+    const { select } = renderSeat({ busy: true }, undefined, undefined, true, 'segmented')
+    const radios = screen.getAllByRole('radio')
+    for (const radio of radios) {
+      expect(radio.getAttribute('aria-disabled')).toBe('true')
+      expect(radio).toHaveProperty('disabled', false)
+    }
+    radios[1]!.focus()
+    fireEvent.click(radios[1]!)
+    expect(document.activeElement).toBe(radios[1])
+    expect(select).not.toHaveBeenCalled()
     cleanup()
     renderSeat({}, undefined, undefined, true, 'menu')
     expect(screen.queryByRole('radiogroup')).toBeNull()

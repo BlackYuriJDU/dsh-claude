@@ -1,10 +1,10 @@
-- banner:
+- main:
   - button "Open right sidebar"
-- text: Into the Unknown Preview
-- button "Choose workspace": workspace
-- button "Standard mode"
-- textbox "Describe what you want to build, / commands, @ files or sessions"
-- button "Add files or run commands"
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
-- button "Send message" [disabled]
+  - heading "Into the Unknown Preview" [level=1]
+  - button "Choose workspace": workspace
+  - button "Standard mode"
+  - textbox "Describe what you want to build, / commands, @ files or sessions"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Workspace Write"': Workspace Write
+  - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
+  - button "Send message" [disabled]

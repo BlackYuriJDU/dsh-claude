@@ -187,11 +187,11 @@
 }
 
 @media (hover: hover) {
-  .segment[aria-checked='false']:not(:disabled):hover {
+  .segment[aria-checked='false']:not([aria-disabled='true']):hover {
     color: var(--dsw-alias-label-primary);
   }
 }
 
-.segment:disabled {
+.segment[aria-disabled='true'] {
   cursor: default;
 }
