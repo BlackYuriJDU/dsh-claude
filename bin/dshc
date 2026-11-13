@@ -27,11 +27,23 @@ if [ -n "${SEARXNG_URL:-}" ] && [ -z "${DSH_WEB_SEARCH_PROVIDER:-}" ]; then
 fi
 mkdir -p "$DSHC_WORKSPACE"
 cd "$DSHC_WORKSPACE"
-has_port=false
-for arg in "$@"; do
-  case "$arg" in --port|--port=*) has_port=true ;; esac
+# dsh reads its own options up to the first token it does not know and hands
+# the rest to the app, so the default --port goes after the launcher options.
+launcher=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --patch|--from-default-profile)
+      [ "$#" -ge 2 ] || break
+      launcher+=("$1" "$2"); shift 2 ;;
+    --patch=*|--from-default-profile=*|--dump-config|--dump-config-schema|--dump-default-config)
+      launcher+=("$1"); shift ;;
+    *) break ;;
+  esac
 done
-if [ "$has_port" = false ]; then
-  exec node "$BIN" dshc --port "$DSHC_PORT" "$@"
-fi
-exec node "$BIN" dshc "$@"
+port=(--port "$DSHC_PORT")
+for arg in ${launcher[@]+"${launcher[@]}"} "$@"; do
+  # A config dump takes no app arguments, and an explicit --port wins.
+  case "$arg" in --dump-config|--dump-config-schema|--dump-default-config|--port|--port=*) port=() ;; esac
+done
+# The ${a[@]+...} form keeps an empty array from failing `set -u` on bash 3.2.
+exec node "$BIN" dshc ${launcher[@]+"${launcher[@]}"} ${port[@]+"${port[@]}"} "$@"

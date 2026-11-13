@@ -31,7 +31,7 @@ pnpm run build
 bin/dshc
 ```
 
-`bin/dshc` serves `http://127.0.0.1:3090` from the built CLI at `apps/cli/lib/bin.js` and keeps its state in `~/.dshc`. Set `DSHC_PORT`, `DSHC_DSH_HOME`, `DSHC_WORKSPACE`, or `DSHC_HOME` to change the port, the home directory, the working directory, or the checkout. Set `SEARXNG_URL` to a SearXNG instance with JSON output enabled to turn on keyless web search.
+`bin/dshc` serves `http://127.0.0.1:3090` from the built CLI at `apps/cli/lib/bin.js` and keeps its state in `~/.dshc`. Set `DSHC_PORT`, `DSHC_DSH_HOME`, `DSHC_WORKSPACE`, or `DSHC_HOME` to change the port, the home directory, the working directory, or the checkout. Set `SEARXNG_URL` to a SearXNG instance with JSON output enabled to turn on keyless web search. The `dsh` options `--patch`, `--from-default-profile`, and the `--dump-*` flags pass through to `dsh`; any other argument goes to the app.
 
 The upstream profiles still work from the same checkout, for example `pnpm dsh web` on port 3080.
 

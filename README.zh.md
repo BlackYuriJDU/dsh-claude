@@ -33,7 +33,7 @@ pnpm run build
 bin/dshc
 ```
 
-`bin/dshc` 从 `apps/cli/lib/bin.js` 处的已构建 CLI 提供 `http://127.0.0.1:3090`，并将状态保存在 `~/.dshc`。设置 `DSHC_PORT`、`DSHC_DSH_HOME`、`DSHC_WORKSPACE` 或 `DSHC_HOME` 可分别更改端口、主目录、工作目录或仓库位置。将 `SEARXNG_URL` 设为启用了 JSON 输出的 SearXNG 实例即可开启免密钥网页搜索。
+`bin/dshc` 从 `apps/cli/lib/bin.js` 处的已构建 CLI 提供 `http://127.0.0.1:3090`，并将状态保存在 `~/.dshc`。设置 `DSHC_PORT`、`DSHC_DSH_HOME`、`DSHC_WORKSPACE` 或 `DSHC_HOME` 可分别更改端口、主目录、工作目录或仓库位置。将 `SEARXNG_URL` 设为启用了 JSON 输出的 SearXNG 实例即可开启免密钥网页搜索。`dsh` 选项 `--patch`、`--from-default-profile` 和各个 `--dump-*` 参数会传给 `dsh`；其他参数都交给应用。
 
 上游配置档仍可在同一仓库中使用，例如在端口 3080 上运行 `pnpm dsh web`。
 
