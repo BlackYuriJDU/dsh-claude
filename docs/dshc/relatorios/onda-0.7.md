@@ -62,7 +62,7 @@ Falhas do `test` que vinham da migração:
 | `Pack npm tarballs` | festive | Versões `0.2.2-alpha.3`; corrigido pelo commit de versão da família |
 | `static` (`constraints`, casts, exports, issue management, Summary) | festive | Corrigido pelos commits de `files` e de gates estáticos |
 | `lint` (`duplication`) | festive | Corrigido pelo commit do `ui-settings-searxng` |
-| `snapshots and artifacts` (suíte web) | festive | Goldens de transcrição com a contagem "N failed" do upstream, que a festive não tinha regravado; nomes de esforço localizados da festive (`关闭`, `高`, `最高`) no `declared-reasoning`; o seletor do peixe do hero, que passou para dentro do slot `conversation.hero.headline`; e o contêiner de sugestões do hero, que nunca ficava `:empty` por causa da âncora do slot e deslocava o composer em 10 px |
+| `snapshots and artifacts` (suíte web) | festive | Goldens de transcrição sem a contagem "N failed" que a própria festive acrescentou aos botões de turno e de grupo (`process-activity.ts`, `turn-process.ts`), porque ela não regravou a suíte web; nomes de esforço localizados da festive (`关闭`, `高`, `最高`) no `declared-reasoning`; o seletor do peixe do hero, que passou para dentro do slot `conversation.hero.headline`; e o contêiner de sugestões do hero, que nunca ficava `:empty` por causa da âncora do slot e deslocava o composer em 10 px |
 | `benchmarks` | ruído do runner | `conversation-fold` e `long-session` passaram do limite por poucos milissegundos num head e passaram no seguinte, sem mudança de código |
 | `node 24 / coverage` | upstream | 100% em todos os arquivos; a única falha é `tool-pwsh-persistent/tests/loader-composition.spec.ts:234`, em que a saída do pwsh some no limite do scrollback. O pacote não difere de `dshc/base` |
 | `windows node 24 / coverage` | upstream | Timeout de 90 s no hook de `scripts/oxlint-contract.spec.ts`, que não difere de `dshc/base` |
@@ -90,6 +90,29 @@ Cada item da tabela M1 do Plano v3, conferido no 0.2.2 com a festive:
 | `knowledgeFileMaxChars` | `ui-projects` já tem `maxFileChars` e `maxTotalChars` como `Config` | Nada a reaplicar |
 | Trajectory sem volta | O header só esconde as abas numa sessão em branco (`hideChrome` vem de `blank` em `ConversationHeader.tsx`) | O defeito não existe no 0.2.2 |
 | MCP de busca DuckDuckGo, instruções no prompt, gaveta compacta, remoção do `zh`, P1 e workflows de issue | — | Descartados, como o plano prevê |
+
+## M1.5: correções da revisão de código e da auditoria
+
+A revisão de código e a auditoria de `origin/dshc/base...HEAD` acharam 17 defeitos (tabela em `docs/dshc/PLANO-V3.md`, M1.5). Cada correção tem um teste que falha antes dela.
+
+| # | Situação | Commit (assunto) |
+|---|---|---|
+| 1 | corrigido | keep only the edited draft in the project card |
+| 2 | corrigido | say the note is sent while Session-log upload is on |
+| 3 | corrigido | accept HTML comment reports only in comment mode |
+| 4, 5, 17 | corrigidos em `ui-memory` e `ui-projects` | confirm saves from the Host and queue list edits; confirm saves from the Host and queue project edits |
+| 6, 11 | corrigidos | report a cancelled search as aborted and release error bodies |
+| 7 | corrigido | keep launcher options ahead of the default port |
+| 9 | corrigido | keep fitting context and mark what the bound cut |
+| 13 | teste que trava a ordem relativa à tabela central | pin the context positions after the central table |
+| 14 | corrigido | split the Host and Client compiler faces |
+| 15 | corrigido | give the segmented picker radio-group keys |
+| 16 | corrigido | name the memory add and edit fields |
+| 8 | adiado | Os testes de composição real (smoke com SearXNG e LLM falsos, e2e web no perfil `dshc`) são trabalho de suíte próprio; ficam para a Onda 1, que já mexe no perfil e grava screenshots e GIF |
+| 10 | adiado | Os eventos `tool/ptc-dispatch` não levam o número do turno, então o nó do turno não consegue contá-los sem mudar a forma como o motor de nós da transcrição associa eventos a turnos. Até lá, o grupo mostra a falha da subchamada e o controle do turno não |
+| 12 | adiado | Os provedores de contexto do system prompt são síncronos (`PromptContext.text`), então tirar a leitura dos arquivos da montagem exige um leitor em segundo plano com invalidação por mudança de config e de `mtime`. O custo atual é um `stat` por arquivo por montagem, com leitura só quando o arquivo muda |
+
+O item 4 propunha também desabilitar os campos quando o documento de configuração não aceita escrita; isso ficou de fora porque o snapshot de carregamento também chega com `writable: false`, e os campos ficariam travados até a primeira leitura.
 
 ## Próximo passo
 
