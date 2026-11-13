@@ -51,6 +51,13 @@ describe('MemorySection', () => {
     expect(getByText('Prefers pt-BR')).toBeTruthy()
   })
 
+  it('names the add and edit fields for assistive technology', () => {
+    const { getByRole, getByText } = mount({ memories: [{ id: 'a', text: 'Old' }] })
+    expect(getByRole('textbox', { name: en['add.label'] })).toBeTruthy()
+    fireEvent.click(getByText(en['edit']))
+    expect((getByRole('textbox', { name: en['edit.label'] }) as HTMLTextAreaElement).value).toBe('Old')
+  })
+
   it('keeps the add button disabled on a blank draft', () => {
     const { memory, getByText } = mount({ memories: [] })
     const button = getByText(en['add']) as HTMLButtonElement

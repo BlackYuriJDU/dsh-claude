@@ -90,6 +90,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
                     <>
                       <textarea
                         className={css.editField}
+                        aria-label={t('edit.label')}
                         value={editText}
                         rows={3}
                         onChange={(e) => { setEditText(e.target.value) }}
@@ -129,6 +130,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
       <div className={css.addRow}>
         <textarea
           className={css.addField}
+          aria-label={t('add.label')}
           value={draft}
           rows={2}
           placeholder={t('add.placeholder')}
