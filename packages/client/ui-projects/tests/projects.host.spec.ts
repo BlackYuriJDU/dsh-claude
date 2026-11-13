@@ -78,9 +78,13 @@ describe('projectContextText', () => {
     expect(projectContextText({ files }, () => text('ok'), { maxFileChars: 10, maxTotalChars: expected.length })).toBe(expected)
   })
 
-  it('cuts oversized instructions to the total bound and reads no file', () => {
+  it('cuts oversized instructions to the total bound, marks the cut, and reads no file', () => {
+    const cut = '\n[Instructions truncated to fit the project context limit.]'
     const result = projectContextText({ instructions: 'y'.repeat(1000), files: [{ id: 'a', path: 'a.md' }] }, never, { maxFileChars: 10, maxTotalChars: 300 })
     expect(result).toHaveLength(300)
     expect(result.startsWith(HEADER)).toBe(true)
+    expect(result.endsWith(cut)).toBe(true)
+    expect(projectContextText({ instructions: 'y'.repeat(1000) }, never, { maxFileChars: 10, maxTotalChars: cut.length + 1 })).toHaveLength(cut.length + 1)
+    expect(projectContextText({ instructions: 'y'.repeat(1000) }, never, { maxFileChars: 10, maxTotalChars: cut.length })).toBe('')
   })
 })

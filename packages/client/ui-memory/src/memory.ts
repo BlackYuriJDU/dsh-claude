@@ -65,11 +65,12 @@ export function profileContextText(name: string, instructions: string, maxChars:
 
 /**
  * Render the saved memories as runtime context, bounded as a whole: memories
- * are kept in order while the complete text, including the header and the
- * omission line, stays within `maxChars`.
+ * are kept in order, a memory that does not fit is skipped and counted on the
+ * omission line, and the complete text, including the header and that line,
+ * stays within `maxChars`.
  * @param memories - the saved memories in order.
  * @param maxChars - the bound on the complete returned text.
- * @returns the context text, or `''` when nothing fits or nothing is saved.
+ * @returns the context text, or `''` when not even the header and omission line fit or nothing is saved.
  */
 export function memoryContextText(memories: readonly MemoryItem[], maxChars: number): string {
   const items = memories.map(item => item.text.trim()).filter(text => text !== '')
@@ -78,17 +79,17 @@ export function memoryContextText(memories: readonly MemoryItem[], maxChars: num
   const omitted = (count: number): string => `\n(${String(count)} more saved memories omitted to fit the limit.)`
   const complete = header + items.map(item => `\n- ${item}`).join('')
   if (complete.length <= maxChars) return complete
+  // The complete list did not fit, so the omission line is always present; its
+  // longest form, with every memory omitted, is reserved up front.
+  const reserve = omitted(items.length).length
   let text = header
   let kept = 0
-  for (const [index, item] of items.entries()) {
+  for (const item of items) {
     const line = `\n- ${item}`
-    const remaining = items.length - index - 1
-    const reserve = remaining > 0 ? omitted(remaining).length : 0
-    if (text.length + line.length + reserve > maxChars) break
+    if (text.length + line.length + reserve > maxChars) continue
     text += line
     kept += 1
   }
-  if (kept === 0) return ''
-  // The complete list did not fit, so at least the last memory is omitted.
-  return text + omitted(items.length - kept)
+  const result = text + omitted(items.length - kept)
+  return result.length <= maxChars ? result : ''
 }

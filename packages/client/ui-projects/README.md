@@ -42,7 +42,7 @@ Mount the plugin with the row id `ui-projects` in a profile that also mounts `ds
 | `maxFileChars` | `20000` | Characters (UTF-16 code units) kept from one knowledge file; at least `100` |
 | `maxTotalChars` | `60000` | Bound on the complete project text, header and file headings included; at least `200` |
 
-A knowledge-file path is absolute or relative to the workspace folder. The section takes typed paths; it has no file picker. A file that cannot be read appears with its error code, and a file that does not fit `maxTotalChars` is listed as omitted.
+A knowledge-file path is absolute or relative to the workspace folder. The section takes typed paths; it has no file picker. A file that cannot be read appears with its error code, and a file that does not fit `maxTotalChars` is listed as omitted. Instructions longer than `maxTotalChars` are cut, end with a line that says so, and leave no room for files.
 
 -----
 
@@ -93,6 +93,7 @@ Project context for this workspace, set by the person in Settings. Follow the in
 
 Instructions:
 <instructions>
+[Instructions truncated to fit the project context limit.]
 
 Knowledge file <path>:
 <file text>

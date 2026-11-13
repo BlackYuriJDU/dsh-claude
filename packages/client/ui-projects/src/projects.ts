@@ -94,7 +94,10 @@ export function projectContextText(
   const parts: string[] = ['Project context for this workspace, set by the person in Settings. Follow the instructions unless the person says otherwise in this conversation.']
   if (instructions !== '') parts.push(`Instructions:\n${instructions}`)
   let text = parts.join('\n\n')
-  if (text.length > limits.maxTotalChars) return text.slice(0, limits.maxTotalChars)
+  if (text.length > limits.maxTotalChars) {
+    const cut = '\n[Instructions truncated to fit the project context limit.]'
+    return limits.maxTotalChars > cut.length ? text.slice(0, limits.maxTotalChars - cut.length) + cut : ''
+  }
   for (const file of files) {
     const result = read(file)
     const body = result.kind === 'error'

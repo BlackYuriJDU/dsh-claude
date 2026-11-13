@@ -30,8 +30,17 @@ describe('memoryContextText', () => {
     expect(memoryContextText(memories, full.length)).toBe(full)
   })
 
-  it('contributes nothing when not even the first memory fits', () => {
-    expect(memoryContextText([item('x'.repeat(500))], HEADER.length + 10)).toBe('')
+  it('skips a memory that does not fit, keeps the later ones in order, and counts it as omitted', () => {
+    const omitted = '\n(1 more saved memories omitted to fit the limit.)'
+    const kept = `${HEADER}\n- small\n- tail`
+    const memories = [item('x'.repeat(500)), item('small'), item('tail')]
+    expect(memoryContextText(memories, kept.length + omitted.length)).toBe(kept + omitted)
+  })
+
+  it('says every memory was omitted when only the header fits, and contributes nothing below that', () => {
+    const allOmitted = `${HEADER}\n(1 more saved memories omitted to fit the limit.)`
+    expect(memoryContextText([item('x'.repeat(500))], allOmitted.length)).toBe(allOmitted)
+    expect(memoryContextText([item('x'.repeat(500))], allOmitted.length - 1)).toBe('')
   })
 })
 

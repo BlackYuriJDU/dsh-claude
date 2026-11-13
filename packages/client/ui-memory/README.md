@@ -42,7 +42,7 @@ Mount the plugin with the row id `ui-memory`; the Settings section edits that ro
 | `instructions` | `''` | The person's instructions for every conversation; edited from the same section |
 | `maxChars` | `8000` | Bound on each complete rendered context text, profile and memories alike, header and omission line included; at least `200` |
 
-Blank entries contribute nothing. When the whole list does not fit in `maxChars`, the earliest memories that fit are kept and a final line states how many were omitted.
+Blank entries contribute nothing. When the whole list does not fit in `maxChars`, the memories are kept in order, each one that does not fit is skipped, and a final line states how many were omitted.
 
 -----
 

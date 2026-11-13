@@ -42,7 +42,7 @@ kind: "package-reference"
 | `maxFileChars` | `20000` | 单个知识文件保留的字符数（UTF-16 码元）；至少为 `100` |
 | `maxTotalChars` | `60000` | 完整项目文本的上限，包括开头与文件标题；至少为 `200` |
 
-知识文件路径可以是绝对路径，或相对于工作区文件夹的路径。分区接受手动输入的路径，不提供文件选择器。无法读取的文件会附带其错误码出现，放不进 `maxTotalChars` 的文件会被列为已省略。
+知识文件路径可以是绝对路径，或相对于工作区文件夹的路径。分区接受手动输入的路径，不提供文件选择器。无法读取的文件会附带其错误码出现，放不进 `maxTotalChars` 的文件会被列为已省略。超过 `maxTotalChars` 的指令会被截断，并以一行说明结尾，此时不再容纳任何文件。
 
 -----
 
@@ -93,6 +93,7 @@ Project context for this workspace, set by the person in Settings. Follow the in
 
 Instructions:
 <instructions>
+[Instructions truncated to fit the project context limit.]
 
 Knowledge file <path>:
 <file text>
