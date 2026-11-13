@@ -9,8 +9,8 @@ import type { PlatformBridge } from '../src/client/PlatformOverlay.tsx'
 import { createPlatformPages, type PlatformPages } from '../src/client/platform-pages.ts'
 import { AccountPlatformHost } from '../src/client/AccountPlatformHost.tsx'
 import { AccountSection, type AccountSectionInjected, type AccountSnapshot } from '../src/client/AccountSection.tsx'
-import type { BonusNotice } from '../src/client/bonus-notices.ts'
 import type { AccountMenuProps } from '../src/client/AccountMenu.tsx'
+import type { AccountNotificationsOwnerProps } from '../src/client/account-ui.ts'
 import type {} from '../src/client/index.ts'
 import { en, zh, type AccountKey } from '../src/client/locales.ts'
 import css from '../src/client/AccountSection.module.css'
@@ -45,7 +45,6 @@ function operationsOf(state: Omit<AccountView, 'links'>, details?: Partial<Accou
     },
     hasRunningAccountTasks: vi.fn(async () => false),
     contactUs: vi.fn(), showLogin: vi.fn(), setOnboarding: vi.fn(),
-    bonusNoticeShown: vi.fn(), bonusNoticeDismissed: vi.fn(),
     refreshAccount: vi.fn(() => Promise.resolve()),
     avatarFailed: vi.fn(),
     start: vi.fn(() => Promise.resolve()), cancel: vi.fn(() => Promise.resolve()), signOut: vi.fn(() => Promise.resolve()),
@@ -101,12 +100,14 @@ function SharedPlatformHost({ Globals, pages, platform, copy, refreshAccount }: 
  * @param settingsOpen - whether the settings panel covers the sidebar.
  * @returns the sidebar launcher with its framework hooks wired to the test face.
  */
-async function accountMenu(operations: AccountSectionInjected, snapshot: () => AccountSnapshot, settingsOpen: boolean) {
+async function accountMenu(operations: AccountSectionInjected, snapshot: () => AccountSnapshot, settingsOpen: boolean,
+  renderSlot: AccountMenuProps['renderSlot'] = renderBadgeFallback,
+  openSettings: AccountMenuProps['openSettings'] = () => {}, wide = true) {
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  return <AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations}
-    settingsOpen={settingsOpen} useAccount={selector => selector(snapshot())} wide
+  return <AccountMenu renderSlot={renderSlot} {...({} as GlobalStandardProps)} {...operations}
+    settingsOpen={settingsOpen} useAccount={selector => selector(snapshot())} wide={wide}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    openOnboarding={() => {}} openSettings={() => {}} t={key => withProduct(en[key as AccountKey])} />
+    openOnboarding={() => {}} openSettings={openSettings} t={key => withProduct(en[key as AccountKey])} />
 }
 
 it.each([en, zh])('renders account cards without inventing profile or balance data', async (copy) => {
@@ -638,29 +639,6 @@ it('dismisses a collapsed menu and hands its login dialog to the API-key onboard
   expect(screen.queryByRole('dialog')).toBeNull()
 })
 
-it('paints the bonus notice under the open settings panel and reports its display once', async () => {
-  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
-  const operations = mount({ status: 'credential-stored', attempt: null }, en, {
-    profile: { status: 'ready', value: { id: null, name: 'User', contact: null } },
-  })
-  cleanup()
-  const notice = { orderId: 'order-1' as BonusNotice['orderId'], message: 'Awarded 5.00', expiresAt: '2099-01-01T00:00:00Z' }
-  // The launcher mounts first; the entry's refresh then delivers the notice while the panel is open.
-  let snapshot: AccountSnapshot = operations.hooks.account.getSnapshot()
-  const view = render(await accountMenu(operations, () => snapshot, true))
-  expect(screen.queryByRole('status')).toBeNull()
-  snapshot = { ...snapshot, notices: [notice] }
-  view.rerender(await accountMenu(operations, () => snapshot, true))
-  // The settings overlay is translucent, so the card paints underneath it instead of waiting for the exit.
-  await vi.waitFor(() => { expect(screen.getByRole('status').textContent).toBe(`${en.bonusNoticeTitle}${notice.message}`) })
-  // A card that passed a presented frame reports once even while the panel is open; that report is the acknowledgement.
-  await vi.waitFor(() => { expect(operations.bonusNoticeShown).toHaveBeenCalledExactlyOnceWith(notice.orderId) })
-  // Leaving the panel keeps the same card without reporting its display a second time.
-  view.rerender(await accountMenu(operations, () => snapshot, false))
-  await vi.waitFor(() => { expect(screen.getByRole('status').textContent).toBe(`${en.bonusNoticeTitle}${notice.message}`) })
-  expect(operations.bonusNoticeShown).toHaveBeenCalledOnce()
-})
-
 it('reads once per Settings entry, whatever section the entry opens', async () => {
   const operations = mount({ status: 'credential-stored', attempt: null }, en)
   cleanup()
@@ -750,22 +728,41 @@ it.each([en, zh])('shows live model sign-in guidance without replaying it after 
   expect(screen.queryByRole('alert')).toBeNull()
 })
 
-it.each(['desktopOnboardingVisible', 'onboarding'] as const)('defers bonus display and acknowledgement until %s ends', async (field) => {
-  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+it.each(['desktopOnboardingVisible', 'onboarding'] as const)('hides the notification slot until %s ends', async (field) => {
   const operations = operationsOf({ status: 'credential-stored', attempt: null })
-  const notice = { orderId: 'order-onboarding' as BonusNotice['orderId'], message: 'Awarded 5.00', expiresAt: '2099-01-01T00:00:00Z' }
-  let snapshot: AccountSnapshot = { ...operations.hooks.account.getSnapshot(), notices: [notice], [field]: true }
-  const view = render(await accountMenu(operations, () => snapshot, false))
-  expect(screen.queryByText(notice.message)).toBeNull()
-  expect(operations.bonusNoticeShown).not.toHaveBeenCalled()
-  view.unmount()
-  expect(operations.bonusNoticeShown).not.toHaveBeenCalled()
-  const reopened = render(await accountMenu(operations, () => snapshot, false))
-  expect(screen.queryByText(notice.message)).toBeNull()
+  let snapshot: AccountSnapshot = { ...operations.hooks.account.getSnapshot(), [field]: true }
+  let active: boolean | undefined
+  let openAccount: (() => void) | undefined
+  const openSettings = vi.fn()
+  const renderSlot: AccountMenuProps['renderSlot'] = (name, owner) => {
+    expect(name).toBe('settings.launcher.notifications')
+    const value: object = owner
+    const props = value as AccountNotificationsOwnerProps
+    active = props.active
+    openAccount = props.openAccount
+    return null
+  }
+  const view = render(await accountMenu(operations, () => snapshot, false, renderSlot, openSettings))
+  expect(active).toBe(false)
   snapshot = { ...snapshot, [field]: false }
-  reopened.rerender(await accountMenu(operations, () => snapshot, false))
-  await vi.waitFor(() => { expect(operations.bonusNoticeShown).toHaveBeenCalledExactlyOnceWith(notice.orderId) })
-  expect(screen.getByText(notice.message)).toBeTruthy()
+  view.rerender(await accountMenu(operations, () => snapshot, false, renderSlot, openSettings))
+  expect(active).toBe(true)
+  openAccount?.()
+  expect(openSettings).toHaveBeenCalledExactlyOnceWith('account')
+})
+
+it('keeps notification DOM inside the launcher while the collapsed rail hides it', async () => {
+  const operations = operationsOf({ status: 'credential-stored', attempt: null })
+  const snapshot = () => operations.hooks.account.getSnapshot()
+  const renderSlot: AccountMenuProps['renderSlot'] = () => <div role="status">Notification</div>
+  const view = render(await accountMenu(operations, snapshot, false, renderSlot))
+  const notice = screen.getByRole('status')
+  expect(view.container.contains(notice)).toBe(true)
+  view.rerender(await accountMenu(operations, snapshot, false, renderSlot, undefined, false))
+  expect(screen.queryByRole('status')).toBeNull()
+  expect(notice.isConnected).toBe(true)
+  view.rerender(await accountMenu(operations, snapshot, false, renderSlot))
+  expect(screen.getByRole('status')).toBe(notice)
 })
 
 it('shows a signed-out identity badge from its slot in place of the More label', async () => {
