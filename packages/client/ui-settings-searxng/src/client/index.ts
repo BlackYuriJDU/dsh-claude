@@ -40,10 +40,10 @@ export const inject = ['slots', 'locale', 'configForms']
  * @param ctx - the browser plugin context.
  */
 export function apply(ctx: ClientContext): void {
-  const t = ctx.locale.bind(NS)
-  ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-settings-searxng: dictionaries')
   const card = new SearxngCardController(ctx.configForms.get(SEARXNG_NS))
   ctx.effect(() => () => { card.dispose() }, 'ui-settings-searxng: form subscription')
+  ctx.effect(() => ctx.locale.register(NS, { zh, en, ja, es, fr, de, ru, pt }), 'ui-settings-searxng: dictionaries')
+  const t = ctx.locale.bind(NS)
   ctx.effect(() => ctx.configForms.whileServed([SEARXNG_NS], () => ctx.slots.inject('plugins.item', () => ctx.slots.register({
     name: 'plugins.item', id: 'searxng', order: 25, label: () => t('title'), locale: NS, inject: () => card.inject(),
   }, SearxngCard))), 'ui-settings-searxng: page')
