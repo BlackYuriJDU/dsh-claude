@@ -7,14 +7,9 @@ import type {} from '@deepseek-ai/dsh-settings'
 import type { Context, Volatile } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 
-/** New-session seat presentation. */
-export type SeatPresentation = 'menu' | 'segmented'
+import type { SeatPresentation } from './seat-policy.ts'
 
-/** Picker policy fields the browser reads. */
-export interface SeatPolicy {
-  seatPresentation?: SeatPresentation
-  seatHiddenPresets?: readonly string[]
-}
+export type { SeatPolicy, SeatPresentation } from './seat-policy.ts'
 
 /** New-session picker policy projected to the browser. */
 export interface Config {

@@ -45,7 +45,7 @@ import { AgentPresetSectionController } from './section-store.ts'
 import { en, ja, es, fr, de, ru, pt, zh, type AgentPresetSettingsKey } from './locales.ts'
 import { AGENT_PRESET_SETTINGS_NS, AgentPresetSettingsController } from './settings-store.ts'
 import { analyticsMode } from './analytics.ts'
-import type { SeatPolicy } from '../index.ts'
+import type { SeatPolicy } from '../seat-policy.ts'
 
 /** Host entry whose Config holds the picker policy. */
 const SEAT_POLICY_ENTRY_ID = 'ui-agent-preset'

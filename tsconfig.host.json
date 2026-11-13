@@ -307,6 +307,8 @@
     { "path": "./packages/client/locale/tsconfig.host.json" },
     { "path": "./packages/client/ui-theme/tsconfig.host.json" },
     { "path": "./packages/client/ui-memory/tsconfig.host.json" },
+    { "path": "./packages/client/ui-agent-preset/tsconfig.host.json" },
+    { "path": "./packages/client/ui-message-feedback/tsconfig.host.json" },
     { "path": "./packages/client/ui-projects/tsconfig.host.json" },
     { "path": "./packages/client/ui-chat/tsconfig.host.json" },
     { "path": "./packages/client/ui-conversation/tsconfig.host.json" },

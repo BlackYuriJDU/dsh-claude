@@ -18,7 +18,7 @@ import { AgentPresetSeat } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSeatProps } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSettingsState } from '../src/client/settings-store.ts'
 import type { AgentPresetSeatState } from '../src/client/seat-store.ts'
-import type { SeatPresentation } from '../src/index.ts'
+import type { SeatPresentation } from '../src/seat-policy.ts'
 import { en } from '../src/client/locales.ts'
 
 afterEach(cleanup)

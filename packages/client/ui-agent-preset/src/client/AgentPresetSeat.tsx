@@ -21,7 +21,7 @@ import {
 // Type-only: pulls the ui-conversation SlotMap merge (the hero seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
-import type { SeatPolicy } from '../index.ts'
+import type { SeatPolicy } from '../seat-policy.ts'
 import type { AgentPresetSeatState } from './seat-store.ts'
 import { presetDisplayText } from './locales.ts'
 import { requiresCodingTools } from './settings-store.ts'
