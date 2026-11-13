@@ -150,7 +150,8 @@ describe('ui-message-feedback browser plugin', () => {
     const face = b.dialogEntry()!.inject!(sid('s1'))
     expect(face.hooks.dialog.getSnapshot()).toMatchObject({ target: null, toast: 0 })
     expect(face.hooks.logPolicy).toBe(b.policy.scope)
-    expect(b.policyRequests).toEqual(['ui-message-feedback'])
+    expect(face.hooks.sessionLogUpload).toBe(b.policy.scope)
+    expect(b.policyRequests).toEqual(['ui-message-feedback', 'session-log-deepseek'])
     expect(face.dismissFailure).toBeTypeOf('function')
   })
 

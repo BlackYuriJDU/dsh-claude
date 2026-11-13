@@ -16,14 +16,14 @@ import { FEEDBACK_CATEGORIES } from '@deepseek-ai/dsh-command-feedback'
 import { FeedbackDialog } from '../src/client/FeedbackDialog.tsx'
 import type { FeedbackDialogState } from '../src/client/dialog.ts'
 import { en, zh } from '../src/client/locales.ts'
-import type { FeedbackLogPolicy } from '../src/client/slots.ts'
+import type { FeedbackLogPolicy, SessionLogUploadPolicy } from '../src/client/slots.ts'
 
 afterEach(cleanup)
 
 const t = makeTranslate(zh, commonZh)
 
 /** Render the entry over a fixed state and recording verbs. */
-function mount(overrides: Partial<FeedbackDialogState> = {}, policy?: FeedbackLogPolicy) {
+function mount(overrides: Partial<FeedbackDialogState> = {}, policy?: FeedbackLogPolicy, upload?: SessionLogUploadPolicy) {
   const state: FeedbackDialogState = {
     target: { kind: 'session' }, category: null, text: '', submitting: false, failure: null, toast: 0,
     ...overrides,
@@ -40,7 +40,10 @@ function mount(overrides: Partial<FeedbackDialogState> = {}, policy?: FeedbackLo
   const policySnapshot = { status: 'ready', value: policy, base: undefined, user: undefined, revision: 1, writable: false } as const
   const useLogPolicy = (<T,>(select: (v: typeof policySnapshot) => T): T =>
     useSyncExternalStore(() => () => {}, () => select(policySnapshot))) as never
-  const props = { useDialog, useLogPolicy, ...verbs, t } as Parameters<typeof FeedbackDialog>[0]
+  const uploadSnapshot = { status: 'ready', value: upload, base: undefined, user: undefined, revision: 1, writable: true } as const
+  const useSessionLogUpload = (<T,>(select: (v: typeof uploadSnapshot) => T): T =>
+    useSyncExternalStore(() => () => {}, () => select(uploadSnapshot))) as never
+  const props = { useDialog, useLogPolicy, useSessionLogUpload, ...verbs, t } as Parameters<typeof FeedbackDialog>[0]
   return { ...render(<FeedbackDialog {...props} />), ...verbs }
 }
 
@@ -50,6 +53,13 @@ describe('FeedbackDialog', () => {
     [{ sharesConversationLog: false }, 'dialog.hintLocal'],
   ] as const)('states where the note goes for Host policy %j', (policy, key) => {
     const ui = mount({}, policy)
+    expect(ui.getByLabelText(zh['dialog.detail']).getAttribute('placeholder')).toBe(zh[key])
+  })
+
+  it.each([
+    [undefined, 'dialog.hintLocal'], [{ enabled: false }, 'dialog.hintLocal'], [{ enabled: true }, 'dialog.hint'],
+  ] as const)('says the note is sent when Session-log upload %j sends the log despite a local-only policy', (upload, key) => {
+    const ui = mount({}, { sharesConversationLog: false }, upload)
     expect(ui.getByLabelText(zh['dialog.detail']).getAttribute('placeholder')).toBe(zh[key])
   })
 

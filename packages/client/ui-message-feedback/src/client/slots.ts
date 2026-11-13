@@ -25,6 +25,11 @@ export interface FeedbackLogPolicy {
   sharesConversationLog?: boolean
 }
 
+/** Session-log upload fields the dialog reads from the `session-log-deepseek` entry. */
+export interface SessionLogUploadPolicy {
+  enabled?: boolean
+}
+
 
 /** Injected business face of one assistant-message feedback entry. */
 export interface MessageFeedbackInjected {
@@ -68,6 +73,11 @@ export interface FeedbackDialogInjected {
     dialog: HostObservable<FeedbackDialogState>
     /** The Host feedback policy; an unread value keeps the sharing notice. */
     logPolicy: HostObservable<ConfigFormSnapshot<FeedbackLogPolicy>>
+    /**
+     * The Session-log upload setting; enabled upload sends the log that holds
+     * the note, so it overrides a local-only policy. An absent entry reads as off.
+     */
+    sessionLogUpload: HostObservable<ConfigFormSnapshot<SessionLogUploadPolicy>>
   }
   /**
    * Replace part of the draft: the category (null clears it) or the text.

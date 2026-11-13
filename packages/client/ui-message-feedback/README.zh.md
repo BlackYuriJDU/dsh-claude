@@ -31,7 +31,7 @@ kind: "package-reference"
 
 评分或列表加载失败在行内展示；提交失败通过警告 toast 展示，弹窗保持打开以便修正草稿。只有已定稿的消息能到达消息条目——被中断冻结的部分输出不带 `messageId`，因此没有反馈控件。
 
-对话框的详情提示说明备注的去向。node 部分的 `sharesConversationLog` Config 字段（默认 `true`）声明已组合的导出器会随提交的反馈发送对话日志，提示据此说明；未组合此类导出器的 profile 将其设为 `false`，提示改为说明反馈只保存在本机的对话日志中。Host 投影该值之前，对话框保留发送说明。该字段表述的是组合事实，不生成设置页面。
+对话框的详情提示说明备注的去向。node 部分的 `sharesConversationLog` Config 字段（默认 `true`）声明已组合的导出器会随提交的反馈发送对话日志，提示据此说明；未组合此类导出器的 profile 将其设为 `false`，提示改为说明反馈只保存在本机的对话日志中。`session-log-deepseek` 条目的 `enabled` 设置优先于 `false`：开启会话日志上传时，包含备注的日志会被发送，提示据此说明。Host 投影该值之前，对话框保留发送说明。该字段表述的是组合事实，不生成设置页面。
 
 访问控制：评分按钮只在当前 Peer 可以在该会话上调用 `messageFeedback/put` 时渲染；`/feedback` 装饰不做前端判断，没有权限时提交由 Host 拒绝。
 
