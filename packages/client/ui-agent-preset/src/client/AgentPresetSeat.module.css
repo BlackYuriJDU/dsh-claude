@@ -145,17 +145,24 @@
 
 /* Segmented presentation: every visible preset side by side, the chosen one
    raised on the layer surface, as a mode switch on the new-session screen. */
+/* The group shrinks with the row and scrolls inside itself when the modes do
+   not fit, so a narrow viewport never pushes a mode off screen and focusing the
+   last mode scrolls the group, not the page. */
 .segments {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  min-width: 0;
   max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
   padding: 2px;
   border-radius: var(--dsw-radius-md);
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .segment {
+  flex: none;
   min-width: 0;
   min-height: 26px;
   padding: 0 12px;
