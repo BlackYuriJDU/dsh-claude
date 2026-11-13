@@ -127,6 +127,33 @@ O item 4 propunha também desabilitar os campos quando o documento de configura�
 
 A `REVISAO-PLANO-V2.md` citada pelo Plano v3 não está no repositório; a errata aplicada é a lista do próprio passo 2 da M2.
 
+## Onda 1: identidade DSHC e acessibilidade
+
+| Item | Resultado | Commit (assunto) |
+|---|---|---|
+| Nome visível | Personas dos quatro presets e README em en e zh dizem DSHC | show the product as DSHC instead of DSH Claude |
+| Tokens AA | Sete tokens de texto ajustados só em luminosidade; `contrast.client.spec.ts` exige 4,5:1 para texto e código e 3:1 para ícones e anel de foco, sobre as 16 superfícies, e reprova um par inválido | bring text, links, and status colors to WCAG AA |
+| Símbolo (D12) | Monograma: placa cor de argila com a inicial em serifa branca; o burst saiu | replace the clay burst with a DSHC monogram (D12) |
+| Onboarding | O diálogo de primeiro uso oferece a escolha de modelo nos 8 idiomas, sem pedir login na DeepSeek | describe the first-run dialog as a choice of model |
+| Composer sem Workspace | Papel `button`, nome acessível igual ao placeholder e anel de foco | give the Workspace-trigger composer a button role and ring |
+| A10, seletor de modos em 390 px | Os segmentos rolam dentro do grupo; setas, Home e End movem o foco | keep every mode reachable in the narrow segmented picker |
+| A11, marcos | `<main>` no painel principal; a árvore vazia de sessões deixou de ser `tree`; o título do hero é o `h1` | drop the empty session tree role and add a main landmark; make the blank-screen headline the page h1; pass the tree role only when the list has rows |
+| A12, rótulos da barra lateral | "Workspaces" inteiro com reticências no limite; o launcher deslogado mostra "Settings", e não um segundo "More" | stop truncating and repeating sidebar labels |
+| Gate axe (N3) | `apps/web/tests/accessibility.e2e.ts` roda as regras WCAG 2.x A e AA do axe-core na composição DSHC, antes e depois de vincular um Workspace, em 1280 e 390 px, e passou 3 de 3 vezes. No perfil padrão do upstream ele acusa `color-contrast` (3,54:1 em "Workspaces") e `label-content-name-mismatch`, o que prova que o gate reprova defeitos reais | audit the DSHC composition with axe-core |
+| Agent Note | `2026-11-13-dshc-aa-contrast-and-monogram`, com link a partir da nota da camada de paleta | record the DSHC contrast floor and monogram decision |
+
+A regra `label-content-name-mismatch` (WCAG 2.5.3) fica desligada no gate, e o teste nomeia os três controles do upstream que a violam: o botão da marca ("New session" sobre o wordmark), o launcher ("Account menu" sobre o rótulo visível) e o botão de Workspace do hero já vinculado ("Choose workspace" sobre o nome). Alinhar esses nomes muda os seletores de cerca de 20 e2e da suíte web, então a correção vai para o upstream junto com esses testes.
+
+O `axe-core` é MPL-2.0 e entra só como devDependency do app de testes `apps/web`, que é privado e não é distribuído. O gate de licenças da Onda 2 precisa aceitar ferramentas de teste com licença de copyleft por arquivo.
+
+O scaffold da suíte web fixa o preset `standard`, que o DSHC desliga. O teste de acessibilidade passa `agentPresets: { default: 'chat' }`, e `connectFreshWorkspace` recebe o placeholder do composer liberado, porque o DSHC usa `heroPlaceholder: help`.
+
+### Pendente
+
+- `outline-offset` do botão de envio, que hoje encosta o anel de foco no preenchimento cor de argila.
+- Favicon e manifest do app web por perfil: vêm do app web do upstream, compartilhado por todos os perfis, e trocá-los para o `dshc` exige sobrescrever recursos no build.
+- Enviar ao upstream, como PR, as correções genéricas desta onda (marcos, árvore vazia, rótulos da barra lateral, seletor segmentado e a regra 2.5.3).
+
 ## Próximo passo
 
-Onda 1: identidade DSHC e acessibilidade (nome visível, tokens AA com teste de contraste, símbolo conforme D12, onboarding neutro, defeitos A10 a A12 e o gate de acessibilidade com axe).
+Onda 2: segurança e licenças (política contra exfiltração, `scripts/verify-licenses.ts` e Dependabot).

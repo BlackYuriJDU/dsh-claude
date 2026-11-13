@@ -2,7 +2,8 @@
  * Automated accessibility audit of the DSHC Web composition: axe-core runs the
  * WCAG 2.x A and AA rules on the first screen before and after a Workspace is
  * bound, in a desktop and a phone viewport, and the page must report no
- * critical or serious violation.
+ * critical or serious violation. At phone width the last mode of the
+ * segmented picker stays reachable by keyboard inside the viewport.
  */
 import { createRequire } from 'node:module'
 import { readFileSync } from 'node:fs'
@@ -88,6 +89,27 @@ describe('web e2e: accessibility audit', () => {
       expect(await blockingViolations(page)).toEqual([])
     } catch (error) {
       await saveFailureShot(page, `web-e2e-accessibility-${String(width)}`)
+      throw error
+    } finally {
+      await page.close()
+    }
+  })
+
+  it('reaches the last mode of the segmented picker by keyboard at 390px without scrolling the page', async () => {
+    const page = await newEnglishPage(browser)
+    try {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+      const modes = page.getByRole('radiogroup')
+      await modes.getByRole('radio', { name: 'Chat', exact: true }).focus()
+      await page.keyboard.press('End')
+      const last = modes.getByRole('radio', { name: 'Design', exact: true })
+      await expect.poll(() => last.evaluate(element => element === document.activeElement)).toBe(true)
+      const box = await last.boundingBox()
+      expect(box !== null && box.x >= 0 && box.x + box.width <= 390).toBe(true)
+      expect(await page.evaluate(() => document.scrollingElement?.scrollLeft)).toBe(0)
+    } catch (error) {
+      await saveFailureShot(page, 'web-e2e-accessibility-segmented-390')
       throw error
     } finally {
       await page.close()
