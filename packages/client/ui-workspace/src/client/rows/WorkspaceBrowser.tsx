@@ -660,8 +660,7 @@ function SessionTree({
       <AnimatedRows
         className={clsx(css.list, workspaceDropAtListStart && css.listTopDropActive)}
         // A tree may only contain tree items; the empty state is a plain list body.
-        role={groups.length === 0 ? undefined : 'tree'}
-        label={groups.length === 0 ? undefined : t('section.sessions')}
+        {...groups.length === 0 ? {} : { role: 'tree', label: t('section.sessions') }}
         rowKeys={rowKeys}
         ready={list.phase === 'ready' && workspaceReady && !nativeDragActive}
         resetKey={JSON.stringify([animationResetKey, watermarkMotionKey])}
@@ -727,8 +726,7 @@ function FlatList({
       <AnimatedRows
         className={clsx(css.list, css.flatList)}
         // A tree may only contain tree items; the empty state is a plain list body.
-        role={rows.length === 0 ? undefined : 'tree'}
-        label={rows.length === 0 ? undefined : t('section.sessions')}
+        {...rows.length === 0 ? {} : { role: 'tree', label: t('section.sessions') }}
         rowKeys={rows.length === 0 ? ['empty'] : rows.map(row => `session:${row.id}`)}
         ready={list.phase === 'ready' && workspaceReady && drag === null}
         resetKey={animationResetKey}
