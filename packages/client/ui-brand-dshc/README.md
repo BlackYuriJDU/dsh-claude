@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package gives the Web client the DSHC identity. It stacks one palette layer over the theme service that recolors the shipped light and dark palettes to the Claude app's warm neutrals and clay accent, and it fills the sidebar and blank-session hero brand slots with the DSHC clay burst, the serif wordmark, and a serif part-of-day greeting as the hero headline. Light, dark, and system preferences keep working, because every override names both schemes. Choose it for the DSHC deployment instead of `ui-brand-official`. It has no runtime state and does not affect model requests.
+This package gives the Web client the DSHC identity. It stacks one palette layer over the theme service that recolors the shipped light and dark palettes to the Claude app's warm neutrals and clay accent, and it fills the sidebar and blank-session hero brand slots with the DSHC monogram (a clay tile holding the serif initial D), the serif wordmark, and a serif part-of-day greeting as the hero headline. Light, dark, and system preferences keep working, because every override names both schemes. Choose it for the DSHC deployment instead of `ui-brand-official`. It has no runtime state and does not affect model requests.
 
 ## Table of Contents
 
@@ -57,7 +57,7 @@ The palette is one `ctx.theme.overrideTokens` layer whose source is the package 
 |---|---|
 | [`src/client/index.ts`](src/client/index.ts) | Browser entry: palette layer, product name, and slot registrations |
 | [`src/client/tokens.ts`](src/client/tokens.ts) | The override map, clay constants, and font stacks |
-| [`src/client/Brand.tsx`](src/client/Brand.tsx) | The clay burst mark and serif wordmark |
+| [`src/client/Brand.tsx`](src/client/Brand.tsx) | The clay monogram mark and serif wordmark |
 | [`src/client/Greeting.tsx`](src/client/Greeting.tsx) | The part-of-day hero greeting |
 | [`src/client/Suggestions.tsx`](src/client/Suggestions.tsx) | The starting suggestions below the hero composer |
 | [`src/client/locales.ts`](src/client/locales.ts) | Greeting dictionaries for every shipped language |

@@ -5,7 +5,7 @@ import { cleanup, render } from '@testing-library/react'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type { ThemeTokenOverrides } from '@deepseek-ai/dsh-client-ui-theme/client'
 import { apply, inject } from '../src/client/index.ts'
-import { burstSpokes, DSHC_WORDMARK, DshcMark, DshcName } from '../src/client/Brand.tsx'
+import { DSHC_MONOGRAM, DSHC_WORDMARK, DshcMark, DshcName } from '../src/client/Brand.tsx'
 import { DSHC_CLAY, DSHC_TOKEN_SOURCE, DSHC_TOKENS } from '../src/client/tokens.ts'
 import { DshcGreeting, greetingKey, type DshcGreetingProps } from '../src/client/Greeting.tsx'
 import { en } from '../src/client/locales.ts'
@@ -146,16 +146,17 @@ describe('DSHC contrast', () => {
 })
 
 describe('DSHC artwork', () => {
-  it('draws eight clay spokes at the requested size', () => {
+  it('draws the clay monogram tile with the wordmark initial at the requested size', () => {
     const { container } = render(<DshcMark size={24} className="mark" />)
     const svg = container.querySelector('svg')
     expect(svg?.getAttribute('width')).toBe('24')
+    expect(svg?.getAttribute('height')).toBe('24')
     expect(svg?.getAttribute('class')).toBe('mark')
     expect(svg?.getAttribute('aria-hidden')).toBe('true')
-    const paths = container.querySelectorAll('path')
-    expect(paths).toHaveLength(8)
-    expect(paths[0]?.getAttribute('stroke')).toBe(DSHC_CLAY)
-    expect(burstSpokes(24)).toHaveLength(8)
+    expect(container.querySelector('rect')?.getAttribute('fill')).toBe(DSHC_CLAY)
+    expect(container.querySelector('path')).toBeNull()
+    expect(container.querySelector('text')?.textContent).toBe(DSHC_MONOGRAM)
+    expect(DSHC_MONOGRAM).toBe('D')
   })
 
   it('renders the serif wordmark', () => {

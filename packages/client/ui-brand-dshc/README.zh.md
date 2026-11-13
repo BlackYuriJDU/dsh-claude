@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-本包为 Web 客户端提供 DSHC 标识。它在主题服务之上叠加一个配色层，将内置的浅色与深色配色改为 Claude 应用的暖色中性色与陶土色强调色，并以 DSHC 陶土色放射标志、衬线字标，以及作为 hero 标题的衬线时段问候语，填充侧栏和空会话 hero 的品牌槽位。浅色、深色与跟随系统的偏好继续有效，因为每个覆盖都同时给出两种配色。DSHC 部署选择它来替代 `ui-brand-official`。它没有运行时状态，也不影响模型请求。
+本包为 Web 客户端提供 DSHC 标识。它在主题服务之上叠加一个配色层，将内置的浅色与深色配色改为 Claude 应用的暖色中性色与陶土色强调色，并以 DSHC 字母标志（陶土色方块内的衬线首字母 D）、衬线字标，以及作为 hero 标题的衬线时段问候语，填充侧栏和空会话 hero 的品牌槽位。浅色、深色与跟随系统的偏好继续有效，因为每个覆盖都同时给出两种配色。DSHC 部署选择它来替代 `ui-brand-official`。它没有运行时状态，也不影响模型请求。
 
 ## 目录
 
@@ -57,7 +57,7 @@ kind: "package-reference"
 |---|---|
 | [`src/client/index.ts`](src/client/index.ts) | 浏览器入口：配色层、产品名称与槽位注册 |
 | [`src/client/tokens.ts`](src/client/tokens.ts) | 覆盖映射、陶土色常量与字体栈 |
-| [`src/client/Brand.tsx`](src/client/Brand.tsx) | 陶土色放射标志与衬线字标 |
+| [`src/client/Brand.tsx`](src/client/Brand.tsx) | 陶土色字母标志与衬线字标 |
 | [`src/client/Greeting.tsx`](src/client/Greeting.tsx) | 按时段的 hero 问候语 |
 | [`src/client/Suggestions.tsx`](src/client/Suggestions.tsx) | hero 输入框下方的开始建议 |
 | [`src/client/locales.ts`](src/client/locales.ts) | 覆盖所有发布语言的问候语词典 |

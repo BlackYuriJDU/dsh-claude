@@ -20,7 +20,7 @@ import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { DshcSuggestions, type DshcSuggestionsInjected } from './Suggestions.tsx'
 
-export { burstSpokes, DSHC_WORDMARK, DshcMark, DshcName } from './Brand.tsx'
+export { DSHC_MONOGRAM, DSHC_WORDMARK, DshcMark, DshcName } from './Brand.tsx'
 export { DshcGreeting, greetingKey } from './Greeting.tsx'
 export { DshcSuggestions, SUGGESTION_CATEGORIES, SUGGESTION_PROMPTS } from './Suggestions.tsx'
 export type { DshcSuggestionsInjected, DshcSuggestionsProps } from './Suggestions.tsx'
