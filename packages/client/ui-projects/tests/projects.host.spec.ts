@@ -1,5 +1,7 @@
+import { Context } from '@deepseek-ai/cordis'
+import SystemPrompt, { type PromptContextOrderName } from '@deepseek-ai/dsh-system-prompt'
 import { describe, expect, it } from 'vitest'
-import { normalizePath, projectContextText, workspaceFor, type KnowledgeRead, type ProjectKnowledgeFile } from '../src/projects.ts'
+import { normalizePath, PROJECT_CONTEXT_ORDER, projectContextText, workspaceFor, type KnowledgeRead, type ProjectKnowledgeFile } from '../src/projects.ts'
 
 const HEADER = 'Project context for this workspace, set by the person in Settings. Follow the instructions unless the person says otherwise in this conversation.'
 const limits = { maxFileChars: 100, maxTotalChars: 10_000 }
@@ -86,5 +88,20 @@ describe('projectContextText', () => {
     expect(result.endsWith(cut)).toBe(true)
     expect(projectContextText({ instructions: 'y'.repeat(1000) }, never, { maxFileChars: 10, maxTotalChars: cut.length + 1 })).toHaveLength(cut.length + 1)
     expect(projectContextText({ instructions: 'y'.repeat(1000) }, never, { maxFileChars: 10, maxTotalChars: cut.length })).toBe('')
+  })
+})
+
+describe('The project runtime-context position', () => {
+  it('comes after every centrally allocated runtime-context position', async () => {
+    // A name the system prompt adds to its table fails to compile here until
+    // this position is checked against it.
+    const central = {
+      WORKING_DIRECTORY: true, SANDBOX_POLICY: true, APPROVAL_POLICY: true, SUBAGENT_DELEGATION: true,
+      HARNESS_SOURCE: true, WEB_SURFACE: true,
+    } satisfies Record<PromptContextOrderName, true>
+    const ctx = new Context()
+    await ctx.plugin(SystemPrompt, {})
+    const orders = (Object.keys(central) as PromptContextOrderName[]).map(name => ctx.systemPrompt.getContextOrder(name))
+    expect(Math.max(...orders)).toBeLessThan(PROJECT_CONTEXT_ORDER)
   })
 })

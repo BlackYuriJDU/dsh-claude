@@ -1,3 +1,4 @@
+import SystemPrompt, { type PromptContextOrderName } from '@deepseek-ai/dsh-system-prompt'
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import * as memoryPlugin from '../src/index.ts'
@@ -90,5 +91,20 @@ describe('profileContextText', () => {
     expect(profileContextText('Ana', 'x'.repeat(500), nameOnly.length + 10)).toBe(nameOnly)
     expect(profileContextText('', 'x'.repeat(500), nameOnly.length + 10)).toBe('')
     expect(profileContextText('Ana', '', nameOnly.length - 1)).toBe('')
+  })
+})
+
+describe('The memory runtime-context position', () => {
+  it('comes after every centrally allocated runtime-context position', async () => {
+    // A name the system prompt adds to its table fails to compile here until
+    // this position is checked against it.
+    const central = {
+      WORKING_DIRECTORY: true, SANDBOX_POLICY: true, APPROVAL_POLICY: true, SUBAGENT_DELEGATION: true,
+      HARNESS_SOURCE: true, WEB_SURFACE: true,
+    } satisfies Record<PromptContextOrderName, true>
+    const ctx = new Context()
+    await ctx.plugin(SystemPrompt, {})
+    const orders = (Object.keys(central) as PromptContextOrderName[]).map(name => ctx.systemPrompt.getContextOrder(name))
+    expect(Math.max(...orders)).toBeLessThan(PROFILE_CONTEXT_ORDER)
   })
 })
