@@ -32,7 +32,10 @@
     "presets/cowork.patch.yml",
     "presets/code.patch.yml",
     "presets/design.patch.yml",
-    "lib/types/**/*.d.ts"
+    "lib/types/**/*.d.ts",
+    "lib/types/**/*.d.ts.map",
+    "lib/**/*.js.map",
+    "src"
   ],
   "license": "MIT",
   "dsh": {
