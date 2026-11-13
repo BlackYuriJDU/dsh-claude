@@ -11,7 +11,7 @@
 - button "コピー"
 - status: 完了
 - button "完了まで {{duration}}" [expanded]
-- button "コードを実行しました、コマンドを実行しました、ファイルを読み取りました" [expanded]
+- button "コードを実行しました、コマンドを実行しました、ファイルを読み取りました 1 件失敗" [expanded]
 - button "コンテキスト注入 runtime-context"
 - button "コンテキスト注入 skill-catalog"
 - button "コンテキスト注入 time-context"

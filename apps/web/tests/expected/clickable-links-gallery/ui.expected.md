@@ -9,8 +9,8 @@
 - text: "Assemble the link gallery: write the report and styles, inspect the sources, and summarize. {{clock}}"
 - button "Copy"
 - status: Completed
-- button "Completed in {{duration}}" [expanded]
-- button "Wrote files, ran commands, called tools, etc." [expanded]
+- button "Completed in {{duration}} 1 failed" [expanded]
+- button "Wrote files, ran commands, called tools, etc. 1 failed" [expanded]
 - button "Write site/report.html 1KB +1 -0":
   - text: Write
   - button "site/report.html"

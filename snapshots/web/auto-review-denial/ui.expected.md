@@ -11,8 +11,8 @@
 - text: Inspect the protected operation, but do not run it unless authorized. {{clock}}
 - button "Copy"
 - status: Completed
-- button "Completed in {{duration}}" [expanded]
-- button "Called tools, ran code, ran commands" [expanded]
+- button "Completed in {{duration}} 1 failed" [expanded]
+- button "Called tools, ran code, ran commands 2 failed" [expanded]
 - text: Failed
 - button "Tool call Rejected by Auto review"
 - button "Code Catch an Auto-denied inner call"
@@ -38,8 +38,8 @@
 - text: Inspect the protected operation, but do not run it unless authorized. {{clock}}
 - button "Copy"
 - status: Completed
-- button "Completed in {{duration}}" [expanded]
-- button "Called tools, ran code, ran commands" [expanded]
+- button "Completed in {{duration}} 1 failed" [expanded]
+- button "Called tools, ran code, ran commands 2 failed" [expanded]
 - text: Failed
 - button "Tool call Rejected by Auto review" [expanded]
 - text: "OUT Tool was not executed. Reason: raw reason"

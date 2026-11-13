@@ -62,6 +62,10 @@ Falhas do `test` que vinham da migração:
 | `Pack npm tarballs` | festive | Versões `0.2.2-alpha.3`; corrigido pelo commit de versão da família |
 | `static` (`constraints`, casts, exports, issue management, Summary) | festive | Corrigido pelos commits de `files` e de gates estáticos |
 | `lint` (`duplication`) | festive | Corrigido pelo commit do `ui-settings-searxng` |
+| `snapshots and artifacts` (suíte web) | festive | Goldens de transcrição com a contagem "N failed" do upstream, que a festive não tinha regravado; nomes de esforço localizados da festive (`关闭`, `高`, `最高`) no `declared-reasoning`; o seletor do peixe do hero, que passou para dentro do slot `conversation.hero.headline`; e o contêiner de sugestões do hero, que nunca ficava `:empty` por causa da âncora do slot e deslocava o composer em 10 px |
+| `benchmarks` | ruído do runner | `conversation-fold` e `long-session` passaram do limite por poucos milissegundos num head e passaram no seguinte, sem mudança de código |
+| `node 24 / coverage` | upstream | 100% em todos os arquivos; a única falha é `tool-pwsh-persistent/tests/loader-composition.spec.ts:234`, em que a saída do pwsh some no limite do scrollback. O pacote não difere de `dshc/base` |
+| `windows node 24 / coverage` | upstream | Timeout de 90 s no hook de `scripts/oxlint-contract.spec.ts`, que não difere de `dshc/base` |
 
 ## Desvios do plano e motivo
 

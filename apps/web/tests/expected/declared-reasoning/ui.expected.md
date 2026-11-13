@@ -1,5 +1,5 @@
 - menu "模型与推理等级":
   - menuitemradio "Default" [checked]
-  - menuitemradio "Off"
-  - menuitemradio "High"
-  - menuitemradio "Max"
+  - menuitemradio "关闭"
+  - menuitemradio "高"
+  - menuitemradio "最高"
