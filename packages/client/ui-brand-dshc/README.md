@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This package gives the Web client the DSHC identity. It stacks one palette layer over the theme service that recolors the shipped light and dark palettes to the Claude app's warm neutrals and clay accent, and it fills the sidebar and blank-session hero brand slots with the DSHC monogram (a clay tile holding the serif initial D), the serif wordmark, and a serif part-of-day greeting as the hero headline. Light, dark, and system preferences keep working, because every override names both schemes. Choose it for the DSHC deployment instead of `ui-brand-official`. It has no runtime state and does not affect model requests.
+This package gives the Web client the DSHC identity. It stacks one palette layer over the theme service that recolors the light and dark palettes to the Claude app's warm neutrals and clay accent, and it fills the sidebar and blank-session hero brand slots with the DSHC monogram (a clay tile with a serif D), the serif wordmark, and a serif part-of-day greeting as the hero headline. Light, dark, and system preferences keep working, because every override names both schemes. Choose it for the DSHC deployment instead of `ui-brand-official`. It has no runtime state and does not affect model requests.
 
 ## Table of Contents
 
