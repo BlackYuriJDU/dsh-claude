@@ -57,7 +57,7 @@
 
 ## 2. Decisões
 
-As quatro decisões do pacote continuam valendo: **D1** React 18, **D2** fork leve, **D3** `workspace-write` por padrão, **D4** marca `DSHC`. O código revelou mais três:
+As quatro decisões do pacote continuam valendo: **D1** React 18, **D2** fork leve, **D3** `workspace-write` por padrão, **D4** marca `DSHC`. O código revelou mais três. No upstream 0.2.2, D3, D6 e D7 já estão entregues pelo próprio upstream (`packages/bundle/base/cordis.patch.yml:239`, `packages/client/ui-theme` e os oito idiomas do cliente); o DSHC não precisa implementá-las:
 
 | # | Decisão | Opções | Recomendação |
 |---|---|---|---|
@@ -208,7 +208,7 @@ Cada item: **o quê → onde → como → por quê → testes → pronto quando*
   3. Alvos de toque ≥ 44px (`@media (pointer: coarse)`).
   4. A coluna de leitura passa a `min(760px, 100vw - 32px)`.
 - **Por quê:** hoje, em 390px, sobram 334px ao lado de um trilho que não ajuda no toque.
-- **Testes:** e2e Playwright em 390×844 e 1280×800 (`apps/web/tests/plan-narrow-viewport.e2e.ts` é o modelo), screenshots de referência e GIF.
+- **Testes:** e2e Playwright em 390×844 e 1280×800 (o modelo é o cenário `plan-narrow-viewport` de `apps/web/tests/plan-control-row.e2e.ts`), screenshots de referência e GIF.
 
 **2.4 · Motion**
 - Padronizar em `ui-theme`: `--dsw-motion-duration-{fast:100ms, base:160ms, enter:240ms, exit:180ms}` e `--dsw-motion-ease-{out, in-out}`, como aliases dos `--ds-transition-*` existentes para não duplicar.

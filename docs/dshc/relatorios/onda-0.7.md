@@ -114,6 +114,19 @@ A revisão de código e a auditoria de `origin/dshc/base...HEAD` acharam 17 defe
 
 O item 4 propunha também desabilitar os campos quando o documento de configuração não aceita escrita; isso ficou de fora porque o snapshot de carregamento também chega com `writable: false`, e os campos ficariam travados até a primeira leitura.
 
+## M2: inventário e documentos
+
+| Passo | Resultado |
+|---|---|
+| Matriz de paridade sobre o 0.2.2 | `docs/dshc/inventario-0.2.2.md`, seção 1: 26 recursos com arquivo e linha. Abertos: artifacts duráveis com versões, citações inline, editar mensagem, responsivo em 390 px e política contra exfiltração |
+| Catálogo dos experimentais | mesma página, seção 2: os 63 pacotes em 16 grupos, com a recomendação da N8 |
+| Errata | `wait_agent` no lugar de `job_output`; Cordis 4.1.0; cenário `plan-narrow-viewport` de `plan-control-row.e2e.ts`; D3, D6 e D7 creditadas ao upstream; a seção 3 de `01-estudo-mestre.md` aponta para o inventário |
+| Layout em 1280, 1024, 768 e 390 px | medido no perfil `dshc` com Playwright; capturas em `docs/dshc/referencias/0.2.2/`. Sem rolagem horizontal em nenhuma largura; em 390 px o seletor de modos passa da tela (A10) |
+| Lista A.4 | saem o foco de 2 px, o SheetJS pelo CDN e as skills de Office, que o 0.2.2 já entrega |
+| Gates de docs | `verify-md-wrap` e `verify-md-links` verdes |
+
+A `REVISAO-PLANO-V2.md` citada pelo Plano v3 não está no repositório; a errata aplicada é a lista do próprio passo 2 da M2.
+
 ## Próximo passo
 
-M2: refazer a matriz de paridade sobre o 0.2.2, aplicar a errata, medir o layout em 1280, 1024, 768 e 390 px e escrever o relatório de inventário.
+Onda 1: identidade DSHC e acessibilidade (nome visível, tokens AA com teste de contraste, símbolo conforme D12, onboarding neutro, defeitos A10 a A12 e o gate de acessibilidade com axe).

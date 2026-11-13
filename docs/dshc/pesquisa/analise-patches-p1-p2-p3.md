@@ -40,7 +40,7 @@ Confirmados: versões e licenças (`@playwright/mcp` 0.0.85 Apache-2.0, `@softer
 | Problema | Correção |
 |---|---|
 | Com `KNOWLEDGE_WORK_PLUGINS_DIR` não definida, a raiz vira `undefined/finance/skills` e o catálogo fica vazio em silêncio (viola "Misconfiguration fails loud") | usar a forma que falha alto, testada no Loader: `- !!js process.env.KNOWLEDGE_WORK_PLUGINS_DIR && process.getBuiltinModule('node:path').join(process.env.KNOWLEDGE_WORK_PLUGINS_DIR, 'finance', 'skills')` |
-| `deep-research` manda usar `subagent` com `run_in_background: true` e `job_output` | o `subagent` distribuído é `continuable`: já roda em segundo plano e o runtime avisa quando termina. Remover `job_output` e usar `send_message` para continuar |
+| `deep-research` manda usar `subagent` com `run_in_background: true` e `job_output` | o `subagent` distribuído é `continuable`: já roda em segundo plano e o runtime avisa quando termina. No 0.2.2, trocar `job_output` por `wait_agent` (`packages/subagent/tool-subagent-control/src/wait-agent.ts`) para esperar o resultado |
 | "o texto da skill entra no system prompt" | o catálogo (nome e descrição) entra como mensagem de usuário de lembrete do sistema, e o corpo como resultado de ferramenta. O risco de injeção continua; corrigir a frase |
 | raiz `~/.dshc/skills` | escrever `$DSH_HOME/skills` (`~/.dshc/skills` com o launcher `dshc`) |
 | ferramentas citadas | existem nos presets `standard`, `code` e `cordis`, **não** no `minimal`; no Windows a ferramenta é `pwsh` |

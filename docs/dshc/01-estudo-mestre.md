@@ -29,7 +29,7 @@
 ### 1.1 A tese, com a origem correta
 - **"Agent = Model + Harness".** O modelo raciocina e o harness dá a ele ferramentas, sessão, sandbox e loop. A fórmula foi popularizada pelo post de Vivek Trivedy no blog da LangChain (10/03/2026). O termo "harness engineering" vem de Mitchell Hashimoto (05/02/2026). A DeepSeek **adotou** a frase, mas ela não é da DeepSeek.
 - **O tema chegou à academia de sistemas operacionais.** O 2nd Workshop on Operating Systems Design for AI Agents (AgenticOS) aconteceu junto da SOSP 2026, em Praga, no dia 29/09/2026. A 1ª edição foi na ASPLOS, em março de 2026.
-- **Base técnica:** o DeepSeek Harness (`deepseek-ai/deepseek-harness`, MIT, ~278,7k estrelas, preview v0.1 que avisa de quebras de compatibilidade) roda sobre o **Cordis**. O Cordis é um meta-framework de composição de plugins que veio do ecossistema Koishi e tem paper no arXiv (2608.25512; autores Shi, Zhang e Cui; afiliação **não** verificada).
+- **Base técnica:** o DeepSeek Harness (`deepseek-ai/deepseek-harness`, MIT, ~278,7k estrelas, preview v0.1 que avisa de quebras de compatibilidade) roda sobre o **Cordis** (4.1.0, vendorizado em `vendor/cordis`). O Cordis é um meta-framework de composição de plugins que veio do ecossistema Koishi e tem paper no arXiv (2608.25512; autores Shi, Zhang e Cui; afiliação **não** verificada).
 
 ### 1.2 O mercado, com os números corrigidos
 | Projeto | O que é | Estrelas (nov/2026) | Licença |
@@ -91,39 +91,7 @@ Skills (`packages/skill/*` e `ui-skill`), subagentes, incluindo **Claude Code e 
 
 ## 3. Matriz de paridade: claude.ai (nov/2026) × DSHC
 
-**Legenda.** ✅ existe · 🟡 parcial · ❌ não existe · **[verificar]** confirmar na Onda 0 do plano.
-
-**Status do claude.ai:** Docs, Slides e Design saíram em 16/09/2026 e estão fora de beta. Dashboards e Motion saíram em 08/10/2026 e estão em beta. Cowork foi fundido ao chat em 16/09/2026. Visualizações inline estão em beta desde 12/03/2026 (fontes em §9). **Sheets e Whiteboard** aparecem como tipos de artifact no produto, mas **não encontrei anúncio público com data**; a "novidade de 10/nov" do Kimi não foi confirmada.
-
-| # | Feature do claude.ai | DSHC hoje | Evidência | Gap real | Mecanismo no repositório | Prioridade |
-|---|---|---|---|---|---|---|
-| 1 | Chat com streaming | ✅ | `ui-conversation`, `assistant/chunk` | polimento | — | — |
-| 2 | Projects | ✅ | `ui-projects` | busca nos arquivos de conhecimento (RAG) **[verificar]** | `systemPrompt.section` + tool | P2 |
-| 3 | Memória | ✅ | `ui-memory` | revisão no estilo "Reflect" | estender `ui-memory` | P2 |
-| 4 | Artifacts (painel, versões, publicar) | 🟡 | `ui-handoff`, `ui-deliverables` (só arquivos produzidos) | **artifact como objeto durável com preview e versões** | família de eventos + `ConversationNodeDefinition` + tool | **P0** |
-| 5 | Docs / Slides / Design | 🟡 | arquivos no workspace | renderização e edição inline | tipos de artifact (G1) | P2 |
-| 6 | Sheets | ❌ | — | planilha inline | artifact `sheet` (Univer) | P1 |
-| 7 | Whiteboard / diagramas | ❌ | — | quadro inline | artifact `board` (Excalidraw) | P1 |
-| 8 | Dashboards / visualizações inline | ❌ | — | gráficos a partir de dados de tools | artifact `chart` (ECharts) | P1 |
-| 9 | Motion (vídeo animado) | ❌ | — | fora do escopo de um harness | — | P3 |
-| 10 | Tarefas agendadas | ✅ | `ui-routines` | — | — | — |
-| 11 | Skills | ✅ | `packages/skill/*`, `ui-skill` | — | — | — |
-| 12 | Conectores (MCP) | 🟡 | `mcp-client` | interface de catálogo e config; OAuth de Google/M365 | MCP + `credentials` | P2 |
-| 13 | Conectores interativos (MCP Apps) | ❌ | — | UI de tool em iframe | `conversation.chat.node` + iframe isolado | P3 |
-| 14 | Cowork (arquivos locais) | ✅ | `fs`, `shell`, `terminal`, `ui-directory-picker-*` | — | — | — |
-| 15 | Claude Code | ✅ | `subagent-claude-code`, `hooks-claude-code` | — | — | — |
-| 16 | Pesquisa web com **citações** | 🟡 | `tool-web` + provedores | citação inline clicável na resposta | `presentationMeta` + renderer | **P0** |
-| 17 | Raciocínio visível (thinking) | 🟡 | `runtime/.../sessions/partial.ts` trata reasoning | bloco recolhível na UI **[verificar]** | renderer de nó | P1 |
-| 18 | Editar mensagem e ramificar | 🟡 | `ctx.sessions.fork` existe; o cliente referencia fork | UI de "editar e ramificar" **[verificar]** | `sessions.fork` | P1 |
-| 19 | Busca de conversas | 🟡 | `ui-sidebar` referencia search | **[verificar]** | — | P2 |
-| 20 | Mobile / responsivo | 🟡 | 3 media queries no total em `ui-layout` e `ui-sidebar` | gaveta (drawer) no mobile, composer | CSS Modules | **P0** |
-| 21 | Tema claro | ❌ (removido) | `5d0e5c76c`, "dark-only" | decidir se volta | `ui-theme` | P2 |
-| 22 | Compartilhar e publicar | ❌ | — | exportar artifact (HTML/arquivo) | tool + download | P2 |
-| 23 | Colaboração em tempo real | ❌ | — | o harness é para um usuário só | — | P3 |
-| 24 | Computer use | ❌ | — | arriscado; adiar | sandbox + subagente | P3 |
-| 25 | Segurança e permissões | 🟡 | `sandbox/*`, `user-approval`, `danger.ts` | **padrão em acesso total** (§7) | `tools/pre-execute`, preset de sandbox | **P0** |
-
-**Resultado:** dos 10 "faltantes" do Kimi, **Projects, Skills e Claude Code já existem**. Reflect e Version History são **extensões** do que existe. Os gaps reais de P0 são **Artifacts duráveis, Citações, Responsivo e Postura de segurança**.
+A matriz desta seção descrevia a linha 0.1.1. A matriz sobre o upstream 0.2.2, com arquivo e linha em cada item, está em [inventario-0.2.2.md](inventario-0.2.2.md). Os estudos de cada gap abaixo continuam valendo onde o inventário ainda marca o item como aberto: G1 (artifacts duráveis), G2 (citações), G3 a G5 (gráficos, planilhas e quadro), G6 (editar mensagem), G8 e G9 (responsivo e motion), G10 (conectores) e G11 (Reflect).
 
 ---
 
