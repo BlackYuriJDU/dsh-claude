@@ -80,26 +80,27 @@ describe('MemorySection', () => {
   it('applies a second edit to the first one while the Host has not answered', async () => {
     const form = stubConfigForm<MemoryFormValue>()
     form.publish({ status: 'ready', value: { memories: [{ id: 'a', text: 'A' }, { id: 'b', text: 'B' }, { id: 'c', text: 'C' }] } })
-    const answers: ((accepted: boolean) => void)[] = []
-    form.set.mockImplementation(() => new Promise<boolean>((resolve) => { answers.push(resolve) }))
+    const answers = [Promise.withResolvers<boolean>(), Promise.withResolvers<boolean>()]
+    for (const answer of answers) form.set.mockReturnValueOnce(answer.promise)
     const t: MemorySectionComponentProps['t'] = key => (en as Record<string, string>)[key] ?? key
     const view = render(<MemorySection memory={form.scope} t={t} />)
     fireEvent.click(view.getAllByText(en['delete'])[0]!)
     fireEvent.click(view.getAllByText(en['delete'])[1]!)
     expect(form.set).toHaveBeenLastCalledWith('memories', [{ id: 'c', text: 'C' }])
-    await act(async () => { for (const answer of answers) answer(true) })
+    await act(async () => { for (const answer of answers) answer.resolve(true) })
     // With nothing in flight, the next edit starts from the Host's list again.
     fireEvent.click(view.getAllByText(en['delete'])[2]!)
     expect(form.set).toHaveBeenLastCalledWith('memories', [{ id: 'a', text: 'A' }, { id: 'b', text: 'B' }])
   })
 
   it.each([
-    ['refuses', () => Promise.resolve(false)],
-    ['fails to reach the Host', () => Promise.reject(new Error('offline'))],
-  ] as const)('reports the failure when the Host %s, and clears it on the next edit', async (_case, answer) => {
+    ['refuses', false],
+    ['fails to reach the Host', new Error('offline')],
+  ] as const)('reports the failure when the Host %s, and clears it on the next edit', async (_case, outcome) => {
     const form = stubConfigForm<MemoryFormValue>()
     form.publish({ status: 'ready', value: { memories: [{ id: 'a', text: 'A' }] } })
-    form.set.mockImplementationOnce(answer)
+    if (outcome instanceof Error) form.set.mockRejectedValueOnce(outcome)
+    else form.set.mockResolvedValueOnce(outcome)
     const t: MemorySectionComponentProps['t'] = key => (en as Record<string, string>)[key] ?? key
     const view = render(<MemorySection memory={form.scope} t={t} />)
     fireEvent.click(view.getByText(en['delete']))

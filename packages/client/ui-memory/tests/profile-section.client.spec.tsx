@@ -41,11 +41,12 @@ describe('ProfileSection', () => {
   })
 
   it.each([
-    ['refuses', () => Promise.resolve(false)],
-    ['fails to reach the Host', () => Promise.reject(new Error('offline'))],
-  ] as const)('keeps the draft and reports the failure when the Host %s', async (_case, answer) => {
+    ['refuses', false],
+    ['fails to reach the Host', new Error('offline')],
+  ] as const)('keeps the draft and reports the failure when the Host %s', async (_case, outcome) => {
     const { form, getByLabelText, findByRole, queryByRole } = mount({ memories: [], profileName: 'Ana' })
-    form.set.mockImplementationOnce(answer)
+    if (outcome instanceof Error) form.set.mockRejectedValueOnce(outcome)
+    else form.set.mockResolvedValueOnce(outcome)
     const name = getByLabelText('What should DSHC call you?') as HTMLInputElement
     fireEvent.change(name, { target: { value: 'Bia' } })
     fireEvent.blur(name)
@@ -56,13 +57,13 @@ describe('ProfileSection', () => {
 
   it('keeps typing that arrives while a save is in flight', async () => {
     const { form, getByLabelText } = mount({ memories: [], profileName: 'Ana' })
-    let accept!: (accepted: boolean) => void
-    form.set.mockImplementationOnce(() => new Promise<boolean>((resolve) => { accept = resolve }))
+    const answer = Promise.withResolvers<boolean>()
+    form.set.mockReturnValueOnce(answer.promise)
     const name = getByLabelText('What should DSHC call you?') as HTMLInputElement
     fireEvent.change(name, { target: { value: 'Bia' } })
     fireEvent.blur(name)
     fireEvent.change(name, { target: { value: 'Bianca' } })
-    accept(true)
+    answer.resolve(true)
     await waitFor(() => { expect(form.set).toHaveBeenCalledTimes(1) })
     await Promise.resolve()
     expect(name.value).toBe('Bianca')
