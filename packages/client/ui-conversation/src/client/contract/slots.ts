@@ -379,8 +379,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
         'conversation.composer.bar': { kind: 'single'; scope: 'session-maybe' }
         'conversation.input.dock': { kind: 'list'; scope: 'session' }
         'conversation.hero.frame': { kind: 'hoc'; scope: 'root' }
-        'conversation.hero.brand.mark': { kind: 'single'; scope: 'root' }
-        'conversation.hero.headline': { kind: 'single'; scope: 'root' }
+        'conversation.hero.brand.mark': { kind: 'single'; scope: 'root'; inline: true }
+        'conversation.hero.headline': { kind: 'single'; scope: 'root'; inline: true }
         'conversation.hero.workspace': { kind: 'single'; scope: 'root' }
         'conversation.hero.agentPreset': { kind: 'single'; scope: 'session-maybe' }
         'conversation.hero.options': { kind: 'list'; scope: 'session' }

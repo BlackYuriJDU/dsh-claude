@@ -135,7 +135,8 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
   return (
     <div className={css.root}>
       <div className={css.stack}>
-        <div className={css.headline}>
+        {/* The blank screen's only heading, so it is the page's h1; the class carries the look. */}
+        <h1 className={css.headline}>
           {/* figma 34:10412: fish 34×25 leading the headline, gap 10. */}
           <span
             className={css.fishHitbox}
@@ -160,7 +161,7 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
               </span>
             ),
           })}
-        </div>
+        </h1>
         <div className={css.body}>
           {/* The composer remains mounted outside this component. */}
         </div>
