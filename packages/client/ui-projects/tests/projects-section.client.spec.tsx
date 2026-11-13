@@ -37,15 +37,15 @@ describe('ProjectsSection', () => {
     expect((view.getByLabelText(en['instructions']) as HTMLTextAreaElement).value).toBe('Be brief.')
   })
 
-  it('saves trimmed instructions on blur, and only when they changed', () => {
-    const { form, getByLabelText, queryByText } = mount(one)
+  it('saves trimmed instructions on blur, and only when they changed', async () => {
+    const { form, getByLabelText, queryByText, findByText } = mount(one)
     const field = getByLabelText(en['instructions'])
     fireEvent.blur(field)
     expect(form.set).not.toHaveBeenCalled()
     fireEvent.change(field, { target: { value: '  Use metric.  ' } })
     fireEvent.blur(field)
     expect(form.set).toHaveBeenCalledWith('projects', { 'ws-1': { instructions: 'Use metric.' } })
-    expect(queryByText(en['saved'])).toBeTruthy()
+    expect(await findByText(en['saved'])).toBeTruthy()
     fireEvent.change(field, { target: { value: 'Use metric!' } })
     expect(queryByText(en['saved'])).toBeNull()
   })
@@ -61,6 +61,47 @@ describe('ProjectsSection', () => {
     expect(form.set).not.toHaveBeenCalled()
   })
 
+  it.each([
+    ['refuses', () => Promise.resolve(false)],
+    ['fails to reach the Host', () => Promise.reject(new Error('offline'))],
+  ] as const)('keeps the instructions draft and reports the failure when the Host %s', async (_case, answer) => {
+    const { form, getByLabelText, findByRole, queryByText } = mount(one)
+    form.set.mockImplementationOnce(answer)
+    const field = getByLabelText(en['instructions']) as HTMLTextAreaElement
+    fireEvent.change(field, { target: { value: 'Use metric.' } })
+    fireEvent.blur(field)
+    expect((await findByRole('alert')).textContent).toBe(en['save.failed'])
+    expect(queryByText(en['saved'])).toBeNull()
+    expect(field.value).toBe('Use metric.')
+  })
+
+  it('keeps typing that arrives while an instructions save is in flight', async () => {
+    const { form, getByLabelText, findByText } = mount(one)
+    let accept!: (accepted: boolean) => void
+    form.set.mockImplementationOnce(() => new Promise<boolean>((resolve) => { accept = resolve }))
+    const field = getByLabelText(en['instructions']) as HTMLTextAreaElement
+    fireEvent.change(field, { target: { value: 'Use metric.' } })
+    fireEvent.blur(field)
+    fireEvent.change(field, { target: { value: 'Use metric units.' } })
+    act(() => { accept(true) })
+    expect(await findByText(en['saved'])).toBeTruthy()
+    expect(field.value).toBe('Use metric units.')
+  })
+
+  it('applies a second file removal to the first one while the Host has not answered', async () => {
+    const files = [{ id: 'f1', path: 'a.md' }, { id: 'f2', path: 'b.md' }, { id: 'f3', path: 'c.md' }]
+    const { form, getAllByText } = mount(one, { projects: { 'ws-1': { files } } })
+    const answers: ((accepted: boolean) => void)[] = []
+    form.set.mockImplementation(() => new Promise<boolean>((resolve) => { answers.push(resolve) }))
+    fireEvent.click(getAllByText(en['knowledge.remove'])[0]!)
+    fireEvent.click(getAllByText(en['knowledge.remove'])[1]!)
+    expect(form.set).toHaveBeenLastCalledWith('projects', { 'ws-1': { files: [files[2]] } })
+    await act(async () => { for (const answer of answers) answer(true) })
+    // With nothing in flight, the next edit starts from the Host's map again.
+    fireEvent.click(getAllByText(en['knowledge.remove'])[2]!)
+    expect(form.set).toHaveBeenLastCalledWith('projects', { 'ws-1': { files: [files[0], files[1]] } })
+  })
+
   it('adds a trimmed file path and removes a file, keeping other projects', () => {
     const other = { instructions: 'Other.' }
     const { form, getByLabelText, getByText } = mount(one, { projects: { 'ws-0': other, 'ws-1': { files: [{ id: 'f1', path: 'old.md' }] } } })
@@ -73,7 +114,8 @@ describe('ProjectsSection', () => {
     expect(added['ws-1']!.files!.map(file => file.path)).toEqual(['old.md', 'notes/new.md'])
     expect((getByLabelText(en['knowledge']) as HTMLInputElement).value).toBe('')
     fireEvent.click(getByText(en['knowledge.remove']))
-    expect(form.set).toHaveBeenLastCalledWith('projects', { 'ws-0': other, 'ws-1': { files: [] } })
+    // The add has not been answered yet, so the removal keeps it.
+    expect(form.set).toHaveBeenLastCalledWith('projects', { 'ws-0': other, 'ws-1': { files: [{ id: expect.any(String), path: 'notes/new.md' }] } })
   })
 })
 

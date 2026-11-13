@@ -17,6 +17,7 @@ export const en = {
   'knowledge.add': 'Add file',
   'knowledge.remove': 'Remove',
   'saved': 'Saved',
+  'save.failed': 'Could not save the change. Try again.',
 } satisfies Record<string, string>
 
 /** The pt-BR dictionary. */
@@ -33,6 +34,7 @@ export const pt = {
   'knowledge.add': 'Adicionar arquivo',
   'knowledge.remove': 'Remover',
   'saved': 'Salvo',
+  'save.failed': 'Não foi possível salvar a alteração. Tente de novo.',
 } satisfies Record<ProjectsKey, string>
 
 /** The Chinese dictionary. */
@@ -49,6 +51,7 @@ export const zh = {
   'knowledge.add': '添加文件',
   'knowledge.remove': '移除',
   'saved': '已保存',
+  'save.failed': '无法保存此更改，请重试。',
 } satisfies Record<ProjectsKey, string>
 
 /** The Japanese dictionary. */
@@ -65,6 +68,7 @@ export const ja = {
   'knowledge.add': 'ファイルを追加',
   'knowledge.remove': '削除',
   'saved': '保存しました',
+  'save.failed': '変更を保存できませんでした。もう一度お試しください。',
 } satisfies Record<ProjectsKey, string>
 
 /** The Spanish dictionary. */
@@ -81,6 +85,7 @@ export const es = {
   'knowledge.add': 'Añadir archivo',
   'knowledge.remove': 'Quitar',
   'saved': 'Guardado',
+  'save.failed': 'No se pudo guardar el cambio. Inténtalo de nuevo.',
 } satisfies Record<ProjectsKey, string>
 
 /** The French dictionary. */
@@ -97,6 +102,7 @@ export const fr = {
   'knowledge.add': 'Ajouter un fichier',
   'knowledge.remove': 'Retirer',
   'saved': 'Enregistré',
+  'save.failed': 'Impossible d’enregistrer la modification. Réessayez.',
 } satisfies Record<ProjectsKey, string>
 
 /** The German dictionary. */
@@ -113,6 +119,7 @@ export const de = {
   'knowledge.add': 'Datei hinzufügen',
   'knowledge.remove': 'Entfernen',
   'saved': 'Gespeichert',
+  'save.failed': 'Die Änderung konnte nicht gespeichert werden. Versuchen Sie es erneut.',
 } satisfies Record<ProjectsKey, string>
 
 /** The Russian dictionary. */
@@ -129,4 +136,5 @@ export const ru = {
   'knowledge.add': 'Добавить файл',
   'knowledge.remove': 'Удалить',
   'saved': 'Сохранено',
+  'save.failed': 'Не удалось сохранить изменение. Попробуйте ещё раз.',
 } satisfies Record<ProjectsKey, string>

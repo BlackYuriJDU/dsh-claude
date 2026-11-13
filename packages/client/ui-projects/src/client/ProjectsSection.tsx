@@ -4,7 +4,7 @@
  * config form; the Host half reads the same Config into the runtime context of
  * sessions that run in that workspace.
  */
-import { useState, useSyncExternalStore } from 'react'
+import { useCallback, useRef, useState, useSyncExternalStore } from 'react'
 import type { GlobalStandardProps, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { WorkspaceView } from '@deepseek-ai/dsh-api-workspace-controller/client'
@@ -30,10 +30,18 @@ export type ProjectsSectionComponentProps =
     hideTitle?: boolean
   }
 
+/** A project entry's knowledge files; an entry without any has none. */
+const filesOf = (entry: ProjectEntry | undefined): NonNullable<ProjectEntry['files']> => entry?.files ?? []
+
 interface ProjectCardProps {
   workspace: Pick<WorkspaceView, 'path' | 'title'>
   entry: ProjectEntry | undefined
-  onSave: (entry: ProjectEntry) => void
+  /**
+   * Queue one change to this workspace's entry.
+   * @param update - derives the next entry from the latest queued one.
+   * @returns whether the Host accepted the write.
+   */
+  onSave: (update: (entry: ProjectEntry | undefined) => ProjectEntry) => Promise<boolean>
   t: PropsLocale<'projects'>['t']
 }
 
@@ -47,27 +55,43 @@ function ProjectCard({ workspace, entry, onSave, t }: ProjectCardProps) {
   // Only an edit in progress lives here; otherwise the field shows the stored value.
   const [draft, setDraft] = useState<string | undefined>()
   const [path, setPath] = useState('')
-  const [saved, setSaved] = useState(false)
-  const files = entry?.files ?? []
+  const [notice, setNotice] = useState<'saved' | 'failed' | null>(null)
+  const files = filesOf(entry)
   const stored = entry?.instructions ?? ''
 
+  const save = (update: (current: ProjectEntry | undefined) => ProjectEntry): Promise<boolean> => {
+    setNotice(null)
+    return onSave(update).then((accepted) => {
+      if (!accepted) setNotice('failed')
+      return accepted
+    })
+  }
+
+  // A refused write keeps the draft in the field; an accepted one hands the
+  // field back to the stored value unless the person typed again meanwhile.
   const commitInstructions = (): void => {
     if (draft === undefined) return
-    setDraft(undefined)
     const next = draft.trim()
-    if (next === stored) return
-    onSave({ ...entry, instructions: next })
-    setSaved(true)
+    if (next === stored) {
+      setDraft(undefined)
+      return
+    }
+    void save(current => ({ ...current, instructions: next })).then((accepted) => {
+      if (!accepted) return
+      setDraft(current => (current === draft ? undefined : current))
+      setNotice('saved')
+    })
   }
 
   // The add button is disabled while the trimmed path is empty.
   const addFile = (): void => {
-    onSave({ ...entry, files: [...files, { id: randomUUID(), path: path.trim() }] })
+    const added = { id: randomUUID(), path: path.trim() }
+    void save(current => ({ ...current, files: [...filesOf(current), added] }))
     setPath('')
   }
 
   const removeFile = (id: string): void => {
-    onSave({ ...entry, files: files.filter(file => file.id !== id) })
+    void save(current => ({ ...current, files: filesOf(current).filter(file => file.id !== id) }))
   }
 
   return (
@@ -83,10 +107,11 @@ function ProjectCard({ workspace, entry, onSave, t }: ProjectCardProps) {
         rows={3}
         aria-label={t('instructions')}
         placeholder={t('instructions.placeholder')}
-        onChange={(e) => { setDraft(e.target.value); setSaved(false) }}
+        onChange={(e) => { setDraft(e.target.value); setNotice(null) }}
         onBlur={commitInstructions}
       />
-      {saved && <span className={css.savedFlag}>{t('saved')}</span>}
+      {notice === 'saved' && <span className={css.savedFlag}>{t('saved')}</span>}
+      {notice === 'failed' && <span className={css.savedFlag} role="alert">{t('save.failed')}</span>}
       <span className={css.fieldLabel}>{t('knowledge')}</span>
       <p className={css.hint}>{t('knowledge.hint')}</p>
       {files.length === 0
@@ -127,9 +152,22 @@ function ProjectCard({ workspace, entry, onSave, t }: ProjectCardProps) {
  * @returns the section element tree.
  */
 export function ProjectsSection({ projects, useWorkspaces, t, hideTitle = false }: ProjectsSectionComponentProps) {
-  const snapshot = useSyncExternalStore(projects.subscribe.bind(projects), projects.getSnapshot.bind(projects))
+  const subscribe = useCallback((listener: () => void) => projects.subscribe(listener), [projects])
+  const map = useSyncExternalStore(subscribe, () => projects.getSnapshot().value?.projects) ?? {}
   const workspaces = useWorkspaces(state => state.items)
-  const map = snapshot.value?.projects ?? {}
+  // Every write replaces the whole map, and the snapshot changes only once the
+  // Host answers, so edits made meanwhile build on the last queued map.
+  const pending = useRef<{ map: ProjectsFormValue['projects']; writes: number }>({ map: {}, writes: 0 })
+  const save = (workspaceId: string, update: (entry: ProjectEntry | undefined) => ProjectEntry): Promise<boolean> => {
+    const base = pending.current.writes > 0 ? pending.current.map : map
+    const next = { ...base, [workspaceId]: update(base[workspaceId]) }
+    pending.current = { map: next, writes: pending.current.writes + 1 }
+    const settle = (accepted: boolean): boolean => {
+      pending.current.writes--
+      return accepted
+    }
+    return projects.set('projects', next).then(settle, () => settle(false))
+  }
 
   return (
     <div className={css.section}>
@@ -144,7 +182,7 @@ export function ProjectsSection({ projects, useWorkspaces, t, hideTitle = false 
                 key={workspace.workspaceId}
                 workspace={workspace}
                 entry={map[workspace.workspaceId]}
-                onSave={(entry) => { void projects.set('projects', { ...map, [workspace.workspaceId]: entry }) }}
+                onSave={update => save(workspace.workspaceId, update)}
                 t={t}
               />
             ))}
