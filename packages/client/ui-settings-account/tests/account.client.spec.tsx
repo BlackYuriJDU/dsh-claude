@@ -200,7 +200,7 @@ it.each([en, zh])('offers settings, contact and sign-in from the signed-out acco
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
     t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />)
   const trigger = screen.getByRole('button', { name: copy.menu })
-  expect(trigger.textContent).toBe(copy.more)
+  expect(trigger.textContent).toBe(copy.settings)
   expect(trigger.querySelector('svg')).not.toBeNull()
   fireEvent.click(trigger)
   expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([copy.settings, copy.contactUs, copy.signIn])

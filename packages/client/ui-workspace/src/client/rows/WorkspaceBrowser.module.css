@@ -94,9 +94,12 @@
   position: relative;
   left: -1px;
   flex: none;
-  max-width: 45%;
+  /* Room for the longer translations ("Espaços de trabalho") beside the three
+     toolbar buttons; anything longer ends in an ellipsis, never a hard cut. */
+  max-width: 60%;
   min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 20px;
   opacity: 1;

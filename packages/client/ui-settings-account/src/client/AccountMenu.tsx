@@ -75,7 +75,8 @@ export function AccountMenu({
           : renderSlot('settings.launcher.badge', { wide }, {
             fallback: <>
               <IconEllipsisOutlineMedium size={14} />
-              {wide && <span className={css.label}>{t('more')}</span>}
+              {/* Signed out, the menu leads with Settings; "More" would repeat the global panels' More above. */}
+              {wide && <span className={css.label}>{t('settings')}</span>}
             </>,
           })}
       </button>}
