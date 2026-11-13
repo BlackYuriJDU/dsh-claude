@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-projects",
   "description": "Per-workspace instructions and knowledge files: a Host runtime-context contribution and a Settings section to edit them",
-  "version": "0.2.2-alpha.3",
+  "version": "0.2.2-rc.2",
   "publishConfig": {
     "access": "public"
   },

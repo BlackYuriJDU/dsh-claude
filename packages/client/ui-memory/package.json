@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-memory",
   "description": "Saved memories for every session: a Host runtime-context contribution and a Settings section to edit the list",
-  "version": "0.2.2-alpha.3",
+  "version": "0.2.2-rc.2",
   "publishConfig": {
     "access": "public"
   },

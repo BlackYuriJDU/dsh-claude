@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-brand-dshc",
   "description": "DSHC identity for the Web client: Claude-app palette over the theme service and the brand mark in the sidebar and hero slots",
-  "version": "0.2.2-alpha.3",
+  "version": "0.2.2-rc.2",
   "publishConfig": {
     "access": "public"
   },
