@@ -782,7 +782,8 @@ it('shows a signed-out identity badge from its slot in place of the More label',
     t: key => key in en ? en[key as AccountKey] : key,
   }
   render(<AccountMenu {...props} />)
-  expect(calls[0]?.slice(0, 2)).toEqual(['settings.launcher.badge', { wide: true }])
-  expect((calls[0]?.[2] as { fallback?: unknown } | undefined)?.fallback).toBeDefined()
+  const badge = calls.find(call => call[0] === 'settings.launcher.badge')
+  expect(badge?.slice(0, 2)).toEqual(['settings.launcher.badge', { wide: true }])
+  expect((badge?.[2] as { fallback?: unknown } | undefined)?.fallback).toBeDefined()
   expect(screen.getByRole('button', { name: en.menu }).textContent).toBe('Ana')
 })

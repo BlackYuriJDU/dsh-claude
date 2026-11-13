@@ -27,7 +27,6 @@ import { ConversationMainPanel } from '../src/client/skeleton/ConversationMainPa
 import { ConversationSession, ConversationSessionHeader } from '../src/client/skeleton/ConversationSession.tsx'
 import { conversationPhase } from '../src/client/contract/snapshot.ts'
 import { HeroShell } from '../src/client/skeleton/EmptyHero.tsx'
-import type { HeroShellProps } from '../src/client/skeleton/EmptyHero.tsx'
 import './control-row-dom.ts'
 import { InputBar } from '../src/client/skeleton/InputBar.tsx'
 import type { InputBarProps } from '../src/client/skeleton/InputBar.tsx'
@@ -431,8 +430,10 @@ function mount(
 
 describe('Hero chrome', () => {
   it('renders the English headline and preview badge as the empty headline slot fallback', () => {
-    const renderSlot = vi.fn<HeroShellProps['renderSlot']>((_key, _owner, options) => options?.fallback ?? null)
-    const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot} />)
+    const renderSlot = vi.fn<(key: string, owner: object, opts?: { fallback?: ReactNode }) => ReactNode>(
+      (_key, _owner, options) => options?.fallback ?? null,
+    )
+    const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot as never} />)
     expect(view.getByText('Into the Unknown')).toBeTruthy()
     expect(view.getByText('Preview')).toBeTruthy()
     expect(renderSlot.mock.calls.map(call => call[0])).toEqual(['conversation.hero.brand.mark', 'conversation.hero.headline'])
