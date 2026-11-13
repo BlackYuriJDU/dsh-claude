@@ -14,7 +14,7 @@ DSH Claude restyled the Web client by editing the shipped theme stylesheets and 
 - Every override names a light and a dark value, so the built-in light, dark, and system preferences keep working; the upstream default preference `system` stays.
 - Values follow the host style variables in Anthropic's MCP Apps design guidelines, plus the app's sidebar tone and clay brand fill and hover. Tokens without a published value are derived from published ones, and the source file marks them.
 - Interface text uses the system UI sans stack and the wordmark uses the system serif stack, which is what the app renders when its own faces are absent. No font file ships, because the app's faces are not redistributable.
-- The mark is an original clay burst; no Anthropic logo or font is included.
+- The mark is the DSHC monogram, and text tokens hold a WCAG AA floor enforced by a test ([contrast floor and monogram](2026-11-13-dshc-aa-contrast-and-monogram.md)); no Anthropic logo or font is included.
 
 ## Alternatives considered
 
