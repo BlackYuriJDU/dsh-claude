@@ -146,6 +146,12 @@ A regra `label-content-name-mismatch` (WCAG 2.5.3) fica desligada no gate, e o t
 
 O `axe-core` é MPL-2.0 e entra só como devDependency do app de testes `apps/web`, que é privado e não é distribuído. O gate de licenças da Onda 2 precisa aceitar ferramentas de teste com licença de copyleft por arquivo.
 
+A regravação da suíte web (`DSH_SNAPSHOT=refresh`, 238 arquivos) mudou cerca de 90 goldens. Fora a indentação, só três coisas mudam: a coluna da conversa é `main`, o título do hero é `h1` e o launcher deslogado diz "Settings". Dentro de `main`, o `<header>` da sessão deixa de ser um `banner` separado. Por isso, `open-in-app-ssh` e `open-in-app-menus` passaram a localizar o header pelo slot de ações. `desktop-onboarding` passou a medir o título do próprio diálogo, porque agora há dois `h1`. `default-product-isolation` espera "Add workspace", porque a lista vazia de sessões não tem mais papel `tree`. `onboarding-native` passou a esperar "设置".
+
+O teste de 390 px achou um defeito do seletor segmentado: durante a troca de preset os segmentos ficavam `disabled`, e o foco que as setas acabavam de mover caía no documento. Agora eles ficam `aria-disabled`, continuam focáveis e ignoram cliques enquanto a troca não termina.
+
+Este container não tem bubblewrap nem WebKit. Os casos que executam comandos (PTC, present, changed-files-turn, forge, cua, entre outros) gravaram "no sandbox backend" nas sessões. Essas sessões foram revertidas, e os goldens desses casos receberam só a mudança de `main`, aplicada por script sobre a versão commitada. Os casos que falharam aqui sem depender de sandbox (schedule-phone, composer-focus, chat-continuous, user-text-secret-mask, agent-team-panel) falham do mesmo jeito no commit anterior à Onda 1.
+
 O scaffold da suíte web fixa o preset `standard`, que o DSHC desliga. O teste de acessibilidade passa `agentPresets: { default: 'chat' }`, e `connectFreshWorkspace` recebe o placeholder do composer liberado, porque o DSHC usa `heroPlaceholder: help`.
 
 ### Pendente
