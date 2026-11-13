@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SearxngSearchProvider } from '@deepseek-ai/dsh-web-search-searxng'
+import { SearxngSearchProvider } from '../src/provider.ts'
 
 /**
  * Live smoke for the SearXNG search provider. Self-skips without `$SEARXNG_URL`

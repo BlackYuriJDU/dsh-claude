@@ -14,10 +14,6 @@ import {
   type MemoryItem,
 } from './memory.ts'
 
-export {
-  MEMORY_CONTEXT_NAME, MEMORY_CONTEXT_ORDER, MEMORY_ENTRY_ID, memoryContextText,
-  PROFILE_CONTEXT_NAME, PROFILE_CONTEXT_ORDER, profileContextText,
-} from './memory.ts'
 export type { MemoryFormValue, MemoryItem } from './memory.ts'
 
 /** Plugin config. */

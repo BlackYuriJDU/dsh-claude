@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { updateVolatile } from '@deepseek-ai/cosmokit'
 import WebRuntime from '@deepseek-ai/dsh-web'
-import { SearxngSearchProvider, SEARXNG_PROVIDER_ID, searxngSearchUrl } from '@deepseek-ai/dsh-web-search-searxng'
+import { SEARXNG_DESCRIPTION, SearxngSearchProvider, SEARXNG_PROVIDER_ID, searxngSearchUrl } from '../src/provider.ts'
 import * as searxngPlugin from '@deepseek-ai/dsh-web-search-searxng'
 import { mapSearxngResponse, mapSearxngResult } from '../src/provider.ts'
 
@@ -257,8 +257,8 @@ describe('web-search-searxng plugin registration', () => {
     await ctx.plugin(WebRuntime, { searchProvider: SEARXNG_PROVIDER_ID })
     await ctx.plugin(searxngPlugin, { baseURL: 'https://searx.test' })
     const entry = ctx.web.listProviders().search.find(provider => provider.id === SEARXNG_PROVIDER_ID)
-    expect(entry).toMatchObject({ title: 'SearXNG', description: searxngPlugin.SEARXNG_DESCRIPTION })
-    expect(Object.keys(searxngPlugin.SEARXNG_DESCRIPTION).sort()).toEqual(['de', 'en', 'es', 'fr', 'ja', 'pt', 'ru', 'zh'])
+    expect(entry).toMatchObject({ title: 'SearXNG', description: SEARXNG_DESCRIPTION })
+    expect(Object.keys(SEARXNG_DESCRIPTION).sort()).toEqual(['de', 'en', 'es', 'fr', 'ja', 'pt', 'ru', 'zh'])
   })
 
   it('applies Settings edits to the next search without reloading', async () => {

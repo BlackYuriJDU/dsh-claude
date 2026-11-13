@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-有了 `dsh-client-ui-memory`，用户只需在设置中保存一次事实、偏好与更正，智能体就会在每个会话中遵循它们。Host 部分把列表渲染进每个会话的运行时上下文；浏览器部分在设置中加入“记忆”分区，用于添加、编辑与删除条目。列表保存在本插件的 Config 中，因此随配置档持久化，每个会话看到的都是同一版本。旁边的“你的 {product}”分区保存用户希望被称呼的名字以及对每次对话的指令，Host 部分会把它们渲染在记忆之前。设置了名字时，侧栏底部的账号启动器会显示其首字母，侧栏展开时还会显示名字。
+有了 `dsh-client-ui-memory`，用户只需在设置中保存一次事实、偏好与更正，智能体就会在每个会话中遵循它们。Host 部分把列表渲染进每个会话的运行时上下文；浏览器部分在设置中加入“记忆”分区，用于添加、编辑与删除条目。列表保存在本插件的 Config 中，因此随配置档持久化，每个会话看到的都是同一版本。旁边的“你的 {product}”分区保存用户希望被称呼的名字以及对每次对话的指令，Host 部分会把它们渲染在记忆之前。
 
 ## 目录
 
@@ -52,7 +52,7 @@ kind: "package-reference"
 <details>
 <summary>实现内部细节——点击展开</summary>
 
-Host 部分注册一个 `systemPrompt.context` 条目 `memory:saved`，顺序为 `300`，位于上游运行时上下文分配之后；其文本在每次组装时根据实时 Config 求值，并关闭提示变量插值，使包含花括号的记忆保持原样。它还调用 `settings.configure({ auto: false })`，避免自动生成的插件页面与设置分区重复。浏览器部分通过 `ctx.configForms.get('ui-memory')` 读写同一 Config，并且只在 Host 提供该条目时显示分区。
+Host 部分注册一个 `systemPrompt.context` 条目 `memory:saved`，顺序为 `300`，位于上游运行时上下文分配之后；其文本在每次组装时根据实时 Config 求值，并关闭提示变量插值，使包含花括号的记忆保持原样。它还调用 `settings.configure({ auto: false })`，避免自动生成的插件页面与设置分区重复。浏览器部分通过 `ctx.configForms.get('ui-memory')` 读写同一 Config，并且只在 Host 提供该条目时显示分区。设置了名字时，浏览器部分会占用 `settings.launcher.badge` 槽位，使未登录时侧栏底部的账号启动器显示名字的首字母，侧栏展开时还显示名字。
 
 | 文件 | 角色 |
 |---|---|

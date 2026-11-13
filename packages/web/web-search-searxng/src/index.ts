@@ -12,15 +12,6 @@ import type {} from '@deepseek-ai/dsh-web'
 import { SEARXNG_DESCRIPTION, SEARXNG_PROVIDER_ID, SEARXNG_TITLE, SearxngSearchProvider } from './provider.ts'
 import type { SearxngSafeSearch, SearxngSearchProviderOptions } from './provider.ts'
 
-export {
-  mapSearxngResponse,
-  mapSearxngResult,
-  SEARXNG_DESCRIPTION,
-  SEARXNG_PROVIDER_ID,
-  SEARXNG_TITLE,
-  SearxngSearchProvider,
-  searxngSearchUrl,
-} from './provider.ts'
 export type { SearxngSafeSearch, SearxngSearchProviderOptions } from './provider.ts'
 
 /** Cordis plugin name used by loader diagnostics. */

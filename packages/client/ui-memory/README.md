@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-With `dsh-client-ui-memory`, a person saves facts, preferences, and corrections once in Settings, and the agent follows them in every session. The Host half renders the list into each session's runtime context; the browser half adds a Memory section to Settings that adds, edits, and deletes entries. The list lives in this plugin's Config, so it persists with the profile and every session sees the same version. A "Your {product}" section beside it holds what the person wants to be called and their instructions for every conversation, which the Host half renders just before the memories. While a name is set, the account launcher at the foot of the sidebar shows its initials and, when wide, the name.
+With `dsh-client-ui-memory`, a person saves facts, preferences, and corrections once in Settings, and the agent follows them in every session. The Host half renders the list into each session's runtime context; the browser half adds a Memory section to Settings that adds, edits, and deletes entries. The list lives in this plugin's Config, so it persists with the profile and every session sees the same version. A "Your {product}" section beside it holds what the person wants to be called and their instructions for every conversation, which the Host half renders just before the memories.
 
 ## Table of Contents
 
@@ -52,7 +52,7 @@ Blank entries contribute nothing. When the whole list does not fit in `maxChars`
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-The Host half registers one `systemPrompt.context` entry, `memory:saved`, at order `300`, after the upstream runtime-context allocations; its text is evaluated at each assembly from the live Config, with prompt-variable interpolation off so a memory containing braces stays literal. It also calls `settings.configure({ auto: false })` so the generated plugin page does not duplicate the Settings section. The browser half reads and writes the same Config through `ctx.configForms.get('ui-memory')` and shows the section only while the Host serves that entry.
+The Host half registers one `systemPrompt.context` entry, `memory:saved`, at order `300`, after the upstream runtime-context allocations; its text is evaluated at each assembly from the live Config, with prompt-variable interpolation off so a memory containing braces stays literal. It also calls `settings.configure({ auto: false })` so the generated plugin page does not duplicate the Settings section. The browser half reads and writes the same Config through `ctx.configForms.get('ui-memory')` and shows the section only while the Host serves that entry. While a name is set, the browser half fills the `settings.launcher.badge` slot, so the signed-out account launcher at the foot of the sidebar shows the name's initials and, when wide, the name.
 
 | File | Role |
 |---|---|

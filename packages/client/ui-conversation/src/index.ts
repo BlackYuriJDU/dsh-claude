@@ -10,7 +10,7 @@ import { ConversationSettingsFields } from './submission-settings.ts'
 
 export {
   BUSY_ENTER_BEHAVIORS, BUSY_ENTER_FIELD, CONVERSATION_SETTINGS_NAMESPACE,
-  DEFAULT_BUSY_ENTER_BEHAVIOR, HERO_PROMPT_FIELD, HERO_PROMPT_KINDS, type BusyEnterBehavior,
+  DEFAULT_BUSY_ENTER_BEHAVIOR, type BusyEnterBehavior,
   type ConversationSettings, type HeroPlaceholder,
 } from './submission-settings.ts'
 

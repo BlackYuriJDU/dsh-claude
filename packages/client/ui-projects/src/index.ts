@@ -15,8 +15,6 @@ import type {} from '@deepseek-ai/dsh-workspace'
 import { KnowledgeReader } from './knowledge.ts'
 import { PROJECT_CONTEXT_NAME, PROJECT_CONTEXT_ORDER, projectContextText, workspaceFor, type ProjectEntry } from './projects.ts'
 
-export { KnowledgeReader } from './knowledge.ts'
-export { PROJECT_CONTEXT_NAME, PROJECT_CONTEXT_ORDER, PROJECTS_ENTRY_ID, projectContextText, workspaceFor } from './projects.ts'
 export type { KnowledgeRead, ProjectEntry, ProjectKnowledgeFile, ProjectLimits, ProjectsFormValue } from './projects.ts'
 
 /** Plugin config. */
