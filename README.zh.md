@@ -1,10 +1,10 @@
-# DSH Claude
+# DSHC
 
 [English](README.md) | 中文
 
-DSH Claude（`dshc`）是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的一个分支。DeepSeek Harness 是一个开源、基于插件的智能体框架；本分支的 Web 客户端仿照 Claude 应用设计样式。你自带模型与 API 密钥；框架、工具与界面保持开放。
+DSHC（`dshc`）是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的一个分支。DeepSeek Harness 是一个开源、基于插件的智能体框架；本分支的 Web 客户端仿照 Claude 应用设计样式。你自带模型与 API 密钥；框架、工具与界面保持开放。
 
-> **与 Anthropic 无关联。** DSH Claude 是一个独立的开源项目。“Claude” 是 Anthropic, PBC 的商标，此处仅用于说明设计灵感来源。不包含任何 Anthropic 标志、字体或其他资产。
+> **与 Anthropic 无关联。** DSHC 是一个独立的开源项目。“Claude” 是 Anthropic, PBC 的商标，此处仅用于说明设计灵感来源。不包含任何 Anthropic 标志、字体或其他资产。
 
 ## 本分支新增的内容
 
@@ -23,7 +23,7 @@ DSH Claude（`dshc`）是 [DeepSeek Harness](https://github.com/deepseek-ai/deep
 
 ### 从源码运行
 
-构建仓库，然后启动 DSH Claude：
+构建仓库，然后启动 DSHC：
 
 ```sh
 git clone https://github.com/BlackYuriJDU/dsh-claude.git

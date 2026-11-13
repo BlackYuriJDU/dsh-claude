@@ -1,10 +1,10 @@
-# DSH Claude
+# DSHC
 
 English | [中文](README.zh.md)
 
-DSH Claude (`dshc`) is a fork of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), an open-source, plugin-based agent harness, with a Web client styled after the Claude app. You bring your own models and API keys; the harness, tools, and interface stay open.
+DSHC (`dshc`) is a fork of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), an open-source, plugin-based agent harness, with a Web client styled after the Claude app. You bring your own models and API keys; the harness, tools, and interface stay open.
 
-> **Not affiliated with Anthropic.** DSH Claude is an independent open-source project. "Claude" is a trademark of Anthropic, PBC, used here only to describe the design inspiration. No Anthropic logos, fonts, or other assets are included.
+> **Not affiliated with Anthropic.** DSHC is an independent open-source project. "Claude" is a trademark of Anthropic, PBC, used here only to describe the design inspiration. No Anthropic logos, fonts, or other assets are included.
 
 ## What the fork adds
 
@@ -21,7 +21,7 @@ The fork is a layer over the upstream harness, so upstream updates merge without
 
 ### Run from source
 
-Build the checkout, then start DSH Claude:
+Build the checkout, then start DSHC:
 
 ```sh
 git clone https://github.com/BlackYuriJDU/dsh-claude.git

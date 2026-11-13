@@ -2,21 +2,21 @@
 # section, a hash of its English and Chinese blocks outside code blocks and generated regions.
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write README.md
-/dsh-claude:
-  en: 11eb5b55cee51432
-  zh: 3bd888369f34f7e6
-/dsh-claude/what-the-fork-adds:
+/dshc:
+  en: 165a64ec9df24f2f
+  zh: 6a7f4e5ade06daf0
+/dshc/what-the-fork-adds:
   en: bf00070e7139b58a
   zh: bbfed044d22720b7
-/dsh-claude/run:
+/dshc/run:
   en: 8bcfe486110004e4
   zh: 5491f0aa70750247
-/dsh-claude/run/run-from-source:
-  en: ac9915cb0fba5a58
-  zh: db4fd33032db6789
-/dsh-claude/upstream:
+/dshc/run/run-from-source:
+  en: 2d94491669961a73
+  zh: 5721f41573198451
+/dshc/upstream:
   en: cbb4839fddcfc9ff
   zh: 2da4a4b62bf3e552
-/dsh-claude/license:
+/dshc/license:
   en: 72c470c3d15a3346
   zh: ce9a3fb6fd69af38
