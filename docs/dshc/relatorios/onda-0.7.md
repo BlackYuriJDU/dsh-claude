@@ -12,6 +12,8 @@ Branch `ccr-a6886271-p3qfkp-v022`, PR #17 contra `dshc/base`. `dshc/base` é o u
 | publish source maps and sources like every 0.2.2 package | Lista `files` padrão do 0.2.2 nos seis pacotes DSHC (exigência do gate `constraints`) |
 | satisfy the 0.2.2 static gates on the DSHC packages | Entradas de plugin sem exports extras; `issue-policy.yml` de volta ao texto do upstream; Summary do README do `ui-memory` dentro de 100 palavras; baseline de casts sem a entrada aposentada |
 | create the card controller before the dictionaries | `ui-settings-searxng` cria o controlador antes dos dicionários, para não repetir o `ui-settings-shell` linha a linha (gate `duplication`) |
+| regenerate source lines for the DSHC plugin entries | `docs/config-catalog` com as linhas novas das entradas sem exports extras |
+| restore and align the tests the 0.2.2 suite caught | As seis correções de teste e de preset descritas em "Falhas do `test` que vinham da migração" |
 
 ## Conflitos do merge (29)
 
@@ -37,14 +39,25 @@ Ambiente: container Linux com 4 vCPUs e 15 GB, Node 24.22.1 (`/opt/node24`) e pn
 | `pnpm run constraints`, `release:verify --family dsh`, `duplication` | cada um reproduzido com falha e depois verde |
 | `pnpm run verify-translation-pairing` | 1.271 pares consistentes |
 | Specs dos arquivos em conflito e dos pacotes DSHC alterados | 105 + 92 + 12 testes passaram |
+| `pnpm run test` | 2.741 arquivos, 57.014 testes: 34 falhas em 18 arquivos. Oito falhas eram da migração e foram corrigidas (tabela abaixo); os specs afetados passam isolados. As outras 26 são do container: roda como root (testes de `chmod` e permissão em `agent-instructions`, `storage-sqlite`, `subagent/out-of-process` e `cordis-include-journal`), não tem bubblewrap (`ptc-runtime-node`, `bash-sandbox`, `workflow-ptc`), tem um `claude` real no PATH (`subagent-claude-code`), não alcança os hosts de rede do teste (`plugin-market`) e não formata o listener IPv6 (`llm-mock-server`). Nenhum desses pacotes difere de `dshc/base` |
+| `pnpm run test:snapshot` | 267 casos: 17 falhas, todas `sandbox-unavailable` (cenários PTC, `workflow-confinement`, `worktree` e `bash-tool` do SDK), porque o container não tem bubblewrap; o CI instala com `scripts/prepare-ci-bubblewrap.sh` |
 
-O `pnpm run test` completo e o `test:snapshot` não têm resultado registrado aqui: a primeira rodada foi invalidada por um `pnpm run clean` no meio, e a segunda, por um reinício do container.
+Falhas do `test` que vinham da migração:
+
+| Teste | Causa | Correção |
+|---|---|---|
+| `ui-agent-preset/tests/components.client.spec.tsx` (sem suíte) | O commit dos presets ocultos da festive esvaziou o arquivo por acidente | Spec recuperado da versão anterior, ajustado à prop `useSeatPolicy`, com um caso novo para presets ocultos; o baseline de casts volta à entrada do upstream |
+| `scripts/rescope-vendor.spec.ts` | O mesmo arquivo vazio | Mesma correção |
+| `scripts/ci-workflow.spec.ts` | A festive esperava `if` no job `Issue policy` | Volta à expectativa do upstream (job sem condição) |
+| `ui-theme/tests/corner-shape-styles.client.spec.ts` | O `.avatar` do `ProfileBadge` usava raio cheio sem `corner-shape: round` | Declaração acrescentada |
+| `bundle/dshc/tests/dshc.spec.ts` | Os presets Cowork, Code e Design copiavam as linhas do preset `standard` da 0.2.2-alpha.3 | As três linhas novas do upstream: `customSkillDirs` do `skill-filesystem`, `interrupt: false` do `tool-subagent-control` e `tool-office` |
+| `apps/cli/tests/profile-mcp.spec.ts` | O teste do upstream espera o `mcp-manager` só no perfil `web` | O perfil `dshc` compõe o bundle Web, então o teste o trata como `web` |
 
 ## CI da PR #17
 
 | Check | Classificação | Situação |
 |---|---|---|
-| `e2e` | ambiente do fork | Falta o secret `DEEPSEEK_API_KEY_EXTERNAL` (pendência do dono) |
+| `e2e` e `python runtime / release-shaped matrix` | ambiente do fork | Falta o secret `DEEPSEEK_API_KEY_EXTERNAL` (pendência do dono). No job Python, os 83 testes do pytest passam; só o passo do teste real de API para |
 | `Issue policy` | ambiente do fork | O fork não tem o GitHub App do upstream. O teste do upstream exige o job sem condição, então o workflow deve ser desabilitado nas configurações |
 | `Pack npm tarballs` | festive | Versões `0.2.2-alpha.3`; corrigido pelo commit de versão da família |
 | `static` (`constraints`, casts, exports, issue management, Summary) | festive | Corrigido pelos commits de `files` e de gates estáticos |
