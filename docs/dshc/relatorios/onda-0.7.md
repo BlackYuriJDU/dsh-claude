@@ -154,6 +154,8 @@ Este container não tem bubblewrap nem WebKit. Os casos que executam comandos (P
 
 O scaffold da suíte web fixa o preset `standard`, que o DSHC desliga. O teste de acessibilidade passa `agentPresets: { default: 'chat' }`, e `connectFreshWorkspace` recebe o placeholder do composer liberado, porque o DSHC usa `heroPlaceholder: help`.
 
+As capturas em 1280 e 390 px, nos temas claro e escuro, ficam em `docs/dshc/referencias/onda-1/`, gravadas no perfil `dshc` compilado. `dshc-390-segmented-keyboard.gif` mostra as setas, Home e End percorrendo os modos sem rolar a página. Este container não tem `xdg-user-dir`, então o Workspace padrão só foi criado com um `xdg-user-dir` local apontando para uma pasta temporária. Sem ele, o app mostra "Unable to create default workspace", que é o comportamento do upstream quando falta a pasta Documents.
+
 ### Pendente
 
 - `outline-offset` do botão de envio, que hoje encosta o anel de foco no preenchimento cor de argila.
