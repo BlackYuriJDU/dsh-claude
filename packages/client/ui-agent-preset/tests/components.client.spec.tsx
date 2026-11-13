@@ -466,6 +466,42 @@ describe('the segmented seat', () => {
     expect(screen.queryByRole('radiogroup')).toBeNull()
   })
 
+  it('is one Tab stop that the arrow keys, Home, and End move and select', async () => {
+    const { select } = renderSeat({ options: [{ id: 'standard' }, { id: 'mine' }, { id: 'third' }] }, undefined, undefined, true, 'segmented')
+    const group = screen.getByRole('radiogroup')
+    const radios = within(group).getAllByRole('radio')
+    expect(radios.map(radio => radio.tabIndex)).toEqual([0, -1, -1])
+    for (const [key, index, id] of [
+      ['ArrowRight', 1, 'mine'], ['ArrowDown', 1, 'mine'], ['ArrowLeft', 2, 'third'], ['ArrowUp', 2, 'third'], ['End', 2, 'third'],
+    ] as const) {
+      select.mockClear()
+      fireEvent.keyDown(group, { key })
+      expect(document.activeElement).toBe(radios[index])
+      await waitFor(() => { expect(select).toHaveBeenCalledExactlyOnceWith(id) })
+    }
+    select.mockClear()
+    fireEvent.keyDown(group, { key: 'Home' })
+    fireEvent.keyDown(group, { key: 'a' })
+    expect(document.activeElement).toBe(radios[0])
+    expect(select).not.toHaveBeenCalled()
+  })
+
+  it('wraps from the last segment, starts at the first without a checked one, and ignores keys while busy', async () => {
+    const last = renderSeat({ current: 'mine' }, undefined, undefined, true, 'segmented')
+    fireEvent.keyDown(screen.getByRole('radiogroup'), { key: 'ArrowRight' })
+    await waitFor(() => { expect(last.select).toHaveBeenCalledExactlyOnceWith('standard') })
+    last.select.mockClear()
+    fireEvent.keyDown(screen.getByRole('radiogroup'), { key: 'ArrowLeft' })
+    await waitFor(() => { expect(last.select).toHaveBeenCalledExactlyOnceWith('standard') })
+    cleanup()
+    renderSeat({ current: 'gone' }, undefined, undefined, true, 'segmented')
+    expect(screen.getAllByRole('radio').map(radio => radio.tabIndex)).toEqual([0, -1])
+    cleanup()
+    const busy = renderSeat({ busy: true }, undefined, undefined, true, 'segmented')
+    fireEvent.keyDown(screen.getByRole('radiogroup'), { key: 'ArrowRight' })
+    expect(busy.select).not.toHaveBeenCalled()
+  })
+
   it('renders nothing segmented before the roster arrives', () => {
     renderSeat({ options: [] }, undefined, undefined, true, 'segmented')
     expect(screen.queryByRole('radiogroup')).toBeNull()

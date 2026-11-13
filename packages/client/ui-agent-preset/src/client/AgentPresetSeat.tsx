@@ -12,7 +12,7 @@
  * Picking stages; the choice reaches a session when one becomes current.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import type { ObservableSnapshot, SnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import {
@@ -82,6 +82,19 @@ export type AgentPresetSeatProps =
  * @param props - composed slot props.
  * @returns The chip and any pending selection refusal, or null outside the main view.
  */
+const next = (from: number, last: number): number => (from >= last ? 0 : from + 1)
+const previous = (from: number, last: number): number => (from <= 0 ? last : from - 1)
+
+/** Segment index each radio-group key moves to, from the checked index (-1 for none) and the last index. */
+const SEGMENT_KEYS: Readonly<Partial<Record<string, (from: number, last: number) => number>>> = {
+  ArrowRight: next,
+  ArrowDown: next,
+  ArrowLeft: previous,
+  ArrowUp: previous,
+  Home: () => 0,
+  End: (_from, last) => last,
+}
+
 export function AgentPresetSeat({
   sessionId, useSessionRetainInfo, load, select, dismissRefusal, introduced, useAgentPresetSeat, useDeveloperTools,
   useSeatPolicy, t,
@@ -182,12 +195,24 @@ export function AgentPresetSeat({
     />
   )
 
+  // Radio-group keys: the arrows, Home, and End move to a segment and select it.
+  const moveSegment = (event: KeyboardEvent<HTMLDivElement>): void => {
+    const move = SEGMENT_KEYS[event.key]
+    const to = move === undefined ? -1 : move(options.findIndex(option => option.id === state.current), options.length - 1)
+    const target = options[to]
+    if (target === undefined || state.busy) return
+    event.preventDefault()
+    // The segments render in roster order, one radio per option.
+    event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]').item(to).focus()
+    if (target.id !== state.current) void select(target.id)
+  }
+
   if (segmented) {
     return (
       <>
         {ready && (
-          <div className={css.segments} role="radiogroup" aria-label={t('seatHint')}>
-            {options.map((option) => {
+          <div className={css.segments} role="radiogroup" aria-label={t('seatHint')} onKeyDown={moveSegment}>
+            {options.map((option, index) => {
               const text = presetDisplayText(option, t)
               const checked = option.id === state.current
               return (
@@ -196,6 +221,8 @@ export function AgentPresetSeat({
                   type="button"
                   role="radio"
                   aria-checked={checked}
+                  // One Tab stop for the group: the checked segment, or the first one.
+                  tabIndex={checked || index === 0 && !options.some(other => other.id === state.current) ? 0 : -1}
                   className={css.segment}
                   title={text.description ?? t('noDescription')}
                   disabled={state.busy}
