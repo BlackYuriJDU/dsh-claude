@@ -1,0 +1,61 @@
+# Onda 0.7 (M0 do Plano v3): migração para o upstream 0.2.2
+
+Branch `ccr-a6886271-p3qfkp-v022`, PR #17 contra `dshc/base`. `dshc/base` é o upstream `deepseek-ai/deepseek-harness` na 0.2.2-rc.2, sem nenhuma mudança. A branch parte da festive (`claude/festive-euler-vb8psi`) e recebe o upstream por merge, no mesmo sentido do merge anterior da própria festive ("Merge upstream master (0.2.2-alpha.3) into the DSHC branch").
+
+## Entregue
+
+| Commit (assunto) | O que mudou |
+|---|---|
+| Merge upstream master (0.2.2-rc.2) into the DSHC branch | Merge do upstream 0.2.2-rc.2 na festive, com os 29 conflitos resolvidos (tabela abaixo) |
+| fit DSHC specs to the merged 0.2.2 slots | Dois specs da festive ajustados aos slots do 0.2.2: o mock de `renderSlot` do hero e a busca do badge do launcher pela chave |
+| put the DSHC packages on the family version | Os seis pacotes DSHC passam a usar a versão da família, `0.2.2-rc.2` (exigência do `release:verify --family dsh`) |
+| publish source maps and sources like every 0.2.2 package | Lista `files` padrão do 0.2.2 nos seis pacotes DSHC (exigência do gate `constraints`) |
+| satisfy the 0.2.2 static gates on the DSHC packages | Entradas de plugin sem exports extras; `issue-policy.yml` de volta ao texto do upstream; Summary do README do `ui-memory` dentro de 100 palavras; baseline de casts sem a entrada aposentada |
+| create the card controller before the dictionaries | `ui-settings-searxng` cria o controlador antes dos dicionários, para não repetir o `ui-settings-shell` linha a linha (gate `duplication`) |
+
+## Conflitos do merge (29)
+
+| Tipo | Arquivos | Resolução |
+|---|---|---|
+| Gerados (13) | `docs/config-catalog{,.zh}.md`, `docs/module-graph{,.zh}.md`, `docs/capability-seams.i18n.yaml`, sete `README.i18n.yaml`, `slot-catalog.ts` | Lado do upstream, regenerados com `gen-config-catalog`, `gen-module-graph`, `gen-client-catalog` e `verify-translation-pairing --write` (os pares en e zh mudaram juntos) |
+| READMEs (6) | `ui-conversation`, `ui-settings`, `ui-settings-account` (en e zh) | Texto do upstream com os parágrafos DSHC reaplicados: placeholder e sugestões do hero, slot `settings.launcher.badge`, rótulo "Back to {product}" |
+| Código e testes (10) | `tsconfig.base.json`, `AssistantMarkdown.module.css`, `ui-message-feedback/package.json`, `ui-conversation/src/client/index.ts`, `ModelSelect.tsx`, `AccountMenu.tsx`, `ui-settings-account/src/client/index.ts`, `skeleton.client.spec.tsx`, `account.client.spec.tsx`, `dsh-doc/references/packages.md` | Os dois lados convivem: slots `hero.headline` e `hero.frame`, slots filhos `settings.launcher.badge` e `settings.launcher.notifications`, nomes de esforço localizados (sem o `MEASURE_STYLE`, que o upstream removeu), variável de fonte da resposta ao lado do `--dsh-assistant-block-gap`, dependência de `schemastery` ao lado da lista `files` nova |
+
+Divergência depois do merge: 339 arquivos diferem de `dshc/base`. Fora dos arquivos que a festive já alterava, só `packages/preset/agent-preset/skills/dsh-doc/references/packages.md` difere, porque o upstream mudou o caminho dele.
+
+## Gates rodados (comando → resultado)
+
+Ambiente: container Linux com 4 vCPUs e 15 GB, Node 24.22.1 (`/opt/node24`) e pnpm 11.28.5. A rede precisa liberar `cdn.sheetjs.com`, de onde o lockfile baixa o SheetJS 0.20.3. Aqui isso exigiu um ambiente próprio da sessão.
+
+| Comando | Resultado |
+|---|---|
+| `pnpm install --frozen-lockfile` | ok |
+| `DSH_GATE_CONCURRENCY=1 pnpm run typecheck` | 4 de 5 gates na primeira execução; o client aggregate falhou num spec, que foi corrigido. Depois, `tsc -b tsconfig.client.json` saiu com 0, e o typecheck completo passou no pre-push de cada envio |
+| `pnpm run lint` | exit 0 |
+| `pnpm run build` | 10 gates, 0 falhas |
+| `pnpm run check:ci:static` | primeira execução: 63 passaram e 4 falharam (unknown casts, plugin entry exports, issue management, README Summaries); os 4 foram corrigidos e cada um passou isolado |
+| `pnpm run constraints`, `release:verify --family dsh`, `duplication` | cada um reproduzido com falha e depois verde |
+| `pnpm run verify-translation-pairing` | 1.271 pares consistentes |
+| Specs dos arquivos em conflito e dos pacotes DSHC alterados | 105 + 92 + 12 testes passaram |
+
+O `pnpm run test` completo e o `test:snapshot` não têm resultado registrado aqui: a primeira rodada foi invalidada por um `pnpm run clean` no meio, e a segunda, por um reinício do container.
+
+## CI da PR #17
+
+| Check | Classificação | Situação |
+|---|---|---|
+| `e2e` | ambiente do fork | Falta o secret `DEEPSEEK_API_KEY_EXTERNAL` (pendência do dono) |
+| `Issue policy` | ambiente do fork | O fork não tem o GitHub App do upstream. O teste do upstream exige o job sem condição, então o workflow deve ser desabilitado nas configurações |
+| `Pack npm tarballs` | festive | Versões `0.2.2-alpha.3`; corrigido pelo commit de versão da família |
+| `static` (`constraints`, casts, exports, issue management, Summary) | festive | Corrigido pelos commits de `files` e de gates estáticos |
+| `lint` (`duplication`) | festive | Corrigido pelo commit do `ui-settings-searxng` |
+
+## Desvios do plano e motivo
+
+- **Passo 4 (`gh workflow disable`) não executado.** Nesta sessão, o `gh` só pode ser usado para busca, e o GitHub MCP não tem operação para desabilitar workflows. O plano proíbe editar os `.yml`, então a desativação fica com o dono, pela interface do GitHub. A lista: `ci-master.yml`, `ci-python.yml`, `pr-check-after-approve.yml`, `pr-check-on-head-branch.yml`, `pr-check-on-base-branch.yml`, `sandbox.yml` e, por causa do teste do upstream, também `issue-policy.yml`.
+- **`issue-policy.yml` sem a condição da festive.** O teste `keeps trusted preflight before token minting and required policy unconditional` do upstream proíbe `if:` no job e no preflight. Voltar ao texto do upstream elimina uma divergência; o fork desabilita o workflow em vez de editá-lo.
+- **`docs/dshc/` fora do pareamento de tradução** (`scripts/translation-pairing.manifest.json`), como a M1 prevê para os documentos do DSHC.
+
+## Próximo passo
+
+Terminar o `test` e o `test:snapshot` locais, deixar o CI da PR #17 verde nos checks que dependem do código e então seguir para a M1 (porte da linha 0.1.1).
