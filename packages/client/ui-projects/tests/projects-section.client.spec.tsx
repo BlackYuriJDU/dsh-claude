@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import type { WorkspaceId, WorkspaceSnapshot } from '@deepseek-ai/dsh-api-workspace-controller/client'
 import { stubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import { ProjectsSection, type ProjectsSectionComponentProps } from '../src/client/ProjectsSection.tsx'
@@ -48,6 +48,17 @@ describe('ProjectsSection', () => {
     expect(queryByText(en['saved'])).toBeTruthy()
     fireEvent.change(field, { target: { value: 'Use metric!' } })
     expect(queryByText(en['saved'])).toBeNull()
+  })
+
+  it('shows instructions stored after mount and does not write them back on a plain blur', () => {
+    const { form, getByLabelText } = mount(one)
+    act(() => { form.publish({ status: 'ready', value: { projects: { 'ws-1': { instructions: 'Stored later.' } } } }) })
+    const field = getByLabelText(en['instructions']) as HTMLTextAreaElement
+    expect(field.value).toBe('Stored later.')
+    fireEvent.blur(field)
+    fireEvent.change(field, { target: { value: ' Stored later. ' } })
+    fireEvent.blur(field)
+    expect(form.set).not.toHaveBeenCalled()
   })
 
   it('adds a trimmed file path and removes a file, keeping other projects', () => {

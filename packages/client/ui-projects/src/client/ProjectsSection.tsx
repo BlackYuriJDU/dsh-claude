@@ -44,14 +44,18 @@ interface ProjectCardProps {
  * @returns the card element tree.
  */
 function ProjectCard({ workspace, entry, onSave, t }: ProjectCardProps) {
-  const [instructions, setInstructions] = useState(entry?.instructions ?? '')
+  // Only an edit in progress lives here; otherwise the field shows the stored value.
+  const [draft, setDraft] = useState<string | undefined>()
   const [path, setPath] = useState('')
   const [saved, setSaved] = useState(false)
   const files = entry?.files ?? []
+  const stored = entry?.instructions ?? ''
 
   const commitInstructions = (): void => {
-    const next = instructions.trim()
-    if (next === (entry?.instructions ?? '')) return
+    if (draft === undefined) return
+    setDraft(undefined)
+    const next = draft.trim()
+    if (next === stored) return
     onSave({ ...entry, instructions: next })
     setSaved(true)
   }
@@ -75,11 +79,11 @@ function ProjectCard({ workspace, entry, onSave, t }: ProjectCardProps) {
       <span className={css.fieldLabel}>{t('instructions')}</span>
       <textarea
         className={css.textarea}
-        value={instructions}
+        value={draft ?? stored}
         rows={3}
         aria-label={t('instructions')}
         placeholder={t('instructions.placeholder')}
-        onChange={(e) => { setInstructions(e.target.value); setSaved(false) }}
+        onChange={(e) => { setDraft(e.target.value); setSaved(false) }}
         onBlur={commitInstructions}
       />
       {saved && <span className={css.savedFlag}>{t('saved')}</span>}
