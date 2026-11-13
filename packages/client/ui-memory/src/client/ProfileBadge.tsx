@@ -3,9 +3,9 @@
  * in the "Your {product}" section, and the name itself while the sidebar
  * shows labels.
  */
-import { useSyncExternalStore } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { MemorySectionInjected } from './MemorySection.tsx'
+import { useFormSnapshot } from './form-snapshot.ts'
 import css from './ProfileBadge.module.css'
 
 /** The launcher geometry plus the memory form that holds the name. */
@@ -34,7 +34,7 @@ export function initialsOf(name: string): string {
  * @returns the badge, or nothing while the name is blank.
  */
 export function ProfileBadge({ wide, memory }: ProfileBadgeProps) {
-  const name = useSyncExternalStore(memory.subscribe.bind(memory), () => memory.getSnapshot().value?.profileName?.trim() ?? '')
+  const name = useFormSnapshot(memory, snapshot => snapshot.value?.profileName?.trim() ?? '')
   if (name === '') return null
   return (
     <>

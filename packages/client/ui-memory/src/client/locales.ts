@@ -21,6 +21,7 @@ export const en = {
   'profile.instructions': 'Instructions for every conversation',
   'profile.instructions.placeholder': 'For example: reply in Portuguese, keep answers short, explain code step by step.',
   'profile.saved': 'Saved',
+  'save.failed': 'Could not save the change. Try again.',
 } satisfies Record<string, string>
 
 /** The pt-BR dictionary. */
@@ -41,6 +42,7 @@ export const pt = {
   'profile.instructions': 'Instruções para todas as conversas',
   'profile.instructions.placeholder': 'Por exemplo: responda em português, seja breve, explique código passo a passo.',
   'profile.saved': 'Salvo',
+  'save.failed': 'Não foi possível salvar a alteração. Tente de novo.',
 } satisfies Record<MemoryKey, string>
 
 /** The Chinese dictionary. */
@@ -61,6 +63,7 @@ export const zh = {
   'profile.instructions': '每次对话的指令',
   'profile.instructions.placeholder': '例如：用中文回复，回答简短，逐步解释代码。',
   'profile.saved': '已保存',
+  'save.failed': '无法保存此更改，请重试。',
 } satisfies Record<MemoryKey, string>
 
 /** The Japanese dictionary. */
@@ -81,6 +84,7 @@ export const ja = {
   'profile.instructions': 'すべての会話への指示',
   'profile.instructions.placeholder': '例：日本語で返信、簡潔に答える、コードは手順ごとに説明する。',
   'profile.saved': '保存しました',
+  'save.failed': '変更を保存できませんでした。もう一度お試しください。',
 } satisfies Record<MemoryKey, string>
 
 /** The Spanish dictionary. */
@@ -101,6 +105,7 @@ export const es = {
   'profile.instructions': 'Instrucciones para todas las conversaciones',
   'profile.instructions.placeholder': 'Por ejemplo: responde en español, sé breve, explica el código paso a paso.',
   'profile.saved': 'Guardado',
+  'save.failed': 'No se pudo guardar el cambio. Inténtalo de nuevo.',
 } satisfies Record<MemoryKey, string>
 
 /** The French dictionary. */
@@ -121,6 +126,7 @@ export const fr = {
   'profile.instructions': 'Instructions pour chaque conversation',
   'profile.instructions.placeholder': 'Par exemple : réponds en français, sois bref, explique le code étape par étape.',
   'profile.saved': 'Enregistré',
+  'save.failed': 'Impossible d’enregistrer la modification. Réessayez.',
 } satisfies Record<MemoryKey, string>
 
 /** The German dictionary. */
@@ -141,6 +147,7 @@ export const de = {
   'profile.instructions': 'Anweisungen für jedes Gespräch',
   'profile.instructions.placeholder': 'Zum Beispiel: Antworte auf Deutsch, fasse dich kurz, erkläre Code Schritt für Schritt.',
   'profile.saved': 'Gespeichert',
+  'save.failed': 'Die Änderung konnte nicht gespeichert werden. Versuchen Sie es erneut.',
 } satisfies Record<MemoryKey, string>
 
 /** The Russian dictionary. */
@@ -161,4 +168,5 @@ export const ru = {
   'profile.instructions': 'Инструкции для каждого разговора',
   'profile.instructions.placeholder': 'Например: отвечай по-русски, кратко, объясняй код по шагам.',
   'profile.saved': 'Сохранено',
+  'save.failed': 'Не удалось сохранить изменение. Попробуйте ещё раз.',
 } satisfies Record<MemoryKey, string>

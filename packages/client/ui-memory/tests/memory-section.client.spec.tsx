@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render } from '@testing-library/react'
+import { stubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import type { ConfigForm, ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { MemorySection, type MemorySectionComponentProps } from '../src/client/MemorySection.tsx'
 import { en } from '../src/client/locales.ts'
@@ -74,5 +75,36 @@ describe('MemorySection', () => {
     fireEvent.click(getAllByText(en['delete'])[0]!)
     expect(memory.writes.at(-1)).toEqual([])
     expect(queryByText('Keep')).toBeNull()
+  })
+
+  it('applies a second edit to the first one while the Host has not answered', async () => {
+    const form = stubConfigForm<MemoryFormValue>()
+    form.publish({ status: 'ready', value: { memories: [{ id: 'a', text: 'A' }, { id: 'b', text: 'B' }, { id: 'c', text: 'C' }] } })
+    const answers: ((accepted: boolean) => void)[] = []
+    form.set.mockImplementation(() => new Promise<boolean>((resolve) => { answers.push(resolve) }))
+    const t: MemorySectionComponentProps['t'] = key => (en as Record<string, string>)[key] ?? key
+    const view = render(<MemorySection memory={form.scope} t={t} />)
+    fireEvent.click(view.getAllByText(en['delete'])[0]!)
+    fireEvent.click(view.getAllByText(en['delete'])[1]!)
+    expect(form.set).toHaveBeenLastCalledWith('memories', [{ id: 'c', text: 'C' }])
+    await act(async () => { for (const answer of answers) answer(true) })
+    // With nothing in flight, the next edit starts from the Host's list again.
+    fireEvent.click(view.getAllByText(en['delete'])[2]!)
+    expect(form.set).toHaveBeenLastCalledWith('memories', [{ id: 'a', text: 'A' }, { id: 'b', text: 'B' }])
+  })
+
+  it.each([
+    ['refuses', () => Promise.resolve(false)],
+    ['fails to reach the Host', () => Promise.reject(new Error('offline'))],
+  ] as const)('reports the failure when the Host %s, and clears it on the next edit', async (_case, answer) => {
+    const form = stubConfigForm<MemoryFormValue>()
+    form.publish({ status: 'ready', value: { memories: [{ id: 'a', text: 'A' }] } })
+    form.set.mockImplementationOnce(answer)
+    const t: MemorySectionComponentProps['t'] = key => (en as Record<string, string>)[key] ?? key
+    const view = render(<MemorySection memory={form.scope} t={t} />)
+    fireEvent.click(view.getByText(en['delete']))
+    expect((await view.findByRole('alert')).textContent).toBe(en['save.failed'])
+    fireEvent.click(view.getByText(en['delete']))
+    expect(view.queryByRole('alert')).toBeNull()
   })
 })

@@ -3,11 +3,12 @@
  * writes the `ui-memory` Config through its config form; the Host half
  * renders the same list into every session's runtime context.
  */
-import { useState, useSyncExternalStore } from 'react'
+import { useRef, useState } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { MemoryFormValue, MemoryItem } from '../memory.ts'
 import { randomUUID } from '@deepseek-ai/dsh-util-crypto'
+import { useFormSnapshot } from './form-snapshot.ts'
 import css from './MemorySection.module.css'
 
 /** Injected business face: the memory Config form this section edits. */
@@ -24,25 +25,37 @@ export type MemorySectionComponentProps = PropsLocale<'memory'> & MemorySectionI
  * @returns the section element tree.
  */
 export function MemorySection({ memory, t }: MemorySectionComponentProps) {
-  const snapshot = useSyncExternalStore(memory.subscribe.bind(memory), memory.getSnapshot.bind(memory))
-  const memories = snapshot.value?.memories ?? []
+  const memories = useFormSnapshot(memory, snapshot => snapshot.value?.memories) ?? []
   const [draft, setDraft] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
+  const [failed, setFailed] = useState(false)
+  // While writes are in flight, each edit applies to the last queued list: the
+  // snapshot only changes once the Host answers, and every write replaces the list.
+  const queued = useRef<readonly MemoryItem[]>(undefined)
+  const inFlight = useRef(0)
 
-  const write = (next: readonly MemoryItem[]): void => {
-    void memory.set('memories', [...next])
+  const write = (update: (items: readonly MemoryItem[]) => MemoryItem[]): void => {
+    const items = update(queued.current ?? memories)
+    queued.current = items
+    inFlight.current++
+    setFailed(false)
+    const settle = (accepted: boolean): void => {
+      if (--inFlight.current === 0) queued.current = undefined
+      if (!accepted) setFailed(true)
+    }
+    memory.set('memories', items).then(settle, () => { settle(false) })
   }
 
   // The add button is disabled while the trimmed draft is empty.
   const add = (): void => {
     const text = draft.trim()
-    write([...memories, { id: randomUUID(), text }])
+    write(items => [...items, { id: randomUUID(), text }])
     setDraft('')
   }
 
   const remove = (id: string): void => {
-    write(memories.filter(item => item.id !== id))
+    write(items => items.filter(item => item.id !== id))
     if (editingId === id) setEditingId(null)
   }
 
@@ -57,7 +70,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
       remove(id)
       return
     }
-    write(memories.map(item => (item.id === id ? { ...item, text } : item)))
+    write(items => items.map(item => (item.id === id ? { ...item, text } : item)))
     setEditingId(null)
   }
 
@@ -65,6 +78,7 @@ export function MemorySection({ memory, t }: MemorySectionComponentProps) {
     <div className={css.section}>
       <div className={css.groupTitle}>{t('title')}</div>
       <p className={css.hint}>{t('hint')}</p>
+      {failed && <p className={css.hint} role="alert">{t('save.failed')}</p>}
       {memories.length === 0
         ? <p className={css.empty}>{t('empty')}</p>
         : (
