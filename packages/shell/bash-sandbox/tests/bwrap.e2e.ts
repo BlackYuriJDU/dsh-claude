@@ -8,7 +8,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { LocalSandboxProvider } from '@deepseek-ai/dsh-sandbox-local'
 import { SandboxPolicyService } from '@deepseek-ai/dsh-sandbox-policy'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
-import { bwrapProfileArgs } from '@deepseek-ai/dsh-sandbox-local/src/profiles.ts'
+import { NO_RESTRICTIONS, bwrapProfileArgs } from '@deepseek-ai/dsh-sandbox-local/src/profiles.ts'
 import { SandboxBashExecutor } from '@deepseek-ai/dsh-bash-sandbox'
 import LocalSubprocessRuntime from '@deepseek-ai/dsh-subprocess-local'
 import type { ShellExecSpec, ShellExecution, ShellRunResult } from '@deepseek-ai/dsh-shell'
@@ -34,7 +34,7 @@ function start(x: { execute(spec: ShellExecSpec): Promise<ShellExecution> }, spe
  * intentional because bwrap replaces `/tmp`, which cannot prove the workspace-root boundary.
  */
 
-const probe = spawnSync('bwrap', [...bwrapProfileArgs({ mode: 'read-only', workspaceRoot: '/' }), '--', 'true'], { timeout: 5_000, stdio: 'ignore' })
+const probe = spawnSync('bwrap', [...bwrapProfileArgs({ mode: 'read-only', workspaceRoot: '/' }, NO_RESTRICTIONS), '--', 'true'], { timeout: 5_000, stdio: 'ignore' })
 const bwrapUsable = probe.status === 0
 
 let ctx: Context | undefined

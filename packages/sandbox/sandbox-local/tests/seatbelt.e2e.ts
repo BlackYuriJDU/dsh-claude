@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import type { SandboxPolicy } from '@deepseek-ai/dsh-sandbox'
 import { LocalSandboxProvider } from '@deepseek-ai/dsh-sandbox-local'
-import { seatbeltProfileArgs } from '../src/profiles.ts'
+import { NO_RESTRICTIONS, seatbeltProfileArgs } from '../src/profiles.ts'
 import { checkExtraWrites, checkRedirectedRoot } from './extra-roots.ts'
 
 /**
@@ -18,7 +18,7 @@ import { checkExtraWrites, checkRedirectedRoot } from './extra-roots.ts'
  * workspace-write proves the workspace-root grant itself.
  */
 
-const probe = spawnSync('sandbox-exec', [...seatbeltProfileArgs({ mode: 'read-only', workspaceRoot: '/' }), '--', 'true'], { timeout: 5_000, stdio: 'ignore' })
+const probe = spawnSync('sandbox-exec', [...seatbeltProfileArgs({ mode: 'read-only', workspaceRoot: '/' }, NO_RESTRICTIONS), '--', 'true'], { timeout: 5_000, stdio: 'ignore' })
 const seatbeltUsable = probe.status === 0
 const gitUsable = spawnSync('git', ['--version'], { timeout: 5_000, stdio: 'ignore' }).status === 0
 

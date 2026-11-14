@@ -3101,7 +3101,7 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-sandbox-local`
 
-- `source`: [`packages/sandbox/sandbox-local/src/index.ts:63`](../packages/sandbox/sandbox-local/src/index.ts)
+- `source`: [`packages/sandbox/sandbox-local/src/index.ts:65`](../packages/sandbox/sandbox-local/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config. All optional — `static Config` supplies the defaults. */
@@ -3126,6 +3126,20 @@ export interface Config {
   runnerFailureSignatures?: string[]
   /** Positive timeout for each functional probe; zero would mean unbounded to Node. */
   probeTimeoutMs?: number
+  /**
+   * Absolute paths, or paths starting with `~/`, that confined commands must
+   * not read. Each confinement resolves them to their real paths and skips
+   * those that do not exist; a directory hides its subtree. bwrap and Seatbelt
+   * enforce them; Landlock and the Windows ACL runner cannot, and report
+   * `partial` enforcement while any is configured.
+   */
+  denyReadPaths?: string[]
+  /**
+   * `off` removes network access from confined commands under bwrap and
+   * Seatbelt; Landlock and the Windows ACL runner cannot, and report `partial`
+   * enforcement.
+   */
+  network?: 'on' | 'off'
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-sandbox-local -->

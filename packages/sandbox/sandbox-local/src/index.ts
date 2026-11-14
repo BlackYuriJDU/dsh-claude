@@ -23,8 +23,9 @@
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { realpath, stat } from 'node:fs/promises'
+import { homedir, tmpdir } from 'node:os'
+import { isAbsolute, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   LAUNCHER_BIN,
@@ -39,7 +40,8 @@ import type { ConfinedArgv, ConfinedSandboxMode, RunnerFailureRule, SandboxEnfor
 import type { SessionId } from '@deepseek-ai/dsh-session'
 import { AclWriteGrant, isTempRootInsideWorkspace, registerAclDiagnosisSkill, tempWriteSid, workspaceWriteSid } from '@deepseek-ai/dsh-sandbox-windows-acl'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
-import { bwrapProfileArgs, landlockProfileArgs, seatbeltProfileArgs } from './profiles.ts'
+import { NO_RESTRICTIONS, bwrapProfileArgs, hasRestrictions, landlockProfileArgs, seatbeltProfileArgs } from './profiles.ts'
+import type { ConfinementRestrictions, DeniedReadPath } from './profiles.ts'
 
 /**
  * Classify one failed Windows ACL preparation step; the platform failure, or an
@@ -81,11 +83,25 @@ export interface Config {
   runnerFailureSignatures?: string[]
   /** Positive timeout for each functional probe; zero would mean unbounded to Node. */
   probeTimeoutMs?: number
+  /**
+   * Absolute paths, or paths starting with `~/`, that confined commands must
+   * not read. Each confinement resolves them to their real paths and skips
+   * those that do not exist; a directory hides its subtree. bwrap and Seatbelt
+   * enforce them; Landlock and the Windows ACL runner cannot, and report
+   * `partial` enforcement while any is configured.
+   */
+  denyReadPaths?: string[]
+  /**
+   * `off` removes network access from confined commands under bwrap and
+   * Seatbelt; Landlock and the Windows ACL runner cannot, and report `partial`
+   * enforcement.
+   */
+  network?: 'on' | 'off'
 }
 
 /** Probe whether `bwrap` can create the profile; the provider caches the bounded result. */
 function defaultProbeBwrap(timeoutMs: number): boolean {
-  const probe = spawnSync('bwrap', [...bwrapProfileArgs({ mode: 'read-only', workspaceRoot: '/' }), '--', 'true'], {
+  const probe = spawnSync('bwrap', [...bwrapProfileArgs({ mode: 'read-only', workspaceRoot: '/' }, NO_RESTRICTIONS), '--', 'true'], {
     timeout: timeoutMs,
     stdio: 'ignore',
   })
@@ -102,7 +118,7 @@ function defaultProbeBwrap(timeoutMs: number): boolean {
  * every macOS; if it ever disappears, this probe is what fails closed.
  */
 function defaultProbeSeatbelt(seatbeltExec: string, timeoutMs: number): boolean {
-  const probe = spawnSync(seatbeltExec, [...seatbeltProfileArgs({ mode: 'read-only', workspaceRoot: '/' }), '--', 'true'], {
+  const probe = spawnSync(seatbeltExec, [...seatbeltProfileArgs({ mode: 'read-only', workspaceRoot: '/' }, NO_RESTRICTIONS), '--', 'true'], {
     timeout: timeoutMs,
     stdio: 'ignore',
   })
@@ -206,6 +222,40 @@ const STATIC_ENFORCEMENT: Record<SelectedRunner['runner'], SandboxEnforcement> =
   'windows-acl': 'partial',
 }
 
+/** Runners whose profiles express `denyReadPaths` and `network: 'off'`. */
+const RESTRICTION_CAPABLE: ReadonlySet<SelectedRunner['runner']> = new Set(['bwrap', 'seatbelt'])
+
+/**
+ * Expand one configured hidden path: `~` and `~/…` resolve against the Host
+ * account's home directory; any other relative path is misconfiguration.
+ * @param configured - a `denyReadPaths` entry.
+ * @returns the absolute, normalized path.
+ */
+function expandDenyReadPath(configured: string): string {
+  const expanded = configured === '~' ? homedir() : configured.startsWith('~/') ? join(homedir(), configured.slice(2)) : configured
+  if (!isAbsolute(expanded)) {
+    throw new Error(`sandbox-local: denyReadPaths entries must be absolute or start with ~/, got ${JSON.stringify(configured)}`)
+  }
+  return normalize(expanded)
+}
+
+/**
+ * Resolve one hidden path for a confinement: its real path and whether it is
+ * a directory. A missing path hides nothing, since bwrap cannot mount over it.
+ * @param path - an expanded `denyReadPaths` entry.
+ * @returns the resolved entry, or undefined when the path does not exist.
+ */
+async function resolveDeniedReadPath(path: string): Promise<DeniedReadPath | undefined> {
+  try {
+    const real = await realpath(path)
+    return { path: real, kind: (await stat(real)).isDirectory() ? 'directory' : 'file' }
+  } catch (error: unknown) {
+    const code = (error as NodeJS.ErrnoException).code
+    if (code === 'ENOENT' || code === 'ENOTDIR') return undefined
+    throw error
+  }
+}
+
 /**
  * A probe bound must be a positive finite number: Node treats
  * `spawnSync({ timeout: 0 })` as NO timeout, so an unvalidated 0 would
@@ -273,6 +323,8 @@ export class LocalSandboxProvider extends SandboxProvider {
     runnerCommand: z.array(z.string()).default([]),
     runnerFailureSignatures: z.array(z.string()).default([]),
     probeTimeoutMs: z.natural().default(5_000),
+    denyReadPaths: z.array(z.string()).default([]),
+    network: z.union([z.const('on'), z.const('off')]).default('on'),
   })
 
   /** Test hook (mirrors the bash executors' `internals`). */
@@ -281,6 +333,9 @@ export class LocalSandboxProvider extends SandboxProvider {
   private readonly runnerCommand: string[] | undefined
   private readonly configuredRunnerFailureSignatures: string[]
   private readonly probeTimeoutMs: number
+  /** Configured hidden paths, absolute and normalized; resolved per confinement. */
+  private readonly denyReadPaths: readonly string[]
+  private readonly network: 'on' | 'off'
   /** Cached chain verdict; undefined until the first confined wrap needs it. */
   private selectedRunner: SelectedRunner | 'unavailable' | undefined
   /**
@@ -313,6 +368,8 @@ export class LocalSandboxProvider extends SandboxProvider {
     this.configuredRunnerFailureSignatures = runnerFailureSignatures
     this.probeTimeoutMs = config.probeTimeoutMs as number
     assertPositiveFinite('probeTimeoutMs', this.probeTimeoutMs)
+    this.denyReadPaths = (config.denyReadPaths as string[]).map(expandDenyReadPath)
+    this.network = config.network as 'on' | 'off'
     // An operator-supplied runner does not use the ACL backend. The registry
     // remains optional and may be mounted after this provider.
     /* v8 ignore next 3 -- Windows-only registration; the Linux coverage lane cannot take this branch */
@@ -343,30 +400,47 @@ export class LocalSandboxProvider extends SandboxProvider {
   async confine(argv: readonly string[], policy: SandboxPolicy, signal?: AbortSignal): Promise<ConfinedArgv> {
     signal?.throwIfAborted()
     policy = { ...policy, workspaceRoot: canonicalPath(policy.workspaceRoot) }
+    const restrictions = await this.resolveRestrictions()
+    signal?.throwIfAborted()
     if (this.runnerCommand !== undefined) {
-      return Promise.resolve<ConfinedArgv>({
-        argv: [...this.runnerCommand, ...bwrapProfileArgs(policy), '--', ...argv],
+      return {
+        argv: [...this.runnerCommand, ...bwrapProfileArgs(policy, restrictions), '--', ...argv],
         enforcement: 'full',
         denialSignatures: DENIAL_SIGNATURES.runnerCommand,
         runnerFailureRules: [{ fatalSignatures: this.configuredRunnerFailureSignatures }],
-      })
+      }
     }
     const selected = this.selectRunner(policy.mode)
-    const runnerArgv = this.runnerArgv(selected.runner, policy)
-    return Promise.resolve<ConfinedArgv>({
+    const runnerArgv = this.runnerArgv(selected.runner, policy, restrictions)
+    return {
       argv: [...runnerArgv, '--', ...argv],
-      enforcement: selected.enforcement,
+      enforcement: hasRestrictions(restrictions) && !RESTRICTION_CAPABLE.has(selected.runner) ? 'partial' : selected.enforcement,
       denialSignatures: DENIAL_SIGNATURES[selected.runner],
       runnerFailureRules: RUNNER_FAILURE_RULES[selected.runner],
-    })
+    }
+  }
+
+  /**
+   * The configured restrictions for one confinement: each hidden path resolved
+   * through symlinks and classified, missing paths skipped, duplicates removed.
+   * @returns the restrictions the profile builders express.
+   */
+  private async resolveRestrictions(): Promise<ConfinementRestrictions> {
+    if (this.denyReadPaths.length === 0 && this.network === 'on') return NO_RESTRICTIONS
+    const resolved = new Map<string, DeniedReadPath>()
+    for (const configured of this.denyReadPaths) {
+      const denied = await resolveDeniedReadPath(configured)
+      if (denied !== undefined) resolved.set(denied.path, denied)
+    }
+    return { denyRead: [...resolved.values()], network: this.network }
   }
 
   /** The selected rung's runner invocation (program + profile arguments) for one policy. */
-  private runnerArgv(runner: SelectedRunner['runner'], policy: SandboxPolicy): string[] {
+  private runnerArgv(runner: SelectedRunner['runner'], policy: SandboxPolicy, restrictions: ConfinementRestrictions): string[] {
     switch (runner) {
-      case 'bwrap': return ['bwrap', ...bwrapProfileArgs(policy)]
+      case 'bwrap': return ['bwrap', ...bwrapProfileArgs(policy, restrictions)]
       case 'landlock': return [this.landlockLauncher(), ...landlockProfileArgs(policy)]
-      case 'seatbelt': return [this.seatbeltExec(), ...seatbeltProfileArgs(policy)]
+      case 'seatbelt': return [this.seatbeltExec(), ...seatbeltProfileArgs(policy, restrictions)]
       case 'windows-acl': return this.windowsAclRunnerArgv(policy)
       default: return assertNever(runner)
     }

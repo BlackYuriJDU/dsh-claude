@@ -8,8 +8,8 @@
  */
 
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
@@ -20,7 +20,7 @@ import {
   LocalSandboxProvider,
 } from '@deepseek-ai/dsh-sandbox-local'
 import type { Config } from '@deepseek-ai/dsh-sandbox-local'
-import { bwrapProfileArgs, landlockProfileArgs, seatbeltProfileArgs } from '../src/profiles.ts'
+import { NO_RESTRICTIONS, bwrapProfileArgs, landlockProfileArgs, seatbeltProfileArgs } from '../src/profiles.ts'
 
 const RO: SandboxPolicy = { mode: 'read-only', workspaceRoot: '/ws' }
 const WW: SandboxPolicy = { mode: 'workspace-write', workspaceRoot: '/ws' }
@@ -74,11 +74,11 @@ const SEATBELT_RO_PROFILE = '(version 1) (allow default) (deny file-write*) (all
 
 describe('profile dialects', () => {
   it('bwrap read-only: whole tree read-only with fresh /dev and private PID-scoped /proc, no writable mounts', () => {
-    expect(bwrapProfileArgs(RO)).toEqual(['--ro-bind', '/', '/', '--dev', '/dev', '--unshare-pid', '--proc', '/proc', '--die-with-parent'])
+    expect(bwrapProfileArgs(RO, NO_RESTRICTIONS)).toEqual(['--ro-bind', '/', '/', '--dev', '/dev', '--unshare-pid', '--proc', '/proc', '--die-with-parent'])
   })
 
   it('bwrap workspace-write: adds an ephemeral /tmp and rebinds the workspace root', () => {
-    expect(bwrapProfileArgs(WW)).toEqual([
+    expect(bwrapProfileArgs(WW, NO_RESTRICTIONS)).toEqual([
       '--ro-bind', '/', '/', '--dev', '/dev', '--unshare-pid', '--proc', '/proc', '--die-with-parent',
       '--tmpfs', '/tmp', '--bind', '/ws', '/ws',
     ])
@@ -100,7 +100,7 @@ describe('profile dialects', () => {
     tempDirs.push(ws, extra)
     const realWs = realpathSync.native(ws)
     const realExtra = realpathSync.native(extra)
-    expect(bwrapProfileArgs({ mode: 'workspace-write', workspaceRoot: ws, additionalWritableRoots: [extra] })).toEqual([
+    expect(bwrapProfileArgs({ mode: 'workspace-write', workspaceRoot: ws, additionalWritableRoots: [extra] }, NO_RESTRICTIONS)).toEqual([
       '--ro-bind', '/', '/', '--dev', '/dev', '--unshare-pid', '--proc', '/proc', '--die-with-parent',
       '--tmpfs', '/tmp', '--bind', realWs, realWs, '--bind', realExtra, realExtra,
     ])
@@ -117,13 +117,13 @@ describe('profile dialects', () => {
 
   it('read-only ignores extra roots in every backend dialect', () => {
     const policy: SandboxPolicy = { mode: 'read-only', workspaceRoot: '/ws', additionalWritableRoots: ['/extra'] }
-    expect(bwrapProfileArgs(policy)).not.toContain('--bind')
+    expect(bwrapProfileArgs(policy, NO_RESTRICTIONS)).not.toContain('--bind')
     expect(landlockProfileArgs(policy)).toEqual(['--ro', '/', '--rw', '/dev/null'])
-    expect(seatbeltProfileArgs(policy)).toEqual(['-p', SEATBELT_RO_PROFILE])
+    expect(seatbeltProfileArgs(policy, NO_RESTRICTIONS)).toEqual(['-p', SEATBELT_RO_PROFILE])
   })
 
   it('seatbelt read-only: allow-default with every file write denied except the /dev/null literal', () => {
-    expect(seatbeltProfileArgs(RO)).toEqual(['-p', SEATBELT_RO_PROFILE])
+    expect(seatbeltProfileArgs(RO, NO_RESTRICTIONS)).toEqual(['-p', SEATBELT_RO_PROFILE])
   })
 
   it('seatbelt workspace-write: one more allow for the canonicalized workspace root, /tmp, and the user temp dir', () => {
@@ -134,7 +134,7 @@ describe('profile dialects', () => {
     // where they resolve to the same directory.
     const roots = [...new Set(['/ws', realpathSync('/tmp'), realpathSync(tmpdir())])]
     const allow = `(allow file-write* ${roots.map(root => `(subpath "${root}")`).join(' ')})`
-    expect(seatbeltProfileArgs(WW)).toEqual(['-p', `${SEATBELT_RO_PROFILE} ${allow}`])
+    expect(seatbeltProfileArgs(WW, NO_RESTRICTIONS)).toEqual(['-p', `${SEATBELT_RO_PROFILE} ${allow}`])
   })
 
   it('seatbelt workspace-write grants every explicit extra root', () => {
@@ -145,12 +145,12 @@ describe('profile dialects', () => {
       mode: 'workspace-write',
       workspaceRoot: ws,
       additionalWritableRoots: [extra],
-    })[1] as string
+    }, NO_RESTRICTIONS)[1] as string
     expect(profile).toContain(`(subpath "${realpathSync.native(extra)}")`)
   })
 
   it('seatbelt workspace-write dedups a workspace root that already IS the temp dir', () => {
-    const profile = seatbeltProfileArgs({ mode: 'workspace-write', workspaceRoot: tmpdir() })[1] as string
+    const profile = seatbeltProfileArgs({ mode: 'workspace-write', workspaceRoot: tmpdir() }, NO_RESTRICTIONS)[1] as string
     const grant = `(subpath "${realpathSync(tmpdir())}")`
     expect(profile).toContain(grant)
     expect(profile.split(grant)).toHaveLength(2)
@@ -168,7 +168,7 @@ describe('runnerCommand config', () => {
     }, { probeBwrap, probeLandlock, probeSeatbelt })
     const confined = await sandbox.confine(['bash', '-c', 'echo hi'], WW)
     expect(confined).toEqual({
-      argv: ['fake-runner', '--flag', ...bwrapProfileArgs(WW), '--', 'bash', '-c', 'echo hi'],
+      argv: ['fake-runner', '--flag', ...bwrapProfileArgs(WW, NO_RESTRICTIONS), '--', 'bash', '-c', 'echo hi'],
       enforcement: 'full',
       // An operator runner's kernel mechanism is unknown: both Linux
       // file-denial dialects, never bare EPERM.
@@ -216,7 +216,7 @@ describe('the platform chains', () => {
     const { sandbox } = await setup({}, { platform: 'linux', probeBwrap, probeLandlock })
     const confined = await sandbox.confine(['true'], RO)
     expect(confined).toEqual({
-      argv: ['bwrap', ...bwrapProfileArgs(RO), '--', 'true'],
+      argv: ['bwrap', ...bwrapProfileArgs(RO, NO_RESTRICTIONS), '--', 'true'],
       enforcement: 'full',
       denialSignatures: ['read-only file system'],
       runnerFailureRules: [{ fatalSignatures: ['bwrap: '] }],
@@ -251,7 +251,7 @@ describe('the platform chains', () => {
     const { sandbox } = await setup({}, { platform: 'darwin', probeSeatbelt })
     const confined = await sandbox.confine(['bash', '-c', 'echo hi'], RO)
     expect(confined).toEqual({
-      argv: ['sandbox-exec', ...seatbeltProfileArgs(RO), '--', 'bash', '-c', 'echo hi'],
+      argv: ['sandbox-exec', ...seatbeltProfileArgs(RO, NO_RESTRICTIONS), '--', 'bash', '-c', 'echo hi'],
       enforcement: 'full',
       denialSignatures: ['operation not permitted'],
       runnerFailureRules: [{ fatalSignatures: ['sandbox-exec: '] }],
@@ -416,7 +416,7 @@ describe('the default seatbelt probe (sandbox-exec contract)', () => {
     const { sandbox } = await setup({}, { chain: ['bwrap', 'seatbelt'], probeBwrap: () => false, seatbeltExec: exec })
     const confined = await sandbox.confine(['true'], RO)
     expect(confined).toEqual({
-      argv: [exec, ...seatbeltProfileArgs(RO), '--', 'true'],
+      argv: [exec, ...seatbeltProfileArgs(RO, NO_RESTRICTIONS), '--', 'true'],
       enforcement: 'full',
       denialSignatures: ['operation not permitted'],
       runnerFailureRules: [{ fatalSignatures: ['sandbox-exec: '] }],
@@ -547,5 +547,103 @@ describe('the windows-acl probe (runner invocation contract)', () => {
     })
     const confined = await sandbox.confine(['true'], RO)
     expect(confined.argv.slice(0, 2)).toEqual([process.execPath, builtEntry])
+  })
+})
+
+describe('deployment restrictions', () => {
+  const restricted = { denyRead: [{ path: '/home/u/.ssh', kind: 'directory' as const }, { path: '/ws/.env', kind: 'file' as const }], network: 'off' as const }
+
+  it('hides directories and files after the writable binds and drops the network under bwrap', () => {
+    expect(bwrapProfileArgs(WW, restricted)).toEqual([
+      '--ro-bind', '/', '/', '--dev', '/dev', '--unshare-pid', '--proc', '/proc', '--die-with-parent', '--unshare-net',
+      '--tmpfs', '/tmp', '--bind', '/ws', '/ws',
+      '--tmpfs', '/home/u/.ssh', '--remount-ro', '/home/u/.ssh',
+      '--ro-bind', '/dev/null', '/ws/.env',
+    ])
+  })
+
+  it('denies reads of the hidden paths and every network operation last under Seatbelt', () => {
+    const profile = seatbeltProfileArgs(RO, restricted)[1]
+    expect(profile).toBe(`${SEATBELT_RO_PROFILE} (deny file-read* (subpath "/home/u/.ssh") (literal "/ws/.env")) (deny network*)`)
+  })
+
+  function denyFixture() {
+    const root = realpathSync(mkdtempSync(join(tmpdir(), 'dsh-deny-read-')))
+    tempDirs.push(root)
+    const secrets = join(root, 'secrets')
+    mkdirSync(secrets)
+    const key = join(root, 'key.pem')
+    writeFileSync(key, 'k')
+    const link = join(root, 'link')
+    symlinkSync(secrets, link)
+    return { root, secrets, key, link }
+  }
+
+  it('resolves configured paths per confinement: symlinks to their targets, duplicates once, missing paths skipped', async () => {
+    const { root, secrets, key, link } = denyFixture()
+    const { sandbox } = await setup(
+      { denyReadPaths: [link, secrets, key, join(root, 'absent'), join(key, 'below-a-file')] },
+      { platform: 'linux', probeBwrap: () => true },
+    )
+    const confined = await sandbox.confine(['true'], RO)
+    expect(confined.argv).toEqual(['bwrap', ...bwrapProfileArgs(RO, {
+      denyRead: [{ path: secrets, kind: 'directory' }, { path: key, kind: 'file' }],
+      network: 'on',
+    }), '--', 'true'])
+    expect(confined.enforcement).toBe('full')
+  })
+
+  it('carries the restrictions into a configured runner command', async () => {
+    const { sandbox } = await setup({ runnerCommand: ['fake-runner'], runnerFailureSignatures: ['fatal'], network: 'off' })
+    const confined = await sandbox.confine(['true'], RO)
+    expect(confined.argv).toEqual(['fake-runner', ...bwrapProfileArgs(RO, { denyRead: [], network: 'off' }), '--', 'true'])
+  })
+
+  it('reports partial enforcement when the selected runner cannot express a restriction', async () => {
+    const launcher = fakeLauncher()
+    const { sandbox } = await setup(
+      { network: 'off' },
+      { platform: 'linux', probeBwrap: () => false, probeLandlock: () => 'full', landlockLauncher: launcher },
+    )
+    const confined = await sandbox.confine(['true'], RO)
+    expect(confined.argv).toEqual([launcher, ...landlockProfileArgs(RO), '--', 'true'])
+    expect(confined.enforcement).toBe('partial')
+  })
+
+  it('keeps full enforcement and the bare profile when no restriction is configured or none exists', async () => {
+    const { root } = denyFixture()
+    const { sandbox } = await setup({ denyReadPaths: [join(root, 'absent')] }, { platform: 'darwin' })
+    const confined = await sandbox.confine(['true'], RO)
+    expect(confined.argv).toEqual(['sandbox-exec', ...seatbeltProfileArgs(RO, NO_RESTRICTIONS), '--', 'true'])
+    expect(confined.enforcement).toBe('full')
+  })
+
+  it('expands ~ against the home directory', async () => {
+    const { sandbox } = await setup({ denyReadPaths: ['~', '~/.dsh-deny-read-absent'], network: 'off' }, { platform: 'linux', probeBwrap: () => true })
+    const confined = await sandbox.confine(['true'], RO)
+    const home = realpathSync(homedir())
+    expect(confined.argv).toContain('--remount-ro')
+    expect(confined.argv.slice(confined.argv.indexOf('--remount-ro') + 1)[0]).toBe(home)
+  })
+
+  it.each(['relative/path', '~user/.ssh', ''])('rejects the relative hidden path %j at load', async (entry) => {
+    await expect(setup({ denyReadPaths: [entry] })).rejects.toThrow('denyReadPaths entries must be absolute or start with ~/')
+  })
+
+  it('propagates a resolution failure other than a missing path', async () => {
+    const { root } = denyFixture()
+    const loop = join(root, 'loop')
+    symlinkSync(loop, loop)
+    const { sandbox } = await setup({ denyReadPaths: [loop] }, { platform: 'linux', probeBwrap: () => true })
+    await expect(sandbox.confine(['true'], RO)).rejects.toMatchObject({ code: 'ELOOP' })
+  })
+
+  it('stops before wrapping when cancelled while the paths resolve', async () => {
+    const { key } = denyFixture()
+    const { sandbox } = await setup({ denyReadPaths: [key] }, { platform: 'linux', probeBwrap: () => true })
+    const controller = new AbortController()
+    const confined = sandbox.confine(['true'], RO, controller.signal)
+    controller.abort()
+    await expect(confined).rejects.toThrow()
   })
 })

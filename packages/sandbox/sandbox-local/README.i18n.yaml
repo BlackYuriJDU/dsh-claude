@@ -21,14 +21,14 @@
   en: 722ad601000b13c7
   zh: d2723f3743fe160b
 /deepseek-ai-dsh-sandbox-local/use-this-package/minimal-configuration:
-  en: 5d5ac6aaea69b3db
-  zh: 8049d91463b6347d
+  en: 8cefa738eb28f54d
+  zh: fdff4fd2dbf48ff3
 /deepseek-ai-dsh-sandbox-local/use-this-package/confined-execution-and-enforcement:
   en: 7282c9ec77fd6f01
   zh: 10e385a9489105e3
 /deepseek-ai-dsh-sandbox-local/use-this-package/failures-and-recovery:
-  en: 3859a87c6122a1bf
-  zh: 55d7be15527f0347
+  en: 704447754bc72d0a
+  zh: 0b0f61094cac9e19
 /deepseek-ai-dsh-sandbox-local/understand-the-implementation:
   en: 15db6ec303151ccc
   zh: 91f62c1f64192f92
@@ -36,8 +36,8 @@
   en: f0c44248c2ca6acc
   zh: 554e9f706671d222
 /deepseek-ai-dsh-sandbox-local/understand-the-implementation/platform-profiles:
-  en: 008967ee30fbbe46
-  zh: 9e5c6a3e97851a69
+  en: c5230a922a422946
+  zh: 708abe650d3fa34b
 /deepseek-ai-dsh-sandbox-local/understand-the-implementation/denial-and-runner-failure-dialects:
   en: 62adfc9229c656cc
   zh: 11b1534b6d61e5de
@@ -54,8 +54,8 @@
   en: e290ccc9b3c92c08
   zh: 469589ac12cdadab
 /deepseek-ai-dsh-sandbox-local/known-limitations-and-deferred-work:
-  en: 08b89c59db310961
-  zh: b505db4148754f94
+  en: a072983f8ca58051
+  zh: 201a6da24ee2bd8c
 /deepseek-ai-dsh-sandbox-local/known-limitations-and-deferred-work/dev-note:
   en: cc273320f6a1beaf
   zh: 5c57a312ddc50651
