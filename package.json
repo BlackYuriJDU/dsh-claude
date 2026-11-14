@@ -114,6 +114,7 @@
     "verify-doc-refs": "tsx scripts/verify-doc-refs.ts",
     "verify-subsystem-pages": "tsx scripts/verify-subsystem-pages.ts",
     "verify-package-paths": "tsx scripts/verify-package-paths.ts",
+    "verify-dependency-licenses": "tsx scripts/verify-dependency-licenses.ts",
     "verify-dsh-package-licenses": "tsx scripts/verify-dsh-package-licenses.ts",
     "verify-config-source-ownership": "tsx scripts/verify-config-source-ownership.ts",
     "verify-package-meta": "tsx scripts/verify-package-meta.ts",
