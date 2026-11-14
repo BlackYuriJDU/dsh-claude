@@ -12,8 +12,8 @@
   en: ae1b4c7e89360a4a
   zh: ddf242e3dd9f1261
 /deepseek-ai-dsh-sensitive-access-policy/table-of-contents:
-  en: b563e4ec4727d0de
-  zh: 44ebe7ceeda3dff6
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
 /deepseek-ai-dsh-sensitive-access-policy/use-this-package:
   en: bbff250eba0f1b89
   zh: 0a618f05cc88ee2b
@@ -51,5 +51,8 @@
   en: 2fbf2175168e8244
   zh: 4c1b01eab34453c9
 /deepseek-ai-dsh-sensitive-access-policy/known-limitations-and-deferred-work:
-  en: ec0f72782edef95c
-  zh: 6de67d4d417d7c06
+  en: 029f8ec12306215f
+  zh: 750537c216c60108
+/deepseek-ai-dsh-sensitive-access-policy/known-limitations-and-deferred-work/dev-note:
+  en: 76dac9aebb2b87e7
+  zh: 1d4228819fe9cdd8

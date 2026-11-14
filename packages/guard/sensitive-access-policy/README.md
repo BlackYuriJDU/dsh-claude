@@ -18,6 +18,7 @@ Use this package to require the user's approval before a file tool reads a prote
 - [Further Exploration](#further-exploration)
 - [Model Experience](#model-experience)
 - [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+- [Dev Note](#dev-note)
 
 -----
 
@@ -107,3 +108,15 @@ Append-only; newly visible content follows the reusable request prefix and does 
 - **Search contents** — a `grep` rooted at the workspace can match text inside a protected file below it, such as an `.env` file, without asking; only a search rooted at or inside a protected directory asks.
 - **Address data only** — a fetch to an allowed domain, or a plain page address, passes without approval even if the site logs the request.
 - **Remote workspaces** — symlink resolution runs on the Host, so a path in a remote workspace is judged by its name alone.
+
+<a id="dev-note"></a>
+### Dev Note
+
+<details>
+<summary>Working context for maintainers — click to expand</summary>
+
+This Dev Note is working context for maintainers: open questions and directions that are not decided. It is explicitly non-authoritative — shipped behavior, limits, and accepted rationale live in the sections above, the package code, and the linked Agent Notes.
+
+Whether a workspace-wide `grep` should skip files that match `sensitivePaths` is open; it would close the search-contents gap without asking on every search, but it changes the results the model sees.
+
+</details>
