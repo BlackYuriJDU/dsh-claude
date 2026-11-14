@@ -66,11 +66,22 @@ describe('dsh-dshc bundle identity layer', () => {
 
   it('inserts the DSHC brand, the SearXNG provider, saved memories, and projects, each a declared dependency', () => {
     const inserted = identityRows.flatMap(row => row.insert ?? [])
-    expect(inserted.map(row => row.id)).toEqual(['ui-brand-dshc', 'web-search-searxng', 'ui-settings-searxng', 'ui-memory', 'ui-projects'])
+    expect(inserted.map(row => row.id)).toEqual(['ui-brand-dshc', 'web-search-searxng', 'ui-settings-searxng', 'ui-memory', 'ui-projects', 'sensitive-access-policy'])
     for (const row of inserted) {
       expect(row.disabled).toBeUndefined()
       expect(manifest.dependencies).toHaveProperty(row.name!)
     }
+  })
+
+  it('asks before tools read credentials or send data to unlisted sites, and hides the credential directories from shell commands', () => {
+    const policy = identityRows.flatMap(row => row.insert ?? []).find(row => row.id === 'sensitive-access-policy')
+    expect(policy?.config).toEqual({
+      sensitivePaths: ['~/.ssh/**', '~/.aws/**', '~/.config/gh/**', '~/.gnupg/**', '**/.env*'],
+      fetchApproval: 'with-data',
+    })
+    const directories = (policy?.config as { sensitivePaths: string[] }).sensitivePaths
+      .filter(pattern => pattern.startsWith('~/')).map(pattern => pattern.slice(0, -'/**'.length))
+    expect(identityRows).toContainEqual({ id: 'sandbox', config: { denyReadPaths: directories } })
   })
 
   it('sends no Session log to DeepSeek by default', () => {

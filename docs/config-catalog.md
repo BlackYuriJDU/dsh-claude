@@ -3251,6 +3251,37 @@ export interface JsonRpcConfig {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-sdk-jsonrpc-server -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-sensitive-access-policy -->
+<a id="deepseek-aidsh-sensitive-access-policy"></a>
+
+## `@deepseek-ai/dsh-sensitive-access-policy`
+
+- `inject`: `tools`
+- `source`: [`packages/guard/sensitive-access-policy/src/index.ts:30`](../packages/guard/sensitive-access-policy/src/index.ts)
+
+```ts config-catalog
+/** Plugin config. Every field defaults to no restriction. */
+export interface Config {
+  /**
+   * Glob patterns (`node:path` `matchesGlob` syntax) for paths that `read`,
+   * `read_image`, `grep`, and `glob` may reach only with approval. A pattern is
+   * absolute, starts with `~/` for the Host account's home, or starts with
+   * `**` to match at any depth; anything else fails at load.
+   */
+  sensitivePaths?: string[]
+  /** `with-data` asks before a `web_fetch` whose address carries data to a site outside {@link fetchAllowedDomains}. */
+  fetchApproval?: FetchApproval
+  /** Domains `web_fetch` reaches without approval; each also covers its subdomains. */
+  fetchAllowedDomains?: string[]
+  /** Address paths longer than this many characters count as carrying data. */
+  fetchPathLengthLimit?: number
+}
+
+/** When `web_fetch` asks for approval. */
+export type FetchApproval = 'never' | 'with-data'
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-sensitive-access-policy -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-session-log-deepseek -->
 <a id="deepseek-aidsh-session-log-deepseek"></a>
 

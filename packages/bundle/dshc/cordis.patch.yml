@@ -31,6 +31,20 @@
     - id: ui-projects
       name: '@deepseek-ai/dsh-client-ui-projects'
 
+    # Approval before file tools read credentials or environment secrets, and
+    # before web_fetch sends data in its address to a site outside the list.
+    - id: sensitive-access-policy
+      name: '@deepseek-ai/dsh-sensitive-access-policy'
+      config:
+        sensitivePaths: ['~/.ssh/**', '~/.aws/**', '~/.config/gh/**', '~/.gnupg/**', '**/.env*']
+        fetchApproval: with-data
+
+# Shell commands and code runs cannot read the same credential directories:
+# bwrap and Seatbelt hide them, Landlock reports partial enforcement.
+- id: sandbox
+  config:
+    denyReadPaths: ['~/.ssh', '~/.aws', '~/.config/gh', '~/.gnupg']
+
 # The DSHC presets (presets/*.patch.yml, listed after this file in
 # package.json `dsh.bundle.patch`) replace the upstream standard preset: Code
 # keeps its tool set with the DSHC engineering persona. New sessions start in

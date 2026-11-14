@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Política de acesso sensível",
+    "description": "Pede aprovação antes que ferramentas leiam caminhos protegidos ou enviem dados a sites fora da lista permitida."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Sensitive access policy",
+    "description": "Asks before tools read protected paths or send data to sites outside the allowed list."
+  }
+}
