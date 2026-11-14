@@ -174,7 +174,7 @@ describe.skipIf(MODE === 'record')('web e2e: App-only desktop onboarding', () =>
         }), `${name}: primary action receives clicks across its height`).toBe(true)
       }
       if (name.includes('-en-')) {
-        const headingFont = await page.locator('h1').evaluate(element => ({
+        const headingFont = await page.locator('#desktop-onboarding-title').evaluate(element => ({
           font: getComputedStyle(element).fontFamily, weight: getComputedStyle(element).fontWeight,
         }))
         expect(headingFont.font).toContain('Montserrat')

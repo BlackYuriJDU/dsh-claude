@@ -1,0 +1,108 @@
+# The dsh-dshc bundle patch: the DSHC identity over dsh-base and dsh-web-app.
+# Applied after the web-app layer; the profile's own cordis.patch.yml and any
+# --patch overlays still come after it.
+
+# The DSHC brand occupies the same single slots as the official brand.
+- id: ui-brand-official
+  disabled: true
+
+- insert:
+    # Claude-app palette layer over the theme service, plus the DSHC mark.
+    - id: ui-brand-dshc
+      name: '@deepseek-ai/dsh-client-ui-brand-dshc'
+
+    # Keyless web search through a SearXNG instance. The provider reads
+    # $SEARXNG_URL and stays unavailable without it, so the web service keeps
+    # selecting among the other usable providers.
+    - id: web-search-searxng
+      name: '@deepseek-ai/dsh-web-search-searxng'
+
+    # The SearXNG provider's settings page on the Plugins page.
+    - id: ui-settings-searxng
+      name: '@deepseek-ai/dsh-client-ui-settings-searxng'
+
+    # Saved memories: a Settings section and a runtime-context contribution
+    # that carries the list into every session.
+    - id: ui-memory
+      name: '@deepseek-ai/dsh-client-ui-memory'
+
+    # Per-workspace projects: instructions and knowledge files for sessions
+    # that run inside a workspace folder.
+    - id: ui-projects
+      name: '@deepseek-ai/dsh-client-ui-projects'
+
+    # Approval before file tools read credentials or environment secrets, and
+    # before web_fetch sends data in its address to a site outside the list.
+    - id: sensitive-access-policy
+      name: '@deepseek-ai/dsh-sensitive-access-policy'
+      config:
+        sensitivePaths: ['~/.ssh/**', '~/.aws/**', '~/.config/gh/**', '~/.gnupg/**', '**/.env*']
+        fetchApproval: with-data
+
+# Shell commands and code runs cannot read the same credential directories:
+# bwrap and Seatbelt hide them, Landlock reports partial enforcement.
+- id: sandbox
+  config:
+    denyReadPaths: ['~/.ssh', '~/.aws', '~/.config/gh', '~/.gnupg']
+
+# The DSHC presets (presets/*.patch.yml, listed after this file in
+# package.json `dsh.bundle.patch`) replace the upstream standard preset: Code
+# keeps its tool set with the DSHC engineering persona. New sessions start in
+# Chat; the Settings choice still overrides this default.
+- id: preset-standard
+  disabled: true
+
+# PTC and Minimal describe themselves relative to the standard preset that
+# Code replaces; Creator stays after the four DSHC presets.
+- id: preset-ptc
+  disabled: true
+
+- id: preset-minimal
+  disabled: true
+
+- id: agent-preset-registry
+  config:
+    default: chat
+
+# The new-session screen switches between Chat, Cowork, Code, and Design side by side
+# instead of opening a menu. Creator mode stays reachable from Settings.
+- id: ui-agent-preset
+  config:
+    seatPresentation: segmented
+    seatHiddenPresets: [cordis]
+
+# The New Session composer asks how DSHC can help, as the Claude app does.
+- id: ui-conversation
+  config:
+    heroPlaceholder: help
+
+# Privacy: DSHC sends no Session log to DeepSeek by default. The OpenTelemetry
+# row that exports a Session-log prefix after message feedback is disabled, the
+# same row DSH_TELEMETRY_DISABLED disables. Session-log upload with official
+# DeepSeek API requests starts off; the Settings → General switch still turns
+# it on.
+- id: session-telemetry-otel
+  disabled: true
+
+- id: session-log-deepseek
+  config:
+    enabled: false
+
+# With no feedback export composed, the feedback dialog says the note stays in
+# the local conversation log instead of promising to send it.
+- id: ui-message-feedback
+  config:
+    sharesConversationLog: false
+
+# The default Workspace lives under <Documents>/dsh-claude instead of the
+# upstream product folder. An existing default Workspace keeps its path.
+- id: workspace-controller
+  config:
+    productDirectory: dsh-claude
+
+# The upstream welcome notice introduces the DeepSeek Harness preview; DSHC
+# starts with it acknowledged. The value matches WELCOME_NOTICE_VERSION in
+# ui-settings-models, and a bundle test fails when that version changes.
+- id: ui-settings-general
+  config:
+    welcomeNoticeVersion: '2026-09-28.1'

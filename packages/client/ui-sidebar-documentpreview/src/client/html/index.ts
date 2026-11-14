@@ -3,6 +3,13 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '../index.ts'
 import type { DocumentPreviewDefinition } from '../document/registry.ts'
 import { hostFileOf } from '../rpc.ts'
+import { parseFileAddress } from '@deepseek-ai/dsh-util-workspace-path'
+// Type-only: the ctx.sessions Context merge.
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
+// Type-only: the ctx.conversation input registry on Session scopes.
+import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { formatHtmlComment } from './comments.ts'
 import { HtmlBody } from './HtmlBody.tsx'
 import type { HtmlBodyInjected } from './HtmlBody.tsx'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
@@ -36,6 +43,16 @@ export function apply(ctx: Context): void {
         readRelated: (address, relativePath, signal) => {
           const file = hostFileOf(address)
           return ctx.remote.workspaceFiles.readBytes(file.sessionId, relativePath, { baseFile: file.path }, signal)
+        },
+        comment: (address, report) => {
+          const file = parseFileAddress(address)
+          if (file?.scope !== 'session') return false
+          // The address is a string boundary: its id segment is the Session id it names.
+          const scope = ctx.get('sessions')?.scope(file.sessionId as SessionId)
+          const input = scope?.get('conversation')?.input.for(scope)
+          if (input === undefined || !input.insertQuote(formatHtmlComment(report, file.path))) return false
+          input.focus()
+          return true
         },
       }),
     }, HtmlBody,

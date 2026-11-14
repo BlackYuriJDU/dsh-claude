@@ -79,10 +79,11 @@ describe.skipIf(MODE === 'record').each([
 
     // Declared levels, nothing else: the provider-default entry (the route
     // configures no `reasoning`), then Off/High/Max — minimal, low, medium,
-    // and xhigh were not declared and must not be offered.
+    // and xhigh were not declared and must not be offered. A level whose name
+    // is the canonical English name of its id shows the locale's copy.
     const levels = page.getByRole('menuitemradio')
     await expect.poll(async () => levels.allTextContents(), { timeout: 10_000 })
-      .toEqual(['Default', 'Off', 'High', 'Max'])
+      .toEqual(['Default', '关闭', '高', '最高'])
     const snapshot = await captureStableAria(page, '[role="menu"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(UI_EXPECTED, snapshot, MODE)
 
@@ -113,13 +114,13 @@ describe.skipIf(MODE === 'record').each([
       { timeout: 10_000 },
     ).toContain('reasoningEffort: high')
     await expect.poll(() => trigger.getAttribute('aria-label'), { timeout: 10_000 })
-      .toBe('选择模型，当前 Acme Think，推理等级 High')
+      .toBe('选择模型，当前 Acme Think，推理等级 高')
 
     // Reopening the drilled pane parks the keyboard on the level in use, and
     // Shift+Tab walks back out like Escape: to the drilled cell, then closed.
     await trigger.click()
     await page.getByRole('menuitem', { name: /推理等级/ }).click()
-    const high = page.getByRole('menuitemradio', { name: 'High' })
+    const high = page.getByRole('menuitemradio', { name: '高', exact: true })
     await expect.poll(
       () => high.evaluate(element => element === document.activeElement),
       { timeout: 10_000 },
@@ -210,7 +211,7 @@ describe.skipIf(MODE === 'record').each([
 
     await trigger.click()
     await page.getByRole('menuitem', { name: /推理等级/ }).click()
-    await page.getByRole('menuitemradio', { name: 'Max', exact: true }).click()
+    await page.getByRole('menuitemradio', { name: '最高', exact: true }).click()
     await menu.waitFor({ state: 'detached' })
     expect(selections).toBe(2)
     await expect.poll(() => scaffold.ctx.agentDefaultModel.currentSelection().reasoningEffort, { timeout: 10_000 })

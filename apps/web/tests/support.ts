@@ -336,8 +336,14 @@ export async function revealNavigationDrawer(page: Page, locale: 'en' | 'zh' | '
  * @param page - the page under test.
  * @param root - host directory the workspace folder is staged in (the scaffold's `workspaceCwd`).
  * @param name - folder name staged and adopted as the workspace.
+ * @param placeholder - the unlocked composer's placeholder; compositions that set `heroPlaceholder: help` show 'How can I help you today?'.
  */
-export async function connectFreshWorkspace(page: Page, root: string, name = 'workspace'): Promise<void> {
+export async function connectFreshWorkspace(
+  page: Page,
+  root: string,
+  name = 'workspace',
+  placeholder = 'Describe what you want to build, / commands, @ files or sessions',
+): Promise<void> {
   mkdirSync(join(root, name), { recursive: true })
   await revealNavigationDrawer(page, 'en')
   await page.getByRole('button', { name: 'Add workspace', exact: true }).click()
@@ -350,7 +356,7 @@ export async function connectFreshWorkspace(page: Page, root: string, name = 'wo
   await dialog.getByRole('button', { name: 'Open', exact: true }).click()
   // The pick connected the workspace: the blank session's live composer
   // replaces the locked placeholder and enables.
-  await page.locator('[data-composer-input][contenteditable="true"][data-placeholder="Describe what you want to build, / commands, @ files or sessions"]')
+  await page.locator(`[data-composer-input][contenteditable="true"][data-placeholder="${placeholder}"]`)
     .waitFor({ timeout: 15_000 })
 }
 

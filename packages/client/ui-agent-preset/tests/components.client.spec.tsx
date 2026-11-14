@@ -6,7 +6,7 @@
  * tools, so the choice is only ever offered before one starts.
  */
 
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { bindSnapshotSelector } from '@deepseek-ai/dsh-client-test-runtime'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -18,6 +18,7 @@ import { AgentPresetSeat } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSeatProps } from '../src/client/AgentPresetSeat.tsx'
 import type { AgentPresetSettingsState } from '../src/client/settings-store.ts'
 import type { AgentPresetSeatState } from '../src/client/seat-store.ts'
+import type { SeatPresentation } from '../src/seat-policy.ts'
 import { en } from '../src/client/locales.ts'
 
 afterEach(cleanup)
@@ -54,9 +55,16 @@ function renderSeat(
   select: () => Promise<string | undefined> = () => Promise.resolve(undefined),
   session?: { id: string; retainInfo: SessionRetainInfo | undefined },
   enabled = true,
+  seatPresentation?: SeatPresentation,
+  seatHiddenPresets?: readonly string[],
 ) {
   const store = createSnapshotStore<AgentPresetSeatState>({ ...SEAT_READY, ...state })
   const developerTools = createSnapshotStore(enabled)
+  const policy = createSnapshotStore({
+    status: 'ready' as const,
+    value: seatPresentation === undefined && seatHiddenPresets === undefined ? undefined : { seatPresentation, seatHiddenPresets },
+    base: undefined, user: undefined, revision: 1, writable: false,
+  })
   const actions = {
     load: vi.fn(() => Promise.resolve()), select: vi.fn(select), introduced: vi.fn(),
     dismissRefusal: vi.fn((error: AgentPresetSeatState['error']) => {
@@ -70,6 +78,7 @@ function renderSeat(
     sessionId: session === undefined ? undefined : SessionId(session.id),
     useDeveloperTools: bindSnapshotSelector(developerTools),
     useAgentPresetSeat: bindSnapshotSelector(store),
+    useSeatPolicy: bindSnapshotSelector(policy),
     useSessionRetainInfo: session === undefined
       ? useSessionRetainInfo
       : <Selected,>(selector: (value: SessionRetainInfo | undefined) => Selected) => selector(session.retainInfo),
@@ -113,6 +122,15 @@ describe('the new-session chip', () => {
     expect(screen.queryByRole('menuitem', { name: /^Minimal mode/ }) !== null).toBe(enabled)
     fireEvent.click(screen.getByRole('menuitem', { name: /^Creator mode/ }))
     expect(actions.select).toHaveBeenCalledWith('cordis')
+  })
+
+  it('leaves hidden presets out of the menu unless one is the staged choice', () => {
+    const options = [{ id: 'standard' }, { id: 'cordis' }, { id: 'mine' }]
+    renderSeat({ current: 'standard', options }, undefined, undefined, true, undefined, ['cordis', 'standard'])
+    fireEvent.click(screen.getByRole('button'))
+    expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([
+      expect.stringMatching(/^Standard mode/), expect.stringMatching(/^mine/),
+    ])
   })
 
   it('keeps a named custom preset that overrides a development preset id', () => {
@@ -423,5 +441,77 @@ describe('the session-header label', () => {
     await act(async () => { await Promise.resolve() })
     expect(absent.load).not.toHaveBeenCalled()
     expect(unknown.load).not.toHaveBeenCalled()
+  })
+})
+
+describe('the segmented seat', () => {
+  it('shows every visible preset as a radio and stages a different one', async () => {
+    const { select } = renderSeat({}, undefined, undefined, true, 'segmented')
+    const group = screen.getByRole('radiogroup', { name: en.seatHint })
+    const radios = within(group).getAllByRole('radio')
+    expect(radios.map(radio => radio.textContent)).toEqual(['Standard mode', 'mine'])
+    expect(radios.map(radio => radio.getAttribute('aria-checked'))).toEqual(['true', 'false'])
+    expect(screen.queryByRole('button', { expanded: false })).toBeNull()
+    fireEvent.click(radios[0]!)
+    expect(select).not.toHaveBeenCalled()
+    fireEvent.click(radios[1]!)
+    await waitFor(() => { expect(select).toHaveBeenCalledWith('mine') })
+  })
+
+  it('marks the radios aria-disabled while a switch is in flight, keeps them focusable, and keeps the menu for other presentations', () => {
+    const { select } = renderSeat({ busy: true }, undefined, undefined, true, 'segmented')
+    const radios = screen.getAllByRole('radio')
+    for (const radio of radios) {
+      expect(radio.getAttribute('aria-disabled')).toBe('true')
+      expect(radio).toHaveProperty('disabled', false)
+    }
+    radios[1]!.focus()
+    fireEvent.click(radios[1]!)
+    expect(document.activeElement).toBe(radios[1])
+    expect(select).not.toHaveBeenCalled()
+    cleanup()
+    renderSeat({}, undefined, undefined, true, 'menu')
+    expect(screen.queryByRole('radiogroup')).toBeNull()
+  })
+
+  it('is one Tab stop that the arrow keys, Home, and End move and select', async () => {
+    const { select } = renderSeat({ options: [{ id: 'standard' }, { id: 'mine' }, { id: 'third' }] }, undefined, undefined, true, 'segmented')
+    const group = screen.getByRole('radiogroup')
+    const radios = within(group).getAllByRole('radio')
+    expect(radios.map(radio => radio.tabIndex)).toEqual([0, -1, -1])
+    for (const [key, index, id] of [
+      ['ArrowRight', 1, 'mine'], ['ArrowDown', 1, 'mine'], ['ArrowLeft', 2, 'third'], ['ArrowUp', 2, 'third'], ['End', 2, 'third'],
+    ] as const) {
+      select.mockClear()
+      fireEvent.keyDown(group, { key })
+      expect(document.activeElement).toBe(radios[index])
+      await waitFor(() => { expect(select).toHaveBeenCalledExactlyOnceWith(id) })
+    }
+    select.mockClear()
+    fireEvent.keyDown(group, { key: 'Home' })
+    fireEvent.keyDown(group, { key: 'a' })
+    expect(document.activeElement).toBe(radios[0])
+    expect(select).not.toHaveBeenCalled()
+  })
+
+  it('wraps from the last segment, starts at the first without a checked one, and ignores keys while busy', async () => {
+    const last = renderSeat({ current: 'mine' }, undefined, undefined, true, 'segmented')
+    fireEvent.keyDown(screen.getByRole('radiogroup'), { key: 'ArrowRight' })
+    await waitFor(() => { expect(last.select).toHaveBeenCalledExactlyOnceWith('standard') })
+    last.select.mockClear()
+    fireEvent.keyDown(screen.getByRole('radiogroup'), { key: 'ArrowLeft' })
+    await waitFor(() => { expect(last.select).toHaveBeenCalledExactlyOnceWith('standard') })
+    cleanup()
+    renderSeat({ current: 'gone' }, undefined, undefined, true, 'segmented')
+    expect(screen.getAllByRole('radio').map(radio => radio.tabIndex)).toEqual([0, -1])
+    cleanup()
+    const busy = renderSeat({ busy: true }, undefined, undefined, true, 'segmented')
+    fireEvent.keyDown(screen.getByRole('radiogroup'), { key: 'ArrowRight' })
+    expect(busy.select).not.toHaveBeenCalled()
+  })
+
+  it('renders nothing segmented before the roster arrives', () => {
+    renderSeat({ options: [] }, undefined, undefined, true, 'segmented')
+    expect(screen.queryByRole('radiogroup')).toBeNull()
   })
 })

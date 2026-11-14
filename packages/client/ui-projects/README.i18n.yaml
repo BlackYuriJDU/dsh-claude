@@ -1,0 +1,52 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-projects/README.md
+/:
+  en: e57c45d8ab8796d5
+  zh: b64621a94a1d3833
+/deepseek-ai-dsh-client-ui-projects:
+  en: 0635c26aaac9c562
+  zh: a933ecc74a51694b
+/deepseek-ai-dsh-client-ui-projects/summary:
+  en: 1622bdc62efb5468
+  zh: fa8b802108d1f94f
+/deepseek-ai-dsh-client-ui-projects/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-projects/use-this-package:
+  en: 7818dcb1910e8503
+  zh: ac8e8875e3c5b375
+/deepseek-ai-dsh-client-ui-projects/understand-the-implementation:
+  en: 8e85ef6385166ff6
+  zh: 01896e8e5297bc9e
+/deepseek-ai-dsh-client-ui-projects/further-exploration:
+  en: d4806d353fe34b00
+  zh: 34c58d00ca9328ee
+/deepseek-ai-dsh-client-ui-projects/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-client-ui-projects/model-experience/project-content:
+  en: 2669167bad47d145
+  zh: 76e6efb469c8cb6d
+/deepseek-ai-dsh-client-ui-projects/model-experience/project-content/what-the-model-sees:
+  en: 020c921b1f63a2c9
+  zh: e301621cc76530f2
+/deepseek-ai-dsh-client-ui-projects/model-experience/project-content/what-the-model-sees/project-content-context:
+  en: a47f5f4b8176ecf3
+  zh: e63c08f8d7d2efbc
+/deepseek-ai-dsh-client-ui-projects/model-experience/project-content/token-effect:
+  en: 4f7768874ed58110
+  zh: d8b26e87f511a4ac
+/deepseek-ai-dsh-client-ui-projects/model-experience/project-content/kv-cache-effect:
+  en: 8fbd3e2c85051d65
+  zh: 10a1fe4207b06596
+/deepseek-ai-dsh-client-ui-projects/known-limitations-and-deferred-work:
+  en: 92e2615cc2845600
+  zh: de04f59190eacc6e
+/deepseek-ai-dsh-client-ui-projects/known-limitations-and-deferred-work/dev-note:
+  en: b5ebcb927b7959b5
+  zh: 6d012ed00dbae35e
+/deepseek-ai-dsh-client-ui-projects/known-limitations-and-deferred-work/dev-note/future-project-memory-and-file-upload:
+  en: a9e49f8d4e2ef3db
+  zh: b3562e63026f219f

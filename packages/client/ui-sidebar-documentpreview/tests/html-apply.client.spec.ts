@@ -1,4 +1,4 @@
-import { byteResult } from './fixtures.client.ts'
+import { byteResult, SESSION as SESSION_ID } from './fixtures.client.ts'
 /** HTML metadata and keyed slot contributions share one identity and unwind with their fiber. */
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -14,7 +14,7 @@ type Registration = {
   name: string
   key: string
   locale: string
-  inject: () => Pick<HtmlBodyProps, 'readRelated'>
+  inject: () => Pick<HtmlBodyProps, 'readRelated' | 'comment'>
 }
 
 let dispose: (() => Promise<void>) | undefined
@@ -73,5 +73,50 @@ describe('HTML registration', () => {
     expect(registry.getSnapshot()).toEqual([])
     expect(bodies.size).toBe(0)
     expect(dictionaries.size).toBe(0)
+  })
+})
+
+describe('HTML design comments', () => {
+  async function commentFace(sessions?: unknown) {
+    const ctx = new Context()
+    ctx.provide('configForms', { developerTools: { enabled: createSnapshotStore(true) } } as never)
+    ctx.provide('documentPreviews', new DocumentPreviewRegistry())
+    ctx.provide('remote', { workspaceFiles: { readBytes: vi.fn() } } as never)
+    let registration: Registration | undefined
+    ctx.provide('slots', {
+      inject: (_key: string, callback: () => () => void) => callback(),
+      register: (options: Registration) => { registration = options; return () => {} },
+    } as never)
+    ctx.provide('locale', { bind: () => (key: keyof typeof en) => en[key], register: () => () => {} } as never)
+    if (sessions !== undefined) {
+      ctx.provide('sessions')
+      ctx.set('sessions', sessions)
+    }
+    const fiber = ctx.plugin({ inject: ['configForms'], apply })
+    dispose = async () => { await fiber.dispose() }
+    await fiber.await()
+    return registration!.inject().comment
+  }
+  const report = { tag: 'h2', id: '', classes: [], text: 'Pricing' }
+  const address = sessionFileAddress(SESSION_ID, 'designs/page.html')
+
+  it('quotes the element into the draft of the file Session and focuses the composer', async () => {
+    const insertQuote = vi.fn(() => true)
+    const focus = vi.fn()
+    const scope = { get: (name: string) => name === 'conversation' ? { input: { for: () => ({ insertQuote, focus }) } } : undefined }
+    const comment = await commentFace({ scope: (id: string) => id === SESSION_ID ? scope : undefined })
+    expect(comment(address, report)).toBe(true)
+    expect(insertQuote).toHaveBeenCalledExactlyOnceWith('designs/page.html <h2> "Pricing"')
+    expect(focus).toHaveBeenCalledOnce()
+    insertQuote.mockReturnValueOnce(false)
+    expect(comment(address, report)).toBe(false)
+    expect(focus).toHaveBeenCalledOnce()
+    expect(comment(sessionFileAddress('other', 'a.html'), report)).toBe(false)
+  })
+
+  it('declines without the Session registry or for a non-Session address', async () => {
+    const comment = await commentFace()
+    expect(comment(address, report)).toBe(false)
+    expect(comment('dsh-resource://not-a-file', report)).toBe(false)
   })
 })

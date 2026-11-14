@@ -30,9 +30,13 @@ const PATTERNS = [
   'packages/**/*.ts',
 ]
 
-/** Paths excluded from the scan: built output and vendored upstream source. */
+/**
+ * Paths excluded from the scan: built output, vendored upstream source, and the DSHC fork's
+ * migration records and proposals under docs/dshc/, which name earlier and planned paths.
+ */
 const isExcluded = (p: string): boolean =>
   isArchivedAgentNotePath(p) || p.includes('/lib/') || p.endsWith('.d.ts') || p.startsWith('vendor/')
+  || p.startsWith('docs/dshc/')
 
 /**
  * Directory names of every real package, `packages/<group>/<pkg>`. A broken

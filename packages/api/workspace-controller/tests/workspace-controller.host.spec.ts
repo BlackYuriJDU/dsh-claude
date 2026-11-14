@@ -51,7 +51,7 @@ function deferred<T>(): Deferred<T> {
   return { promise, resolve }
 }
 
-async function harness(options: { systemDocuments?: boolean } = {}) {
+async function harness(options: { systemDocuments?: boolean; productDirectory?: string } = {}) {
   const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'dsh-workspace-controller-')))
   tempDirs.push(root)
   const ctx = new Context()
@@ -71,7 +71,10 @@ async function harness(options: { systemDocuments?: boolean } = {}) {
     resources: { register: vi.fn(() => dispose) },
   } as never)
   new RemoteAccessService(ctx)
-  const controller = new WorkspaceController(ctx, options.systemDocuments === true ? {} : { documentsDirectory: root })
+  const controller = new WorkspaceController(ctx, {
+    ...options.systemDocuments === true ? {} : { documentsDirectory: root },
+    ...options.productDirectory === undefined ? {} : { productDirectory: options.productDirectory },
+  })
   return { controller, ctx, root, storageDomain }
 }
 
@@ -588,6 +591,16 @@ describe('first-use Remote', () => {
     const signal = AbortSignal.abort()
     await expect(controller.initializeDefault(signal))
       .resolves.toMatchObject({ workspace: { workspaceId: workspace!.id, path: root, title: basename(root) } })
+  })
+
+  it('places the default Workspace under the configured product directory', async () => {
+    const { controller, root } = await harness({ productDirectory: 'dsh-claude' })
+    const result = await controller.initializeDefault(new AbortController().signal)
+    expect(result!.workspace.path).toBe(join(root, 'dsh-claude', DEFAULT_WORKSPACE_DIRECTORY))
+  })
+
+  it.each(['', '.', '..', 'a/b', 'a\\b'])('rejects a product directory that is not one path segment: %j', async (productDirectory) => {
+    await expect(harness({ productDirectory })).rejects.toThrow('one path segment')
   })
 
   it('returns a durable Workspace named after its fixed directory without allocating a Session', async () => {

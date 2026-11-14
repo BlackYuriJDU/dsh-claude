@@ -21,6 +21,8 @@ import type { DraftAttachmentId, InputActions, InputNotice, InputState } from '.
 import type { ComposerKeyboard, DraftSnapshot, EditSelection } from './draft-editor.ts'
 import type { createConversationStore } from '../stores.ts'
 import type { BusyEnterBehavior } from './composer-submission.ts'
+import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { ConversationSettings } from '../../submission-settings.ts'
 import type { ConversationSnapshot } from './snapshot.ts'
 import type { ViewTab } from './views.ts'
 import type { UserTextDocumentInput, UserTextEvaluator, UserTextId, UserTextNode } from './user-text.ts'
@@ -294,10 +296,14 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'conversation.hero.frame': { kind: 'hoc'; scope: 'root'; owner: HeroFrameOwnerProps }
     /** Brand mark shown before the blank-session headline. */
     'conversation.hero.brand.mark': { kind: 'single'; scope: 'root'; owner: HeroBrandMarkOwnerProps }
+    /** Blank-session headline after the brand mark; without an occupant the product headline and its Preview badge render. */
+    'conversation.hero.headline': { kind: 'single'; scope: 'root'; owner: HeroHeadlineOwnerProps }
     /** Agent-preset control staged for a New Session. */
     'conversation.hero.agentPreset': { kind: 'single'; scope: 'session-maybe'; owner: HeroAgentPresetOwnerProps }
     /** Compact options right-aligned in the New Session row after the workspace and preset controls; rendered only with a Session. */
     'conversation.hero.options': { kind: 'list'; scope: 'session' }
+    /** Starting suggestions below the New Session composer card; rendered only with a Session. */
+    'conversation.hero.suggestions': { kind: 'list'; scope: 'session' }
     /**
      * Full-width entries above the composer card; fixed overlays must portal to the document body
      * because the docked composer contains them.
@@ -373,10 +379,12 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
         'conversation.composer.bar': { kind: 'single'; scope: 'session-maybe' }
         'conversation.input.dock': { kind: 'list'; scope: 'session' }
         'conversation.hero.frame': { kind: 'hoc'; scope: 'root' }
-        'conversation.hero.brand.mark': { kind: 'single'; scope: 'root' }
+        'conversation.hero.brand.mark': { kind: 'single'; scope: 'root'; inline: true }
+        'conversation.hero.headline': { kind: 'single'; scope: 'root'; inline: true }
         'conversation.hero.workspace': { kind: 'single'; scope: 'root' }
         'conversation.hero.agentPreset': { kind: 'single'; scope: 'session-maybe' }
         'conversation.hero.options': { kind: 'list'; scope: 'session' }
+        'conversation.hero.suggestions': { kind: 'list'; scope: 'session' }
       }
       inject: ConversationInjected
       locale: 'conversation'
@@ -470,8 +478,12 @@ export type ConvViewProps = PropsRuntime<'conversation.view'>
 export interface ConversationInjected {
   /** Connect and open a blank Session in the selected Workspace. */
   selectWorkspace: (workspaceId: WorkspaceId) => Promise<void>
-  /** Session-addressed composer block source, or the stable absent source. */
-  hooks: { composerBlock: ObservableSnapshot<ComposerBlock | undefined> }
+  hooks: {
+    /** Session-addressed composer block source, or the stable absent source. */
+    composerBlock: ObservableSnapshot<ComposerBlock | undefined>
+    /** Host conversation settings; the New Session placeholder reads `heroPlaceholder`. */
+    conversationSettings: ObservableSnapshot<ConfigFormSnapshot<ConversationSettings>>
+  }
 }
 
 /** Business callbacks injected into the strict Session body. */
@@ -669,6 +681,12 @@ export interface HeroBrandMarkOwnerProps {
   /** Requested square edge in pixels. */
   size: number
   /** Host class preserving the surrounding mark geometry. */
+  className?: string | undefined
+}
+
+/** Presentation props supplied to the blank-session headline. */
+export interface HeroHeadlineOwnerProps {
+  /** Host class keeping the headline one centered wrap unit beside the brand mark. */
   className?: string | undefined
 }
 

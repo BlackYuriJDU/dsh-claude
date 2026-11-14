@@ -131,7 +131,7 @@ function liveToolDetail(name: string, args: ToolArgs): string {
  * Rank categories by distinct call count, breaking ties by first appearance.
  * A group whose members are all Context reports one `context` category counting those members; Context beside other members adds no count.
  * @param nodes - process members, including recursive tools.
- * @returns all ranked categories and the latest running tool category and bounded task detail.
+ * @returns all ranked categories, the latest running tool category and bounded task detail, and the settled failure count.
  */
 export function processActivity(nodes: readonly ChatNode[]): ProcessActivitySummary {
   const counts = new Map<ProcessActivity, number>()
@@ -140,6 +140,7 @@ export function processActivity(nodes: readonly ChatNode[]): ProcessActivitySumm
   let runningDetail = ''
   let runningTime = -Infinity
   let preparing: boolean | undefined
+  let failed = 0
   const visit = (tool: ToolCallBlock): void => {
     if (seen.has(tool.callId)) return
     seen.add(tool.callId)
@@ -154,6 +155,7 @@ export function processActivity(nodes: readonly ChatNode[]): ProcessActivitySumm
       }
       counts.set(kind, (counts.get(kind) ?? 0) + 1)
     }
+    if (!isRunningTool(tool) && tool.isError) failed++
     for (const child of tool.subCalls) visit(child)
   }
   for (const node of nodes) {
@@ -166,5 +168,6 @@ export function processActivity(nodes: readonly ChatNode[]): ProcessActivitySumm
     running,
     runningDetail,
     ...preparing ? { preparing: true } : {},
+    ...failed > 0 ? { failed } : {},
   }
 }

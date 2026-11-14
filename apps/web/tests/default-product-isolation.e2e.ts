@@ -85,7 +85,8 @@ it('activates the actual default Client registry without experimental packages',
       })
       const navigation = await page.goto(url)
       expect(navigation?.status()).toBe(200)
-      await page.getByRole('tree', { name: 'Sessions' }).waitFor({ state: 'visible' })
+      // A fresh profile has no Workspace, so the Sessions list has no tree role yet.
+      await page.getByRole('button', { name: 'Add workspace', exact: true }).waitFor({ state: 'visible' })
       const roster = await page.evaluate(readClientRoster)
       const host = await request('roster')
       expect(roster.entries.map(entry => entry.name).sort()).toEqual(host.client.entries.map(entry => entry.id).sort())

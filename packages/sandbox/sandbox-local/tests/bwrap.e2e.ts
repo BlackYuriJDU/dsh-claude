@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, readlinkSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readlinkSync, rmSync, writeFileSync } from 'node:fs'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -7,7 +7,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import type { SandboxPolicy } from '@deepseek-ai/dsh-sandbox'
 import { LocalSandboxProvider } from '@deepseek-ai/dsh-sandbox-local'
-import { bwrapProfileArgs } from '../src/profiles.ts'
+import type { Config } from '@deepseek-ai/dsh-sandbox-local'
+import { NO_RESTRICTIONS, bwrapProfileArgs } from '../src/profiles.ts'
 import { checkExtraWrites, checkRedirectedRoot } from './extra-roots.ts'
 
 /**
@@ -18,7 +19,7 @@ import { checkExtraWrites, checkRedirectedRoot } from './extra-roots.ts'
  * ephemeral `/tmp`, so workspace-write actually proves the workspace-root rebind.
  */
 
-const probe = spawnSync('bwrap', [...bwrapProfileArgs({ mode: 'read-only', workspaceRoot: '/' }), '--', 'true'], { timeout: 5_000, stdio: 'ignore' })
+const probe = spawnSync('bwrap', [...bwrapProfileArgs({ mode: 'read-only', workspaceRoot: '/' }, NO_RESTRICTIONS), '--', 'true'], { timeout: 5_000, stdio: 'ignore' })
 const bwrapUsable = probe.status === 0
 
 let ctx: Context | undefined
@@ -38,9 +39,9 @@ async function tempDir(base: string): Promise<string> {
   return dir
 }
 
-async function provider(): Promise<LocalSandboxProvider> {
+async function provider(config: Config = {}): Promise<LocalSandboxProvider> {
   ctx = new Context()
-  await ctx.plugin(LocalSandboxProvider, {})
+  await ctx.plugin(LocalSandboxProvider, config)
   return ctx.sandbox as LocalSandboxProvider
 }
 
@@ -149,5 +150,34 @@ describe.skipIf(!bwrapUsable)('sandbox-local: real bwrap confinement', () => {
     expect(result.status).toBe(0)
     expect(result.stdout).toBe('tmp-ok')
     expect(existsSync(target)).toBe(false)
+  })
+
+  it('hides denied files and directories, even inside the writable workspace', async () => {
+    const workdir = await tempDir(homedir())
+    const secrets = join(workdir, 'secrets')
+    mkdirSync(secrets)
+    writeFileSync(join(secrets, 'id_rsa'), 'PRIVATE')
+    writeFileSync(join(workdir, '.env'), 'TOKEN=1')
+    const sandbox = await provider({ denyReadPaths: [secrets, join(workdir, '.env')] })
+    const policy = { mode: 'workspace-write', workspaceRoot: workdir } as const
+    const key = await runConfined(sandbox, `cat ${secrets}/id_rsa`, policy)
+    expect(key.result.status).not.toBe(0)
+    expect(key.result.stdout).not.toContain('PRIVATE')
+    const listing = await runConfined(sandbox, `ls -A ${secrets}; cat ${workdir}/.env; printf end`, policy)
+    expect(listing.result.status).toBe(0)
+    expect(listing.result.stdout).toBe('end')
+    const write = await runConfined(sandbox, `printf x > ${secrets}/planted`, policy)
+    expect(write.result.status).not.toBe(0)
+    expect(existsSync(join(secrets, 'planted'))).toBe(false)
+  })
+
+  it('runs in a private network namespace when the network is off', async () => {
+    const workdir = await tempDir(tmpdir())
+    const hostNetwork = readlinkSync('/proc/self/ns/net')
+    const sandbox = await provider({ network: 'off' })
+    const { result, confined } = await runConfined(sandbox, 'readlink /proc/self/ns/net', { mode: 'read-only', workspaceRoot: workdir })
+    expect(confined.enforcement).toBe('full')
+    expect(result.status).toBe(0)
+    expect(result.stdout.trim()).not.toBe(hostNetwork)
   })
 })

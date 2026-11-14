@@ -248,6 +248,30 @@ describe('Definition-owned Chat process groups', () => {
     expect(source.getSnapshot()?.data.summary).toEqual({ counts: [{ kind, count: 1 }], running: undefined, runningDetail: '' })
   })
 
+  it('counts failed settled results, nested calls included, and keeps the count when the group closes', () => {
+    const result = (callId: string, isError: boolean, subCalls: ChatNode<'tool-call'>['data']['root'][] = []) => ({
+      kind: 'tool-result' as const, callId, seq: 3, time: 3, callTime: 2,
+      name: 'bash', args: PartialArguments.fromText('{"command":"pwd"}'),
+      call: { name: 'bash', argsRaw: '{"command":"pwd"}' }, content: [], isError, subCalls,
+    })
+    const running = tool('child-running', 2).data.root
+    const failedRoot: ChatNode<'tool-call'> = { ...tool('a', 2), data: { root: result('a', true, [result('a1', true), result('a2', false), running]) } }
+    const passedRoot: ChatNode<'tool-call'> = { ...tool('b', 4), data: { root: result('b', false) } }
+    expect(processActivity([failedRoot, passedRoot]).failed).toBe(2)
+    expect(processActivity([passedRoot])).not.toHaveProperty('failed')
+    const h = harness([failedRoot, passedRoot])
+    const group = h.store.entries[0]!
+    if (group.kind !== 'group') throw new Error('expected group')
+    const source = h.store.groupSource(group.key)
+    expect(source.getSnapshot()?.data.summary.failed).toBe(2)
+    h.builder.apply({ upserts: [separator(9, true)], timeline })
+    h.commit()
+    expect(source.getSnapshot()?.data).toMatchObject({ closed: true, summary: { failed: 2 } })
+    h.builder.apply({ upserts: [{ ...failedRoot, data: { root: result('a', false) } }], timeline })
+    h.commit()
+    expect(source.getSnapshot()?.data.summary).not.toHaveProperty('failed')
+  })
+
   it.each(['process', 'turn', 'input'] as const)('ends the group at a Node declared at %s, whatever its kind', (position) => {
     const h = harness([tool('before', 4), { ...tool('standalone', 5), groupTree: position }, tool('after', 8)])
     expect(h.store.entries.map(entry => entry.kind === 'group' ? 'group' : entry.key)).toEqual(['group', 'standalone', 'group'])
@@ -268,7 +292,7 @@ describe('Definition-owned Chat process groups', () => {
       location: { kind: 'turn', turn }, visibility: 'visible', groupTree: 'turn',
       data: {
         turn: 1, controlAnchorSeq: 1, processStartSeq: 1, answerAnchorSeq: null,
-        answerStep: null, inlineReasoning: false, messageCount: 0, toolCallCount: 1, subagentCount: 0,
+        answerStep: null, inlineReasoning: false, messageCount: 0, toolCallCount: 1, subagentCount: 0, failedToolCallCount: 0,
       },
     }
     const h = harness([control, tool('first', 6), tool('after', 8)])
@@ -283,7 +307,7 @@ describe('Definition-owned Chat process groups', () => {
       location: { kind: 'turn', turn }, visibility: 'visible', groupTree: 'turn',
       data: {
         turn: 1, controlAnchorSeq: 6, processStartSeq: 1, answerAnchorSeq: null,
-        answerStep: null, inlineReasoning: false, messageCount: 0, toolCallCount: 1, subagentCount: 0,
+        answerStep: null, inlineReasoning: false, messageCount: 0, toolCallCount: 1, subagentCount: 0, failedToolCallCount: 0,
       },
     }
     const h = harness([tool('reply', 6), control, tool('after', 8)])

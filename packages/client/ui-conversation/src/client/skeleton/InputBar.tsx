@@ -494,7 +494,9 @@ export const InputBar = memo(function InputBar({
           editorDisabled={editorDisabled}
           phase={input?.phase ?? 'inert'}
           placeholderText={placeholderText}
-          ariaLabel={workspaceTrigger ? t('hero.chooseWorkspace') : placeholderText}
+          // As the Workspace trigger the surface is a second button beside the
+          // Workspace chip, so it takes the placeholder's longer wording as its name.
+          ariaLabel={placeholderText}
           workspaceTrigger={workspaceTrigger}
           workspacePickerOpen={workspacePickerOpen}
           onWorkspaceKeyDown={onWorkspaceKeyDown}

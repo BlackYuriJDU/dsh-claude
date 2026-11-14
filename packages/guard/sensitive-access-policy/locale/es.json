@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Política de acceso sensible",
+    "description": "Pide aprobación antes de que las herramientas lean rutas protegidas o envíen datos a sitios fuera de la lista permitida."
+  }
+}

@@ -28,14 +28,28 @@ export function validateDocumentsDirectory(directory: string, platform: NodeJS.P
 }
 
 /**
+ * Validate the product folder name placed under Documents.
+ * @param name - one path segment.
+ * @returns the name unchanged.
+ */
+export function validateProductDirectory(name: string): string {
+  if (name === '' || name === '.' || name === '..' || /[\\/]/.test(name)) {
+    throw new Error(`Product directory must be one path segment: '${name}'`)
+  }
+  return name
+}
+
+/**
  * Resolve the first-use directory on the Host without creating files.
  * @param documentsDirectory - explicit deployment override for the system Documents directory.
+ * @param productDirectory - folder under Documents that holds the default Workspace.
  * @param signal - caller lifetime and lookup deadline.
  * @param internals - platform facts and native command runner.
  * @returns the absolute candidate path.
  */
 export async function defaultWorkspaceDirectory(
   documentsDirectory: string | undefined,
+  productDirectory: string,
   signal: AbortSignal,
   internals: DocumentsDirectoryInternals = {},
 ): Promise<string> {
@@ -74,5 +88,5 @@ export async function defaultWorkspaceDirectory(
   }
   directory = validateDocumentsDirectory(directory, platform)
   signal.throwIfAborted()
-  return paths.join(directory, 'deepseek-harness', DEFAULT_WORKSPACE_DIRECTORY)
+  return paths.join(directory, productDirectory, DEFAULT_WORKSPACE_DIRECTORY)
 }

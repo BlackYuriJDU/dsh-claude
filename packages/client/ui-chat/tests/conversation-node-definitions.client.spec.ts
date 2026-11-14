@@ -516,7 +516,7 @@ describe('built-in conversation node Definitions', () => {
       .toMatchObject({ processStartSeq: 30.1, answerAnchorSeq: 30.1, answerStep: 4 })
   })
 
-  it('counts Assistant messages, Tool calls, and subagent delegations per Turn', () => {
+  it('counts Assistant messages, Tool calls, subagent delegations, and failed results per Turn', () => {
     const value = assembler([
       at(1, 'turn/start', { turn: 1 }),
       at(2, 'step/start', { turn: 1, step: 1 }),
@@ -533,8 +533,12 @@ describe('built-in conversation node Definitions', () => {
         turn: 1, step: 1, callId: 'call-subagent', name: 'subagent_fork', arguments: '{}',
       }),
       at(7, 'tool/result', {
-        turn: 1, step: 1, message: toolResult('call-subagent', 'delegation done'),
+        turn: 1, step: 1, message: toolResult('call-subagent', 'delegation failed', true),
       }, { surfaceOp: 'append' }),
+      // A result that does not append to the surface is not a new failure.
+      at(7.5, 'tool/result', {
+        turn: 1, step: 1, message: toolResult('call-subagent', 'delegation failed', true),
+      }),
       at(8, 'step/end', { turn: 1, step: 1 }),
       at(9, 'step/start', { turn: 1, step: 2 }),
       at(10, 'assistant/message', {
@@ -548,6 +552,7 @@ describe('built-in conversation node Definitions', () => {
       messageCount: 1,
       toolCallCount: 1,
       subagentCount: 1,
+      failedToolCallCount: 1,
     })
   })
 

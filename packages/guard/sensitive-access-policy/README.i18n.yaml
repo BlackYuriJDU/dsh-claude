@@ -1,0 +1,58 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/guard/sensitive-access-policy/README.md
+/:
+  en: c6cf48b6872e93a4
+  zh: 58cf40f505a7dcfd
+/deepseek-ai-dsh-sensitive-access-policy:
+  en: 84204779911b3098
+  zh: 192e5a60eb00b2b7
+/deepseek-ai-dsh-sensitive-access-policy/summary:
+  en: ae1b4c7e89360a4a
+  zh: ddf242e3dd9f1261
+/deepseek-ai-dsh-sensitive-access-policy/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-sensitive-access-policy/use-this-package:
+  en: bbff250eba0f1b89
+  zh: 0a618f05cc88ee2b
+/deepseek-ai-dsh-sensitive-access-policy/use-this-package/when-to-choose-it:
+  en: 2759f5a56165eab1
+  zh: bc730063aa46f05d
+/deepseek-ai-dsh-sensitive-access-policy/use-this-package/setting-it-up:
+  en: 3170494af720c90d
+  zh: c69937538999a259
+/deepseek-ai-dsh-sensitive-access-policy/use-this-package/what-you-get:
+  en: a3756e83700cc83e
+  zh: 68053c080ccc2439
+/deepseek-ai-dsh-sensitive-access-policy/understand-the-implementation:
+  en: da2b0175abf03f57
+  zh: a9b6d9748de9b3d7
+/deepseek-ai-dsh-sensitive-access-policy/understand-the-implementation/source-map:
+  en: 576de0e2992abccd
+  zh: 18fea58bb67fc8c6
+/deepseek-ai-dsh-sensitive-access-policy/further-exploration:
+  en: 259e5ddb0f0fa681
+  zh: 1c80ea627deee9a4
+/deepseek-ai-dsh-sensitive-access-policy/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-sensitive-access-policy/model-experience/conditional-tool-result:
+  en: 7877631ca859b191
+  zh: 32222c70fd81713a
+/deepseek-ai-dsh-sensitive-access-policy/model-experience/conditional-tool-result/what-the-model-sees:
+  en: bf673c6494501941
+  zh: 12639c41071848ed
+/deepseek-ai-dsh-sensitive-access-policy/model-experience/conditional-tool-result/token-effect:
+  en: fda5cdec68f5a70f
+  zh: 5c5544d0d57ff058
+/deepseek-ai-dsh-sensitive-access-policy/model-experience/conditional-tool-result/kv-cache-effect:
+  en: 2fbf2175168e8244
+  zh: 4c1b01eab34453c9
+/deepseek-ai-dsh-sensitive-access-policy/known-limitations-and-deferred-work:
+  en: 029f8ec12306215f
+  zh: 750537c216c60108
+/deepseek-ai-dsh-sensitive-access-policy/known-limitations-and-deferred-work/dev-note:
+  en: 76dac9aebb2b87e7
+  zh: 1d4228819fe9cdd8

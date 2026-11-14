@@ -1,4 +1,4 @@
-- banner:
+- main:
   - navigation "Session hierarchy": Reply with a one-sentence description
   - text: Standard mode
   - button "More actions"
@@ -7,23 +7,23 @@
     - tab "Chat" [selected]
     - tab "Trajectory"
   - button "More conversation views"
-- text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
-- button "Copy"
-- button "Context injection runtime-context"
-- button "Context injection skill-catalog"
-- button "Context injection time-context"
-- paragraph: partial
-- status: Deep diving
-- text: Deep diving for {{duration}} ···
-- list:
-  - listitem:
-    - img "Queued message image"
-    - text: Compare with this screenshot
-    - button "Edit queued message" [disabled]
-    - button "Remove queued message"
-    - button "Steer queued message"
-- textbox "Cmd/Ctrl+Enter steers all queued messages"
-- button "Add files or run commands"
-- 'button "Access mode, current: Workspace Write"': Workspace Write
-- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
-- button "Stop generating"
+  - text: Reply with a one-sentence description of event sourcing, then stop. {{clock}}
+  - button "Copy"
+  - button "Context injection runtime-context"
+  - button "Context injection skill-catalog"
+  - button "Context injection time-context"
+  - paragraph: partial
+  - status: Deep diving
+  - text: Deep diving for {{duration}} ···
+  - list:
+    - listitem:
+      - img "Queued message image"
+      - text: Compare with this screenshot
+      - button "Edit queued message" [disabled]
+      - button "Remove queued message"
+      - button "Steer queued message"
+  - textbox "Cmd/Ctrl+Enter steers all queued messages"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Workspace Write"': Workspace Write
+  - button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
+  - button "Stop generating"

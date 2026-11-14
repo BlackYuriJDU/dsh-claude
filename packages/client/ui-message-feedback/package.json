@@ -67,7 +67,9 @@
     "@deepseek-ai/dsh-client-ui-session": "workspace:*",
     "@deepseek-ai/dsh-client-ui-commands": "workspace:*",
     "@deepseek-ai/dsh-command-feedback": "workspace:*",
-    "@deepseek-ai/dsh-client-store": "workspace:*"
+    "@deepseek-ai/dsh-client-store": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-settings": "workspace:*",
+    "@deepseek-ai/dsh-settings": "workspace:*"
   },
   "files": [
     "locale/*.json",
@@ -77,5 +79,8 @@
     "lib/types/**/*.d.ts.map",
     "lib/**/*.js.map",
     "src"
-  ]
+  ],
+  "dependencies": {
+    "@deepseek-ai/schemastery": "workspace:~"
+  }
 }

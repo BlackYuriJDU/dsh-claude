@@ -1,0 +1,194 @@
+# Onda 0.7 (M0 do Plano v3): migração para o upstream 0.2.2
+
+Branch `ccr-a6886271-p3qfkp-v022`, PR #17 contra `dshc/base`. `dshc/base` é o upstream `deepseek-ai/deepseek-harness` na 0.2.2-rc.2, sem nenhuma mudança. A branch parte da festive (`claude/festive-euler-vb8psi`) e recebe o upstream por merge, no mesmo sentido do merge anterior da própria festive ("Merge upstream master (0.2.2-alpha.3) into the DSHC branch").
+
+## Entregue
+
+| Commit (assunto) | O que mudou |
+|---|---|
+| Merge upstream master (0.2.2-rc.2) into the DSHC branch | Merge do upstream 0.2.2-rc.2 na festive, com os 29 conflitos resolvidos (tabela abaixo) |
+| fit DSHC specs to the merged 0.2.2 slots | Dois specs da festive ajustados aos slots do 0.2.2: o mock de `renderSlot` do hero e a busca do badge do launcher pela chave |
+| put the DSHC packages on the family version | Os seis pacotes DSHC passam a usar a versão da família, `0.2.2-rc.2` (exigência do `release:verify --family dsh`) |
+| publish source maps and sources like every 0.2.2 package | Lista `files` padrão do 0.2.2 nos seis pacotes DSHC (exigência do gate `constraints`) |
+| satisfy the 0.2.2 static gates on the DSHC packages | Entradas de plugin sem exports extras; `issue-policy.yml` de volta ao texto do upstream; Summary do README do `ui-memory` dentro de 100 palavras; baseline de casts sem a entrada aposentada |
+| create the card controller before the dictionaries | `ui-settings-searxng` cria o controlador antes dos dicionários, para não repetir o `ui-settings-shell` linha a linha (gate `duplication`) |
+| regenerate source lines for the DSHC plugin entries | `docs/config-catalog` com as linhas novas das entradas sem exports extras |
+| restore and align the tests the 0.2.2 suite caught | As seis correções de teste e de preset descritas em "Falhas do `test` que vinham da migração" |
+
+## Conflitos do merge (29)
+
+| Tipo | Arquivos | Resolução |
+|---|---|---|
+| Gerados (13) | `docs/config-catalog{,.zh}.md`, `docs/module-graph{,.zh}.md`, `docs/capability-seams.i18n.yaml`, sete `README.i18n.yaml`, `slot-catalog.ts` | Lado do upstream, regenerados com `gen-config-catalog`, `gen-module-graph`, `gen-client-catalog` e `verify-translation-pairing --write` (os pares en e zh mudaram juntos) |
+| READMEs (6) | `ui-conversation`, `ui-settings`, `ui-settings-account` (en e zh) | Texto do upstream com os parágrafos DSHC reaplicados: placeholder e sugestões do hero, slot `settings.launcher.badge`, rótulo "Back to {product}" |
+| Código e testes (10) | `tsconfig.base.json`, `AssistantMarkdown.module.css`, `ui-message-feedback/package.json`, `ui-conversation/src/client/index.ts`, `ModelSelect.tsx`, `AccountMenu.tsx`, `ui-settings-account/src/client/index.ts`, `skeleton.client.spec.tsx`, `account.client.spec.tsx`, `dsh-doc/references/packages.md` | Os dois lados convivem: slots `hero.headline` e `hero.frame`, slots filhos `settings.launcher.badge` e `settings.launcher.notifications`, nomes de esforço localizados (sem o `MEASURE_STYLE`, que o upstream removeu), variável de fonte da resposta ao lado do `--dsh-assistant-block-gap`, dependência de `schemastery` ao lado da lista `files` nova |
+
+Divergência depois do merge: 339 arquivos diferem de `dshc/base`. Fora dos arquivos que a festive já alterava, só `packages/preset/agent-preset/skills/dsh-doc/references/packages.md` difere, porque o upstream mudou o caminho dele.
+
+## Gates rodados (comando → resultado)
+
+Ambiente: container Linux com 4 vCPUs e 15 GB, Node 24.22.1 (`/opt/node24`) e pnpm 11.28.5. A rede precisa liberar `cdn.sheetjs.com`, de onde o lockfile baixa o SheetJS 0.20.3. Aqui isso exigiu um ambiente próprio da sessão.
+
+| Comando | Resultado |
+|---|---|
+| `pnpm install --frozen-lockfile` | ok |
+| `DSH_GATE_CONCURRENCY=1 pnpm run typecheck` | 4 de 5 gates na primeira execução; o client aggregate falhou num spec, que foi corrigido. Depois, `tsc -b tsconfig.client.json` saiu com 0, e o typecheck completo passou no pre-push de cada envio |
+| `pnpm run lint` | exit 0 |
+| `pnpm run build` | 10 gates, 0 falhas |
+| `pnpm run check:ci:static` | primeira execução: 63 passaram e 4 falharam (unknown casts, plugin entry exports, issue management, README Summaries); os 4 foram corrigidos e cada um passou isolado |
+| `pnpm run constraints`, `release:verify --family dsh`, `duplication` | cada um reproduzido com falha e depois verde |
+| `pnpm run verify-translation-pairing` | 1.271 pares consistentes |
+| Specs dos arquivos em conflito e dos pacotes DSHC alterados | 105 + 92 + 12 testes passaram |
+| `pnpm run test` | 2.741 arquivos, 57.014 testes: 34 falhas em 18 arquivos. Oito falhas eram da migração e foram corrigidas (tabela abaixo); os specs afetados passam isolados. As outras 26 são do container: roda como root (testes de `chmod` e permissão em `agent-instructions`, `storage-sqlite`, `subagent/out-of-process` e `cordis-include-journal`), não tem bubblewrap (`ptc-runtime-node`, `bash-sandbox`, `workflow-ptc`), tem um `claude` real no PATH (`subagent-claude-code`), não alcança os hosts de rede do teste (`plugin-market`) e não formata o listener IPv6 (`llm-mock-server`). Nenhum desses pacotes difere de `dshc/base` |
+| `pnpm run test:snapshot` | 267 casos: 17 falhas, todas `sandbox-unavailable` (cenários PTC, `workflow-confinement`, `worktree` e `bash-tool` do SDK), porque o container não tem bubblewrap; o CI instala com `scripts/prepare-ci-bubblewrap.sh` |
+
+Falhas do `test` que vinham da migração:
+
+| Teste | Causa | Correção |
+|---|---|---|
+| `ui-agent-preset/tests/components.client.spec.tsx` (sem suíte) | O commit dos presets ocultos da festive esvaziou o arquivo por acidente | Spec recuperado da versão anterior, ajustado à prop `useSeatPolicy`, com um caso novo para presets ocultos; o baseline de casts volta à entrada do upstream |
+| `scripts/rescope-vendor.spec.ts` | O mesmo arquivo vazio | Mesma correção |
+| `scripts/ci-workflow.spec.ts` | A festive esperava `if` no job `Issue policy` | Volta à expectativa do upstream (job sem condição) |
+| `ui-theme/tests/corner-shape-styles.client.spec.ts` | O `.avatar` do `ProfileBadge` usava raio cheio sem `corner-shape: round` | Declaração acrescentada |
+| `bundle/dshc/tests/dshc.spec.ts` | Os presets Cowork, Code e Design copiavam as linhas do preset `standard` da 0.2.2-alpha.3 | As três linhas novas do upstream: `customSkillDirs` do `skill-filesystem`, `interrupt: false` do `tool-subagent-control` e `tool-office` |
+| `apps/cli/tests/profile-mcp.spec.ts` | O teste do upstream espera o `mcp-manager` só no perfil `web` | O perfil `dshc` compõe o bundle Web, então o teste o trata como `web` |
+
+## CI da PR #17
+
+| Check | Classificação | Situação |
+|---|---|---|
+| `e2e` e `python runtime / release-shaped matrix` | ambiente do fork | Falta o secret `DEEPSEEK_API_KEY_EXTERNAL` (pendência do dono). No job Python, os 83 testes do pytest passam; só o passo do teste real de API para |
+| `Issue policy` | ambiente do fork | O fork não tem o GitHub App do upstream. O teste do upstream exige o job sem condição, então o workflow deve ser desabilitado nas configurações |
+| `Pack npm tarballs` | festive | Versões `0.2.2-alpha.3`; corrigido pelo commit de versão da família |
+| `static` (`constraints`, casts, exports, issue management, Summary) | festive | Corrigido pelos commits de `files` e de gates estáticos |
+| `lint` (`duplication`) | festive | Corrigido pelo commit do `ui-settings-searxng` |
+| `snapshots and artifacts` (suíte web) | festive | Goldens de transcrição sem a contagem "N failed" que a própria festive acrescentou aos botões de turno e de grupo (`process-activity.ts`, `turn-process.ts`), porque ela não regravou a suíte web; nomes de esforço localizados da festive (`关闭`, `高`, `最高`) no `declared-reasoning`; o seletor do peixe do hero, que passou para dentro do slot `conversation.hero.headline`; e o contêiner de sugestões do hero, que nunca ficava `:empty` por causa da âncora do slot e deslocava o composer em 10 px |
+| `benchmarks` | ruído do runner | `conversation-fold` e `long-session` passaram do limite por poucos milissegundos num head e passaram no seguinte, sem mudança de código |
+| `node 24 / coverage` | upstream | 100% em todos os arquivos; a única falha é `tool-pwsh-persistent/tests/loader-composition.spec.ts:234`, em que a saída do pwsh some no limite do scrollback. O pacote não difere de `dshc/base` |
+| `windows node 24 / coverage` | upstream | Timeout de 90 s no hook de `scripts/oxlint-contract.spec.ts`, que não difere de `dshc/base` |
+
+## Desvios do plano e motivo
+
+- **Passo 4 (`gh workflow disable`) não executado.** Nesta sessão, o `gh` só pode ser usado para busca, e o GitHub MCP não tem operação para desabilitar workflows. O plano proíbe editar os `.yml`, então a desativação fica com o dono, pela interface do GitHub. A lista: `ci-master.yml`, `ci-python.yml`, `pr-check-after-approve.yml`, `pr-check-on-head-branch.yml`, `pr-check-on-base-branch.yml`, `sandbox.yml` e, por causa do teste do upstream, também `issue-policy.yml`.
+- **`issue-policy.yml` sem a condição da festive.** O teste `keeps trusted preflight before token minting and required policy unconditional` do upstream proíbe `if:` no job e no preflight. Voltar ao texto do upstream elimina uma divergência; o fork desabilita o workflow em vez de editá-lo.
+- **`docs/dshc/` fora do pareamento de tradução** (`scripts/translation-pairing.manifest.json`), como a M1 prevê para os documentos do DSHC.
+
+## M1: porte da linha 0.1.1
+
+Cada item da tabela M1 do Plano v3, conferido no 0.2.2 com a festive:
+
+| Item | Situação no 0.2.2 | Decisão |
+|---|---|---|
+| `docs/claw-os/*` | não existia | Portado para `docs/dshc/`, com "claw-os" trocado por "DSHC", junto do Plano v3 e do estudo de melhorias. Os checks de referências de commit e de caminhos de pacote pulam `docs/dshc/`, como pulam as Agent Notes arquivadas, porque estes registros citam commits da linha anterior e caminhos planejados. Os blocos de código propostos no estudo são `ts ignore-check` |
+| `conversation-column-overflow.e2e.ts` | já existe em `apps/web/tests/` | Nada a portar |
+| Anel de uso | O `ContextMeter` do upstream fica abaixo do card do composer: anel com a porcentagem e painel com a barra de composição do contexto (system prompt, ferramentas, conversa) | Mantido o do upstream. A seção de sessão da linha antiga (tokens, cache, entrada e saída, velocidade) não foi portada, porque exigiria alterar o `ContextMeter` do upstream. Os mesmos números por turno estão na aba Statistics do `experimental/client-ui-stats` (ver N8 e N9 do estudo) |
+| Seletor de acesso sob o composer | `ui-permission-presets` ocupa o slot `conversation.input.permission` e vem no bundle Web | Nada a portar |
+| `ui-routines` | `ui-schedule` agenda instruções recorrentes (`every`, `daily`, `weekly`, `cron`, `rrule`) | Descartado |
+| `ui-handoff` | `ui-sidebar-right`, `deliverables` e `documentpreview` | Descartado |
+| Perfil e conta do `ui-settings-general` | "Your {product}" do `ui-memory` (nome e instruções) e o launcher de conta | Descartado |
+| `ChatFontRow` | `ui-theme` tem `textFontFamily` configurável, e a camada DSHC aplica a fonte escolhida às respostas | Descartado |
+| `knowledgeFileMaxChars` | `ui-projects` já tem `maxFileChars` e `maxTotalChars` como `Config` | Nada a reaplicar |
+| Trajectory sem volta | O header só esconde as abas numa sessão em branco (`hideChrome` vem de `blank` em `ConversationHeader.tsx`) | O defeito não existe no 0.2.2 |
+| MCP de busca DuckDuckGo, instruções no prompt, gaveta compacta, remoção do `zh`, P1 e workflows de issue | — | Descartados, como o plano prevê |
+
+## M1.5: correções da revisão de código e da auditoria
+
+A revisão de código e a auditoria de `origin/dshc/base...HEAD` acharam 17 defeitos (tabela em `docs/dshc/PLANO-V3.md`, M1.5). Cada correção tem um teste que falha antes dela.
+
+| # | Situação | Commit (assunto) |
+|---|---|---|
+| 1 | corrigido | keep only the edited draft in the project card |
+| 2 | corrigido | say the note is sent while Session-log upload is on |
+| 3 | corrigido | accept HTML comment reports only in comment mode |
+| 4, 5, 17 | corrigidos em `ui-memory` e `ui-projects` | confirm saves from the Host and queue list edits; confirm saves from the Host and queue project edits |
+| 6, 11 | corrigidos | report a cancelled search as aborted and release error bodies |
+| 7 | corrigido | keep launcher options ahead of the default port |
+| 9 | corrigido | keep fitting context and mark what the bound cut |
+| 13 | teste que trava a ordem relativa à tabela central | pin the context positions after the central table |
+| 14 | corrigido | split the Host and Client compiler faces |
+| 15 | corrigido | give the segmented picker radio-group keys |
+| 16 | corrigido | name the memory add and edit fields |
+| 8 | adiado | Os testes de composição real (smoke com SearXNG e LLM falsos, e2e web no perfil `dshc`) são trabalho de suíte próprio; ficam para a Onda 1, que já mexe no perfil e grava screenshots e GIF |
+| 10 | adiado | Os eventos `tool/ptc-dispatch` não levam o número do turno, então o nó do turno não consegue contá-los sem mudar a forma como o motor de nós da transcrição associa eventos a turnos. Até lá, o grupo mostra a falha da subchamada e o controle do turno não |
+| 12 | adiado | Os provedores de contexto do system prompt são síncronos (`PromptContext.text`), então tirar a leitura dos arquivos da montagem exige um leitor em segundo plano com invalidação por mudança de config e de `mtime`. O custo atual é um `stat` por arquivo por montagem, com leitura só quando o arquivo muda |
+
+O item 4 propunha também desabilitar os campos quando o documento de configuração não aceita escrita; isso ficou de fora porque o snapshot de carregamento também chega com `writable: false`, e os campos ficariam travados até a primeira leitura.
+
+## M2: inventário e documentos
+
+| Passo | Resultado |
+|---|---|
+| Matriz de paridade sobre o 0.2.2 | `docs/dshc/inventario-0.2.2.md`, seção 1: 26 recursos com arquivo e linha. Abertos: artifacts duráveis com versões, citações inline, editar mensagem, responsivo em 390 px e política contra exfiltração |
+| Catálogo dos experimentais | mesma página, seção 2: os 63 pacotes em 16 grupos, com a recomendação da N8 |
+| Errata | `wait_agent` no lugar de `job_output`; Cordis 4.1.0; cenário `plan-narrow-viewport` de `plan-control-row.e2e.ts`; D3, D6 e D7 creditadas ao upstream; a seção 3 de `01-estudo-mestre.md` aponta para o inventário |
+| Layout em 1280, 1024, 768 e 390 px | medido no perfil `dshc` com Playwright; capturas em `docs/dshc/referencias/0.2.2/`. Sem rolagem horizontal em nenhuma largura; em 390 px o seletor de modos passa da tela (A10) |
+| Lista A.4 | saem o foco de 2 px, o SheetJS pelo CDN e as skills de Office, que o 0.2.2 já entrega |
+| Gates de docs | `verify-md-wrap` e `verify-md-links` verdes |
+
+A `REVISAO-PLANO-V2.md` citada pelo Plano v3 não está no repositório; a errata aplicada é a lista do próprio passo 2 da M2.
+
+## Onda 1: identidade DSHC e acessibilidade
+
+| Item | Resultado | Commit (assunto) |
+|---|---|---|
+| Nome visível | Personas dos quatro presets e README em en e zh dizem DSHC | show the product as DSHC instead of DSH Claude |
+| Tokens AA | Sete tokens de texto ajustados só em luminosidade; `contrast.client.spec.ts` exige 4,5:1 para texto e código e 3:1 para ícones e anel de foco, sobre as 16 superfícies, e reprova um par inválido | bring text, links, and status colors to WCAG AA |
+| Símbolo (D12) | Monograma: placa cor de argila com a inicial em serifa branca; o burst saiu | replace the clay burst with a DSHC monogram (D12) |
+| Onboarding | O diálogo de primeiro uso oferece a escolha de modelo nos 8 idiomas, sem pedir login na DeepSeek | describe the first-run dialog as a choice of model |
+| Composer sem Workspace | Papel `button`, nome acessível igual ao placeholder e anel de foco | give the Workspace-trigger composer a button role and ring |
+| A10, seletor de modos em 390 px | Os segmentos rolam dentro do grupo; setas, Home e End movem o foco | keep every mode reachable in the narrow segmented picker |
+| A11, marcos | `<main>` no painel principal; a árvore vazia de sessões deixou de ser `tree`; o título do hero é o `h1` | drop the empty session tree role and add a main landmark; make the blank-screen headline the page h1; pass the tree role only when the list has rows |
+| A12, rótulos da barra lateral | "Workspaces" inteiro com reticências no limite; o launcher deslogado mostra "Settings", e não um segundo "More" | stop truncating and repeating sidebar labels |
+| Gate axe (N3) | `apps/web/tests/accessibility.e2e.ts` roda as regras WCAG 2.x A e AA do axe-core na composição DSHC, antes e depois de vincular um Workspace, em 1280 e 390 px, e passou 3 de 3 vezes. No perfil padrão do upstream ele acusa `color-contrast` (3,54:1 em "Workspaces") e `label-content-name-mismatch`, o que prova que o gate reprova defeitos reais | audit the DSHC composition with axe-core |
+| Agent Note | `2026-11-13-dshc-aa-contrast-and-monogram`, com link a partir da nota da camada de paleta | record the DSHC contrast floor and monogram decision |
+
+A regra `label-content-name-mismatch` (WCAG 2.5.3) fica desligada no gate, e o teste nomeia os três controles do upstream que a violam: o botão da marca ("New session" sobre o wordmark), o launcher ("Account menu" sobre o rótulo visível) e o botão de Workspace do hero já vinculado ("Choose workspace" sobre o nome). Alinhar esses nomes muda os seletores de cerca de 20 e2e da suíte web, então a correção vai para o upstream junto com esses testes.
+
+O `axe-core` é MPL-2.0 e entra só como devDependency do app de testes `apps/web`, que é privado e não é distribuído. O gate de licenças da Onda 2 precisa aceitar ferramentas de teste com licença de copyleft por arquivo.
+
+A regravação da suíte web (`DSH_SNAPSHOT=refresh`, 238 arquivos) mudou cerca de 90 goldens. Fora a indentação, só três coisas mudam: a coluna da conversa é `main`, o título do hero é `h1` e o launcher deslogado diz "Settings". Dentro de `main`, o `<header>` da sessão deixa de ser um `banner` separado. Por isso, `open-in-app-ssh` e `open-in-app-menus` passaram a localizar o header pelo slot de ações. `desktop-onboarding` passou a medir o título do próprio diálogo, porque agora há dois `h1`. `default-product-isolation` espera "Add workspace", porque a lista vazia de sessões não tem mais papel `tree`. `onboarding-native` passou a esperar "设置".
+
+O teste de 390 px achou um defeito do seletor segmentado: durante a troca de preset os segmentos ficavam `disabled`, e o foco que as setas acabavam de mover caía no documento. Agora eles ficam `aria-disabled`, continuam focáveis e ignoram cliques enquanto a troca não termina.
+
+Este container não tem bubblewrap nem WebKit. Os casos que executam comandos (PTC, present, changed-files-turn, forge, cua, entre outros) gravaram "no sandbox backend" nas sessões. Essas sessões foram revertidas, e os goldens desses casos receberam só a mudança de `main`, aplicada por script sobre a versão commitada. Os casos que falharam aqui sem depender de sandbox (schedule-phone, composer-focus, chat-continuous, user-text-secret-mask, agent-team-panel) falham do mesmo jeito no commit anterior à Onda 1.
+
+O scaffold da suíte web fixa o preset `standard`, que o DSHC desliga. O teste de acessibilidade passa `agentPresets: { default: 'chat' }`, e `connectFreshWorkspace` recebe o placeholder do composer liberado, porque o DSHC usa `heroPlaceholder: help`.
+
+As capturas em 1280 e 390 px, nos temas claro e escuro, ficam em `docs/dshc/referencias/onda-1/`, gravadas no perfil `dshc` compilado. `dshc-390-segmented-keyboard.gif` mostra as setas, Home e End percorrendo os modos sem rolar a página. Este container não tem `xdg-user-dir`, então o Workspace padrão só foi criado com um `xdg-user-dir` local apontando para uma pasta temporária. Sem ele, o app mostra "Unable to create default workspace", que é o comportamento do upstream quando falta a pasta Documents.
+
+### Pendente
+
+- `outline-offset` do botão de envio, que hoje encosta o anel de foco no preenchimento cor de argila.
+- Favicon e manifest do app web por perfil: vêm do app web do upstream, compartilhado por todos os perfis, e trocá-los para o `dshc` exige sobrescrever recursos no build.
+- Enviar ao upstream, como PR, as correções genéricas desta onda (marcos, árvore vazia, rótulos da barra lateral, seletor segmentado e a regra 2.5.3).
+
+## Onda 2: segurança e licenças
+
+Decisões do dono: D13, `web_fetch` pede aprovação só quando o endereço leva dados; D14, licenças fora da política entram como exceções nomeadas, cada uma com motivo.
+
+| Item | Resultado | Commit (assunto) |
+|---|---|---|
+| Camada 1, sandbox | `denyReadPaths` e `network` em `sandbox-local`. bwrap usa tmpfs só leitura, `/dev/null` e `--unshare-net`; Seatbelt usa `deny file-read*` e `deny network*`; Landlock e ACL do Windows reportam `partial`. Os padrões não restringem nada | hide configured paths and remove network access |
+| Camada 2, ferramentas | Pacote `dsh-sensitive-access-policy`: `read`, `read_image`, `grep` e `glob` pedem aprovação em caminhos protegidos; `web_fetch` pede quando leva dados a um site fora da lista. Spec com cobertura de 100% e prova de que um `deny` posterior prevalece | ask before tools read protected paths or send data to unlisted sites |
+| Padrões do DSHC | Protege `~/.ssh`, `~/.aws`, `~/.config/gh`, `~/.gnupg` e `**/.env*`; esconde os quatro diretórios dos comandos de shell; `fetchApproval: with-data` com lista vazia | idem |
+| Composição real e N4 | `dshc-privacy.e2e.ts`: nenhum host externo no navegador nem no Host durante a inicialização e 5 s ociosos; ler o `.env` do workspace e um fetch com dados param na aprovação. Sem `**/.env*` no bundle, o teste reprova | prove DSHC stays local and gates sensitive reads in its real composition |
+| Licenças | `verify-dependency-licenses` no `run-gates` estático e no `hygiene`. Cobre 469 pacotes de runtime e 1.154 só de desenvolvimento; a spec reprova GPL sem alternativa, tldraw, licença desconhecida e exceção sem uso | check the licenses of the whole dependency closure and group Dependabot updates |
+| Dependabot | Minor e patch agrupados por ecossistema, majors separados, fuso `America/Sao_Paulo` | idem |
+| Agent Note | `2026-11-14-dshc-two-layer-exfiltration-policy`, em en e zh | record the two-layer exfiltration policy |
+
+### Desvios do plano
+
+- Os dois snapshots sem chave viraram o teste de composição real. As sessões gravadas exigem uma chave da DeepSeek para gravar, e o caso do `bash` exige bwrap, que este container não tem. O `dshc-privacy.e2e.ts` cobre a camada 2 na composição DSHC carregada pelo Loader, com ferramentas `read` e `web_fetch` substitutas no contexto raiz, porque os presets registram as ferramentas reais por agente.
+- O `bash cat` negado pela camada 1 é provado em `sandbox-local/tests/bwrap.e2e.ts` (arquivo e diretório escondidos, rede em outro namespace). Esse teste roda na faixa `e2e` do CI, que neste fork falha antes por falta do secret.
+- O gate de licenças chama-se `verify-dependency-licenses`, porque o `gen-third-party-notices` do upstream já valida as declarações diretas com o mesmo `isPermissive`, e o novo cobre o fecho transitivo. O nome do diretório do pacote é `sensitive-access-policy`, igual ao nome do pacote, porque o gerador de aliases do `tsconfig` exige isso.
+- O `THIRD_PARTY_NOTICES.md` estava desatualizado desde a Onda 1 (`axe-core`) e foi regenerado.
+
+### Pendente
+
+- O launcher do Landlock precisa aceitar negação de leitura e rede para a camada 1 valer fora do bwrap e do Seatbelt.
+- A camada 1 não aceita glob, então um `.env` dentro do workspace continua legível por comandos de shell.
+- Propor ao upstream, como PR, as mudanças de `sandbox-local`.
+
+## Próximo passo
+
+Onda 3: artifacts duráveis (G1), sobre `ui-sidebar-right` e `documentpreview`.

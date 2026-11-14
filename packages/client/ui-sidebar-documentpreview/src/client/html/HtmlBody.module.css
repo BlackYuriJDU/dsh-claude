@@ -13,3 +13,36 @@
   color: var(--dsw-alias-label-secondary);
   white-space: normal;
 }
+
+/* Interactive previews carry the design-comment switch over the frame's top-right corner. */
+.interactive {
+  position: relative;
+  height: 100%;
+}
+
+.commentToggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-secondary);
+  font-family: var(--dsw-font, sans-serif);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.commentToggle[aria-pressed='true'] {
+  border-color: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-label-primary);
+}
+
+@media (hover: hover) {
+  .commentToggle:hover {
+    color: var(--dsw-alias-label-primary);
+  }
+}

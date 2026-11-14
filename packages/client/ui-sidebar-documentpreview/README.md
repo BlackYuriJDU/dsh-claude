@@ -52,6 +52,8 @@ Coding Tools selects the HTML preview policy in both Web and desktop. The render
 
 Both HTML modes set the initial iframe name to `dsh-sidebar-html-<tab-id>` for Desktop shortcut routing. This correlation does not grant the preview access to the parent document.
 
+The interactive preview carries a Comment switch for design review. While it is on, the fixed bootstrap outlines the hovered element and turns a click into one element report posted to the parent instead of the page's own action; the parent accepts only messages whose source is that frame's own window, only while the switch is on, and validates each report: a lowercase tag, an id and up to three class names without spaces, quotes, or angle brackets, and at most 160 characters of text. Because the page's own scripts can post the same message, a report can never do more than add a quote such as `designs/page.html <h2#title> "Pricing"` to the draft of the file's Session, which the person reviews before sending; the parent sends the frame nothing but the on or off switch. The static preview has no Comment switch.
+
 The body reads its record, navigation and lifetime through `useTabInfo().tab`. `useResource<'file'>(tab.contentId)` supplies metadata; ordinary inject callbacks supply content reads:
 
 - The resource snapshot contains only `status`, `value`, and `failure`; `value` is `WorkspaceFileStat` metadata. Content reads do not wait for the first metadata frame once the provider is available. Observation failures take precedence over Preview's change notice; loaded content remains while metadata is unavailable.

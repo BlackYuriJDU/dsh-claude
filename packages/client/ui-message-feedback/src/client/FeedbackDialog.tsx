@@ -43,9 +43,12 @@ const FAILURE_COPY: Partial<Record<string, 'error.conflict' | 'error.noteTooLarg
  * @returns the modal while a target is open and either toast while it is showing.
  */
 export function FeedbackDialog({
-  useDialog, edit, submit, dismiss, dismissFailure, dismissToast, t,
+  useDialog, useLogPolicy, useSessionLogUpload, edit, submit, dismiss, dismissFailure, dismissToast, t,
 }: FeedbackDialogProps) {
   const state = useDialog(s => s)
+  const policySharesLog = useLogPolicy(s => s.value?.sharesConversationLog !== false)
+  const uploadsLog = useSessionLogUpload(s => s.value?.enabled === true)
+  const sharesLog = policySharesLog || uploadsLog
   // The toast centers over the composer card this entry renders inside of.
   const probeRef = useRef<HTMLSpanElement>(null)
   const [card, setCard] = useState<HTMLElement | null>(null)
@@ -117,7 +120,7 @@ export function FeedbackDialog({
         <textarea
           className={css.detail}
           aria-label={t('dialog.detail')}
-          placeholder={t('dialog.hint')}
+          placeholder={t(sharesLog ? 'dialog.hint' : 'dialog.hintLocal')}
           value={state.text}
           readOnly={state.submitting}
           onChange={(event) => { edit({ text: event.target.value }) }}

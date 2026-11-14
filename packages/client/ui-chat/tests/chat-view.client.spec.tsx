@@ -878,6 +878,35 @@ describe('ChatView', () => {
     expect(snapshot.nodes.get(omitted)).toBeDefined()
   })
 
+  it('names failed Tool results on the closed Turn and process-group headers', () => {
+    const h = makeHarness({
+      nodes: [user(1, 'do the thing'), assistant(2, 'running tools'), { ...toolResult(3, 'a'), isError: true }, toolResult(4, 'b')],
+      turnEnds: new Map([[1, 5]]),
+    })
+    const view = render(<h.ChatView {...h.props} />)
+    const turnHeader = view.container.querySelector<HTMLButtonElement>('[data-turn-process]')!
+    expect(turnHeader.textContent).toContain(h.props.t('message.process.failedCount', { count: 1 }))
+
+    const snapshot = chatSnapshotFixture({ nodes: [user(1, 'outside'), userInTurn(2, 'inside', 1)] })
+    const grouped = makeHarness({}, {}, snapshot)
+    const [outside, inside] = snapshot.order.map(key => ({ kind: 'node' as const, key: key as NodeKey }))
+    if (outside === undefined || inside === undefined) throw new Error('expected two Nodes')
+    const key = 'process' as GroupKey
+    const groupStore = new ConversationGroupStore<ProcessGroupData>()
+    const summary = { counts: [{ kind: 'commands' as const, count: 2 }], running: undefined, runningDetail: '', failed: 2 }
+    groupStore.prepareAndInstall({
+      entries: [outside, { kind: 'group', key }],
+      groups: { kind: 'replace', snapshots: [{ key, data: { turn: 1, closed: true, summary }, members: [inside] }] },
+    }, id => snapshot.nodes.get(id))
+    groupStore.publish()
+    grouped.setGrouped(groupStore)
+    const groupView = render(<grouped.ChatView {...grouped.props} />)
+    const groupHeader = groupView.container.querySelector<HTMLButtonElement>('[data-chat-group-key] [data-process-activity]')!
+    expect(groupHeader.textContent).toBe(
+      `${grouped.props.t('message.stepProcess.done.commands')}${grouped.props.t('message.process.failedCount', { count: 2 })}`,
+    )
+  })
+
   it('keeps grouped Node instances mounted across presentation modes and group data updates', () => {
     const snapshot = chatSnapshotFixture({ nodes: [user(1, 'outside'), userInTurn(2, 'inside', 1)] })
     const h = makeHarness({}, {}, snapshot)

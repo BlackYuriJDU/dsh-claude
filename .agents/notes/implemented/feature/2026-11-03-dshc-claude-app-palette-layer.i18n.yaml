@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-03-dshc-claude-app-palette-layer.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-11-03-dshc-claude-app-palette-layer.md
+/agent-note-dshc-identity-as-a-theme-override-layer:
+  en: c4541eaf57f3c55f
+  zh: 523ee47939dd7bbb
+/agent-note-dshc-identity-as-a-theme-override-layer/problem:
+  en: 71e07cbb42da2647
+  zh: 06edd3318a46107c
+/agent-note-dshc-identity-as-a-theme-override-layer/decision:
+  en: 90be7a599b04db4a
+  zh: 8ea3bbfa2d6b1a39
+/agent-note-dshc-identity-as-a-theme-override-layer/alternatives-considered:
+  en: 486573fd5342c6ae
+  zh: 121e5aaf6646b092
+/agent-note-dshc-identity-as-a-theme-override-layer/consequences:
+  en: fcc20f89c485cd46
+  zh: 4c5946d3f971dbd7

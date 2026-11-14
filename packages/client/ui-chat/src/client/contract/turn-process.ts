@@ -15,6 +15,8 @@ export interface TurnProcessSpec {
   readonly toolCallCount: number
   /** Tool calls whose configured name identifies a subagent delegation. */
   readonly subagentCount: number
+  /** Durable Tool results, subagent delegations included, that report an error. */
+  readonly failedToolCallCount: number
 }
 
 /**
@@ -33,6 +35,7 @@ export function sameTurnProcessSpec(left: TurnProcessSpec, right: TurnProcessSpe
     && left.messageCount === right.messageCount
     && left.toolCallCount === right.toolCallCount
     && left.subagentCount === right.subagentCount
+    && left.failedToolCallCount === right.failedToolCallCount
 }
 
 /**

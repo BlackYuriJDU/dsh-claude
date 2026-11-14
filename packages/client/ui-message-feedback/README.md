@@ -31,6 +31,8 @@ Mount this plugin alongside `ui-conversation` and `ui-commands`; the Like/Dislik
 
 A rating or list-load failure shows inline in the row; a submission failure shows in a warning toast while the dialog stays open so the draft can be corrected. Only finalized messages reach the message entry — an interruption-frozen partial carries no `messageId` and therefore no feedback controls.
 
+The dialog's description hint states where the note goes. The node half's `sharesConversationLog` Config field (default `true`) declares that a composed exporter sends the conversation log with submitted feedback, and the hint says so; a profile that composes no such exporter sets it to `false`, and the hint says the feedback stays in the conversation log on this computer. The `enabled` setting of the `session-log-deepseek` entry overrides `false`: while Session-log upload is on, the log that holds the note is sent, and the hint says so. Until the Host projects the value, the dialog keeps the sharing notice. The field states a composition fact and has no generated settings page.
+
 Access: the rating buttons render only while the current Peer may call `messageFeedback/put` on the Session; the `/feedback` decoration has no Client check, and the Host refuses a submission without access.
 
 -----

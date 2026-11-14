@@ -112,6 +112,8 @@ blank Session 保留 header 的 leading 与 corner 控件，包括右侧栏展�
 
 Session Header 持有末尾的更多按钮，在 utility 贡献之后渲染共享 `contextMenu.button` factory。本包声明 `sessionHeader` 右键菜单目标 `{ sessionId }`，独立于会话行右键操作；Header 菜单提供者导入本包的 client 类型。只要仍注册有其他 Header 菜单提供者，未挂载导出插件时按钮也可用；没有任何提供者时隐藏。各提供者在菜单打开时决定自己的条目及可用性。[右键菜单](../ui-context-menu/README.zh.md)负责按钮开关与可访问性；[会话日志导出](../../session-query/session-log-export/README.zh.md)负责导出操作与全局下载弹窗。
 
+新会话输入框的占位文字由 node 部分的 `heroPlaceholder` Config 字段决定：默认值 `build` 说明要构建的内容以及 `/` 与 `@` 菜单，`help` 询问助手能提供什么帮助；该字段没有设置行。在该输入卡片下方，`conversation.hero.suggestions` 以居中、可换行的一行承载插件建议，为空时隐藏；仅在存在 Session 时渲染。
+
 View 选择规则固定：有效且已注册的持久化选择优先，其次是已注册的 `chat`，否则不渲染 View；绝不选择第一个已注册 View。Shell phase 只组合 Session lifecycle 与 active-target set，不读取任何 target-specific 快照。
 
 Session 首次绑定或缓存的 Session 成为 current 时，shell 会在渲染前读取持久化 View 偏好，激活已注册的偏好 View 或 Chat fallback，并在后续 tab 或 focus 选择写入 store 前先激活对应 target。blank Session 仍不渲染 `conversation.view` slot；未选中的 target 不会激活。

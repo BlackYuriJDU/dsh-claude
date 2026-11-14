@@ -15,6 +15,14 @@ import type {} from '../src/client/index.ts'
 import { en, zh, type AccountKey } from '../src/client/locales.ts'
 import css from '../src/client/AccountSection.module.css'
 import type { AccountAvatarSnapshot } from '../src/client/account-avatar.ts'
+import { DEFAULT_PRODUCT_NAME } from '@deepseek-ai/dsh-client-locale/client'
+
+/** No badge occupant: the launcher shows its own signed-out fallback. */
+const renderBadgeFallback: AccountMenuProps['renderSlot'] = (_name, _owner, options) => options?.fallback ?? null
+
+/** Fill `{product}` the way the locale runtime does when no brand registers a name. */
+const withProduct = (text: string): string => text.replace('{product}', DEFAULT_PRODUCT_NAME)
+
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
@@ -53,7 +61,7 @@ function mount(state: Omit<AccountView, 'links'>, copy: typeof en | typeof zh = 
     <AccountSection {...globals} {...operations}
       useAccount={selector => selector(operations.hooks.account.getSnapshot())}
       useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-      close={() => {}} t={key => key in copy ? copy[key as AccountKey] : key} />
+      close={() => {}} t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
     {/* The application renders this from `shell.overlay`; the settings page only requests a page. */}
     {platform !== undefined && pages !== undefined
       && <SharedPlatformHost Globals={globals} pages={pages} platform={platform} copy={copy}
@@ -83,7 +91,7 @@ function SharedPlatformHost({ Globals, pages, platform, copy, refreshAccount }: 
       const page = pages.getSnapshot()?.page
       pages.close()
       if (page === 'top-up') void refreshAccount()
-    }} t={key => key in copy ? copy[key as AccountKey] : key} />
+    }} t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
 }
 
 /**
@@ -93,13 +101,13 @@ function SharedPlatformHost({ Globals, pages, platform, copy, refreshAccount }: 
  * @returns the sidebar launcher with its framework hooks wired to the test face.
  */
 async function accountMenu(operations: AccountSectionInjected, snapshot: () => AccountSnapshot, settingsOpen: boolean,
-  renderSlot: AccountMenuProps['renderSlot'] = () => null,
+  renderSlot: AccountMenuProps['renderSlot'] = renderBadgeFallback,
   openSettings: AccountMenuProps['openSettings'] = () => {}, wide = true) {
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   return <AccountMenu renderSlot={renderSlot} {...({} as GlobalStandardProps)} {...operations}
     settingsOpen={settingsOpen} useAccount={selector => selector(snapshot())} wide={wide}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    openOnboarding={() => {}} openSettings={openSettings} t={key => en[key as AccountKey]} />
+    openOnboarding={() => {}} openSettings={openSettings} t={key => withProduct(en[key as AccountKey])} />
 }
 
 it.each([en, zh])('renders account cards without inventing profile or balance data', async (copy) => {
@@ -129,11 +137,12 @@ it.each([en, zh].flatMap(copy => ([false, true, 'unknown'] as const).map(running
   const operations = mount({ status: 'credential-stored', attempt: null }, copy)
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} signOut={signOut}
+  render(<AccountMenu renderSlot={renderBadgeFallback}
+    {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} signOut={signOut}
     hasRunningAccountTasks={async () => { if (running === 'unknown') throw new Error('offline'); return running }}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
-    t={key => key in copy ? copy[key as AccountKey] : key} />)
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />)
   fireEvent.click(screen.getByRole('button', { name: copy.menu }))
   expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([copy.settings, copy.contactUs, copy.signOut])
   await expect(`${screen.getByRole('menu').textContent}\n`).toMatchFileSnapshot(`./expected/menu-${copy === en ? 'en' : 'zh'}.txt`)
@@ -156,8 +165,8 @@ it.each([en, zh])('updates the Settings menu keycaps and accessible combination 
   const operations = mount({ status: 'signed-out', attempt: null }, copy)
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  const props: AccountMenuProps = { renderSlot: () => null,
-    ...({} as GlobalStandardProps), ...operations, wide: true, settingsOpen: false,
+  const props: AccountMenuProps = {
+    ...({} as GlobalStandardProps), ...operations, renderSlot: renderBadgeFallback, wide: true, settingsOpen: false,
     useAccount: selector => selector(operations.hooks.account.getSnapshot()),
     useTheme: selector => selector(operations.hooks.theme.getSnapshot()),
     openSettings: vi.fn(() => { expect(document.activeElement).toBe(screen.getByRole('button', { name: copy.menu })) }),
@@ -170,7 +179,8 @@ it.each([en, zh])('updates the Settings menu keycaps and accessible combination 
   expect(settings.getAttribute('aria-keyshortcuts')).toBe('Meta+,')
   expect([...settings.querySelectorAll('kbd')].map(key => key.textContent)).toEqual(['⌘', ','])
 
-  view.rerender(<AccountMenu {...props} settingsShortcut={{ keys: ['Ctrl', 'Shift', 'S'], aria: 'Control+Shift+S' }} />)
+  view.rerender(<AccountMenu
+    {...props} settingsShortcut={{ keys: ['Ctrl', 'Shift', 'S'], aria: 'Control+Shift+S' }} />)
   expect(settings.getAttribute('aria-keyshortcuts')).toBe('Control+Shift+S')
   expect([...settings.querySelectorAll('kbd')].map(key => key.textContent)).toEqual(['Ctrl', 'Shift', 'S'])
 
@@ -185,12 +195,12 @@ it.each([en, zh])('offers settings, contact and sign-in from the signed-out acco
   const openSettings = vi.fn()
   const operations = operationsOf({ status: 'signed-out', attempt: null })
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={openSettings}
-    t={key => key in copy ? copy[key as AccountKey] : key} />)
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />)
   const trigger = screen.getByRole('button', { name: copy.menu })
-  expect(trigger.textContent).toBe(copy.more)
+  expect(trigger.textContent).toBe(copy.settings)
   expect(trigger.querySelector('svg')).not.toBeNull()
   fireEvent.click(trigger)
   expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([copy.settings, copy.contactUs, copy.signIn])
@@ -205,8 +215,8 @@ it.each([en, zh])('offers settings, contact and sign-in from the signed-out acco
 it.each([true, false])('keeps the account inset local through sign-in changes with wide=%s', async (wide) => {
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   let operations = operationsOf({ status: 'signed-out', attempt: null })
-  const props: AccountMenuProps = { renderSlot: () => null,
-    ...({} as GlobalStandardProps), ...operations, wide, settingsOpen: false,
+  const props: AccountMenuProps = {
+    ...({} as GlobalStandardProps), ...operations, renderSlot: renderBadgeFallback, wide, settingsOpen: false,
     useAccount: selector => selector(operations.hooks.account.getSnapshot()),
     useTheme: selector => selector(operations.hooks.theme.getSnapshot()),
     openSettings: vi.fn(), openOnboarding: vi.fn(), t: key => en[key as AccountKey],
@@ -237,8 +247,8 @@ it('reports a failed start in the login dialog, not as a sidebar alert', async (
     snapshot = { ...snapshot, loginVisible: true, loginFailed: true }
     return Promise.reject(new Error('account start failed'))
   })
-  const view = render(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
-    start={start}
+  const view = render(<AccountMenu renderSlot={renderBadgeFallback}
+    {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} start={start}
     useAccount={selector => selector(snapshot)} useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     wide openOnboarding={() => {}} openSettings={() => {}}
     t={key => key in en ? en[key as AccountKey] : key} />)
@@ -246,8 +256,8 @@ it('reports a failed start in the login dialog, not as a sidebar alert', async (
   await act(async () => { fireEvent.click(screen.getByRole('menuitem', { name: en.signIn })) })
   expect(start).toHaveBeenCalledOnce()
   expect(screen.queryByRole('alert')).toBeNull()
-  view.rerender(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
-    start={start}
+  view.rerender(<AccountMenu renderSlot={renderBadgeFallback}
+    {...({} as GlobalStandardProps)} {...operations} settingsOpen={false} start={start}
     useAccount={selector => selector(snapshot)} useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
     wide openOnboarding={() => {}} openSettings={() => {}}
     t={key => key in en ? en[key as AccountKey] : key} />)
@@ -263,7 +273,7 @@ it('keeps the confirmation dialog open after a failed sign-out', async () => {
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   const signOut = vi.fn((): Promise<void> => Promise.reject(new Error('account sign-out failed')))
-  render(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     signOut={signOut}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide
@@ -307,11 +317,11 @@ it('opens usage inside Desktop and returns to the same Account settings', async 
   act(() => { usage.focus() })
   await act(async () => { fireEvent.click(usage) })
   expect(platform.open).toHaveBeenCalledWith('usage', { x: 0, y: 0, width: 0, height: 0 })
-  const back = screen.getByRole('button', { name: en.backToHarness })
+  const back = screen.getByRole('button', { name: withProduct(en.backToHarness) })
   await expect(`${back.parentElement!.parentElement!.textContent}\n`).toMatchFileSnapshot('./expected/platform-header-en.txt')
   await act(async () => { fireEvent.click(back) })
   expect(platform.close).toHaveBeenCalledOnce()
-  expect(screen.queryByRole('button', { name: en.backToHarness })).toBeNull()
+  expect(screen.queryByRole('button', { name: withProduct(en.backToHarness) })).toBeNull()
   expect(screen.getByRole('region', { name: en.nav })).toBeTruthy()
   // The overlay's layout cleanup hands the page's return focus back to the link
   // that opened it, with no dialog to take it instead.
@@ -327,7 +337,7 @@ it('keeps a return action available when the native document fails to load', asy
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: zh.topUp })) })
   expect(platform.open).toHaveBeenCalledWith('top-up', { x: 0, y: 0, width: 0, height: 0 })
   expect(screen.getByText(zh.platformFailed)).toBeTruthy()
-  const back = screen.getByRole('button', { name: zh.backToHarness })
+  const back = screen.getByRole('button', { name: withProduct(zh.backToHarness) })
   await expect(`${back.parentElement!.parentElement!.textContent}\n`).toMatchFileSnapshot('./expected/platform-header-zh.txt')
   await act(async () => { fireEvent.click(back) })
   expect(platform.close).toHaveBeenCalledOnce()
@@ -355,13 +365,13 @@ it.each([en, zh])('retries the failed Platform destination and removes the error
   expect(screen.getByRole('status', { name: copy.loading })).toBeTruthy()
   // Retrying removes the button that was focused, so the return action keeps
   // keyboard focus instead of dropping it onto the document body.
-  const backAgain = screen.getByRole('button', { name: copy.backToHarness })
+  const backAgain = screen.getByRole('button', { name: withProduct(copy.backToHarness) })
   expect(document.activeElement).toBe(backAgain)
   await act(async () => { loaded.resolve(undefined); await loaded.promise })
   expect(screen.queryByText(copy.platformFailed)).toBeNull()
   expect(screen.queryByRole('status', { name: copy.loading })).toBeNull()
   expect(document.activeElement).toBe(backAgain)
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: copy.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(copy.backToHarness) })) })
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(platform.close).toHaveBeenCalledTimes(3)
 })
@@ -375,7 +385,7 @@ it('ignores a retried document completing after returning to Account', async () 
   mount({ status: 'credential-stored', attempt: null }, en, undefined, platform)
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: en.usage })) })
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.platformRetry })) })
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   await act(async () => { loaded.resolve(undefined); await loaded.promise })
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(screen.getByRole('region', { name: en.nav })).toBeTruthy()
@@ -408,7 +418,7 @@ it.each(['usage', 'top-up'] as const)('shows an accessible spinner until %s fini
     }
   `)
   expect(status.querySelector('[aria-hidden="true"]')).not.toBeNull()
-  expect(screen.getByRole('button', { name: en.backToHarness })).toBeTruthy()
+  expect(screen.getByRole('button', { name: withProduct(en.backToHarness) })).toBeTruthy()
   await act(async () => { loaded.resolve(undefined) })
   expect(screen.queryByRole('status', { name: en.loading })).toBeNull()
 })
@@ -425,10 +435,10 @@ it.each([
   })
   cleanup()
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    wide openSettings={() => {}} openOnboarding={() => {}} t={key => en[key as AccountKey]} />)
+    wide openSettings={() => {}} openOnboarding={() => {}} t={key => withProduct(en[key as AccountKey])} />)
   expect(screen.getByRole('button', { name: en.menu }).textContent).toBe(expected)
 })
 
@@ -438,10 +448,10 @@ it('shows the same shared picture outcome in settings and the sidebar', async ()
     profile: { status: 'ready', value: { id: null, name: 'User', contact: null, avatarUrl: 'https://example.test/avatar.png' } },
   }, undefined, avatar)
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  render(<AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
+  render(<AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations} settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())}
-    wide openSettings={() => {}} openOnboarding={() => {}} t={key => en[key as AccountKey]} />)
+    wide openSettings={() => {}} openOnboarding={() => {}} t={key => withProduct(en[key as AccountKey])} />)
   const images = document.querySelectorAll('img')
   expect(images).toHaveLength(2)
   for (const image of images) expect(image.getAttribute('src')).toBe('https://example.test/avatar.png')
@@ -509,11 +519,11 @@ it.each([en, zh])('shows a localized toast when the account credential expires',
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   let expire: (() => void) | undefined
   const unsubscribe = vi.fn()
-  const element = <AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations}
+  const element = <AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations}
     settingsOpen={false} subscribeSessionExpired={(listener) => { expire = listener; return unsubscribe }}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={() => {}}
-    t={key => key in copy ? copy[key as AccountKey] : key} />
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
   const view = render(element)
   expect(screen.queryByRole('alert')).toBeNull()
   act(() => { expire!() })
@@ -578,9 +588,9 @@ it('opens the embedded Platform page from a failed balance row on Desktop', asyn
   // inspect the balance the Harness could not load without leaving the app.
   await act(async () => { fireEvent.click(screen.getAllByRole('link', { name: en.balanceUnavailable })[0]!) })
   expect(platform.open).toHaveBeenCalledWith('usage', expect.anything())
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   expect(platform.close).toHaveBeenCalledOnce()
-  expect(screen.queryByRole('button', { name: en.backToHarness })).toBeNull()
+  expect(screen.queryByRole('button', { name: withProduct(en.backToHarness) })).toBeNull()
 })
 
 it('reports a rejected settings login and disables login while initial state is unavailable', async () => {
@@ -608,7 +618,7 @@ it('dismisses a collapsed menu and hands its login dialog to the API-key onboard
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
   const openOnboarding = vi.fn()
   let snapshot = operations.hooks.account.getSnapshot()
-  const props = { ...({} as GlobalStandardProps), ...operations, renderSlot: () => null, wide: false, settingsOpen: false,
+  const props = { ...({} as GlobalStandardProps), ...operations, renderSlot: renderBadgeFallback, wide: false, settingsOpen: false,
     openSettings: vi.fn(), openOnboarding,
     useAccount: <T,>(select: (value: AccountSnapshot) => T) => select(snapshot),
     useTheme: <T,>(select: (value: ThemeSnapshot) => T) => select(operations.hooks.theme.getSnapshot()),
@@ -657,13 +667,13 @@ it('reads the account again when the user returns from the top-up view, and not 
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: en.topUp })) })
   expect(platform.open).toHaveBeenCalledWith('top-up', expect.anything())
   expect(operations.refreshAccount).not.toHaveBeenCalled()
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   // The page leaves immediately and the account reads settle behind it.
   expect(screen.queryByRole('dialog')).toBeNull()
   expect(operations.refreshAccount).toHaveBeenCalledOnce()
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: en.usage })) })
   expect(platform.open).toHaveBeenCalledWith('usage', expect.anything())
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   // Usage changed nothing the account owns, so returning from it reads nothing.
   expect(operations.refreshAccount).toHaveBeenCalledOnce()
 })
@@ -684,7 +694,7 @@ it('reports resize failure, ignores late native failures, and tolerates a remove
   await act(async () => { resize!() })
   expect(platform.setBounds).toHaveBeenCalled()
   expect(screen.getByText(en.platformFailed)).toBeTruthy()
-  await act(async () => { fireEvent.click(screen.getByRole('button', { name: en.backToHarness })) })
+  await act(async () => { fireEvent.click(screen.getByRole('button', { name: withProduct(en.backToHarness) })) })
   await act(async () => { loaded.reject(new Error('late failure')); await loaded.promise.catch(() => {}) })
   expect(screen.queryByRole('dialog')).toBeNull()
 })
@@ -697,11 +707,11 @@ it.each([en, zh])('shows live model sign-in guidance without replaying it after 
   const unsubscribe = vi.fn(() => { listener = undefined })
   operations.subscribeModelSignInRequired = (next) => { listener = next; return unsubscribe }
   const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
-  const element = <AccountMenu renderSlot={() => null} {...({} as GlobalStandardProps)} {...operations}
+  const element = <AccountMenu renderSlot={renderBadgeFallback} {...({} as GlobalStandardProps)} {...operations}
     settingsOpen={false}
     useAccount={selector => selector(operations.hooks.account.getSnapshot())}
     useTheme={selector => selector(operations.hooks.theme.getSnapshot())} wide openOnboarding={() => {}} openSettings={() => {}}
-    t={key => key in copy ? copy[key as AccountKey] : key} />
+    t={key => withProduct(key in copy ? copy[key as AccountKey] : key)} />
   const view = render(element)
   expect(screen.queryByRole('alert')).toBeNull()
   act(() => { listener?.() })
@@ -753,4 +763,27 @@ it('keeps notification DOM inside the launcher while the collapsed rail hides it
   expect(notice.isConnected).toBe(true)
   view.rerender(await accountMenu(operations, snapshot, false, renderSlot))
   expect(screen.getByRole('status')).toBe(notice)
+})
+
+it('shows a signed-out identity badge from its slot in place of the More label', async () => {
+  const operations = mount({ status: 'signed-out', attempt: null }, en)
+  cleanup()
+  const { AccountMenu } = await import('../src/client/AccountMenu.tsx')
+  const calls: unknown[][] = []
+  const renderSlot: AccountMenuProps['renderSlot'] = (...args) => {
+    calls.push(args)
+    return <span>Ana</span>
+  }
+  const props: AccountMenuProps = {
+    ...({} as GlobalStandardProps), ...operations, renderSlot, wide: true, settingsOpen: false,
+    useAccount: selector => selector(operations.hooks.account.getSnapshot()),
+    useTheme: selector => selector(operations.hooks.theme.getSnapshot()),
+    openSettings: vi.fn(), openOnboarding: vi.fn(),
+    t: key => key in en ? en[key as AccountKey] : key,
+  }
+  render(<AccountMenu {...props} />)
+  const badge = calls.find(call => call[0] === 'settings.launcher.badge')
+  expect(badge?.slice(0, 2)).toEqual(['settings.launcher.badge', { wide: true }])
+  expect((badge?.[2] as { fallback?: unknown } | undefined)?.fallback).toBeDefined()
+  expect(screen.getByRole('button', { name: en.menu }).textContent).toBe('Ana')
 })

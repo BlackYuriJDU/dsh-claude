@@ -125,6 +125,9 @@ const ProcessGroupHeader = memo(function ProcessGroupHeader({ groupKey, useChatG
       <TextShimmer active={!data.closed}>
         <TextShimmer className={css.label}>{title}</TextShimmer>
       </TextShimmer>
+      {data.closed && data.summary.failed !== undefined && (
+        <span className={css.failed}>{t('message.process.failedCount', { count: data.summary.failed })}</span>
+      )}
     </button>
   )
 })

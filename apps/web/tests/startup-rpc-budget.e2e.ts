@@ -69,7 +69,7 @@ describe('startup RPC budget', () => {
     page.on('requestfailed', request => pending.delete(request))
     try {
       await page.goto(scaffold.authenticatedUrl)
-      await page.getByRole('textbox', { name: 'Choose workspace' }).waitFor({ timeout: 30_000 })
+      await page.getByRole('button', { name: 'Choose a workspace to start' }).waitFor({ timeout: 30_000 })
       await expect.poll(() => settingsFinished, { timeout: 30_000 }).toBeGreaterThanOrEqual(DESCRIBE_BUDGET)
       await expect.poll(() => webSearchFinished, { timeout: 30_000 }).toBeGreaterThanOrEqual(WEB_SEARCH_CREDENTIAL_BUDGET)
       await expect.poll(() => pending.size, { timeout: 30_000 }).toBe(0)

@@ -41,10 +41,9 @@ export function ComposerContentEditable({ editor, editable, ...rest }: ComposerC
       // renders it, and setEditable above keeps the editor's own gate in step.
       contentEditable={editor !== null && editable}
       suppressContentEditableWarning
-      role="textbox"
-      aria-multiline="true"
       data-composer-input
       {...rest}
+      role={rest.role ?? 'textbox'}
     />
   )
 }

@@ -140,6 +140,8 @@ function mount(
     nestedSubagent?: boolean
     /** A composer block another plugin raised for this session. */
     composerBlock?: { reason: string }
+    /** Host New Session placeholder choice; absent leaves the setting unread. */
+    heroPlaceholder?: 'build' | 'help'
     /** Mutable view ledger used by registration-order regressions. */
     viewTabs?: ViewTab[]
     /** Persisted ids of unpinned View tabs. */
@@ -211,6 +213,7 @@ function mount(
       seatOwners.push({ key, owner })
     }
     if (key === 'conversation.hero.workspace') { pickerOwner = owner; return null }
+    if (key === 'conversation.hero.headline') return opts?.fallback ?? null
     if (key === 'conversation.hero.frame') {
       // A hoc slot with no layers renders its content unchanged.
       frameOwners.push(owner as HeroFrameOwnerProps)
@@ -372,6 +375,10 @@ function mount(
       ...allowAllAccess,
       useProjection: (() => undefined),
       useComposerBlock: select => select(options.composerBlock),
+      useConversationSettings: select => select({
+        status: 'ready', base: undefined, user: undefined, revision: 1, writable: true,
+        value: options.heroPlaceholder === undefined ? undefined : { busyEnter: 'queue', heroPlaceholder: options.heroPlaceholder },
+      }),
       useInput,
       inputActions,
       renderSlot,
@@ -422,13 +429,17 @@ function mount(
 }
 
 describe('Hero chrome', () => {
-  it('renders the English preview badge through the hero locale seat', () => {
-    const renderSlot = vi.fn<(key: string, owner: object, opts?: { fallback?: ReactNode }) => ReactNode>(() => null)
+  it('renders the English headline and preview badge as the empty headline slot fallback', () => {
+    const renderSlot = vi.fn<(key: string, owner: object, opts?: { fallback?: ReactNode }) => ReactNode>(
+      (_key, _owner, options) => options?.fallback ?? null,
+    )
     const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot as never} />)
     expect(view.getByText('Into the Unknown')).toBeTruthy()
     expect(view.getByText('Preview')).toBeTruthy()
-    expect(renderSlot).toHaveBeenCalledOnce()
-    expect(renderSlot.mock.calls[0]?.[0]).toBe('conversation.hero.brand.mark')
+    expect(renderSlot.mock.calls.map(call => call[0])).toEqual(['conversation.hero.brand.mark', 'conversation.hero.headline'])
+    const headlineOwner = renderSlot.mock.calls[1]?.[1]
+    if (headlineOwner === undefined || !('className' in headlineOwner)) throw new Error('hero headline owner must provide className')
+    expect(headlineOwner.className).toBeTypeOf('string')
     const brandMarkOwner = renderSlot.mock.calls[0]?.[1]
     if (brandMarkOwner === undefined || !('size' in brandMarkOwner) || !('className' in brandMarkOwner)) {
       throw new Error('hero brand-mark owner must provide size and className')
@@ -468,6 +479,13 @@ describe('ConversationRoot resident composer', () => {
     expect(dispatchCount()).toBe(before)
   })
 
+  it.each([
+    [undefined, 'placeholder.hero'], ['build', 'placeholder.hero'], ['help', 'placeholder.heroHelp'],
+  ] as const)('shows the New Session placeholder for the Host choice %s', (heroPlaceholder, key) => {
+    const b = mount(sessionSnapshotOf({ blank: true }), undefined, undefined, heroPlaceholder === undefined ? {} : { heroPlaceholder })
+    expect(b.view.getByRole('textbox').getAttribute('data-placeholder')).toBe(zh[key])
+  })
+
   it('renders the composer inert with the blocker\u2019s own reason', () => {
     const b = mount(sessionSnapshotOf(), undefined, undefined, {
       composerBlock: { reason: 'select a model first' },
@@ -495,7 +513,9 @@ describe('ConversationRoot resident composer', () => {
       summaryBlank: true,
       composerBlock: { reason: 'select a model first' },
     })
-    const box = b.view.getByRole('textbox')
+    // Without a Workspace the surface is the Workspace menu's button, not a textbox.
+    const box = b.view.getByRole('button', { name: zh['placeholder.workspace'] })
+    expect(b.view.queryByRole('textbox')).toBeNull()
     expect(box.getAttribute('aria-disabled')).not.toBe('true')
     expect(box.getAttribute('contenteditable')).not.toBe('true')
     expect(box.getAttribute('aria-haspopup')).toBe('menu')
@@ -929,6 +949,17 @@ describe('ConversationRoot resident composer', () => {
     const cold = mount(sessionSnapshotOf(), [], undefined, { sessionId: undefined })
     expect(cold.slotCalls).toContain('conversation.hero.agentPreset')
     expect(cold.slotCalls).not.toContain('conversation.hero.options')
+  })
+
+  it('seats the New Session suggestions after the composer card, and only for a Session', () => {
+    const b = mount(sessionSnapshotOf({ blank: true }))
+    const suggestions = within(b.view.container).getByTestId('view-conversation.hero.suggestions')
+    const previous = suggestions.parentElement?.previousElementSibling
+    expect(previous?.matches('[data-composer-card]') === true || previous?.querySelector('[data-composer-card]') != null).toBe(true)
+    expect(suggestions.parentElement?.nextElementSibling).toBeNull()
+
+    const cold = mount(sessionSnapshotOf(), [], undefined, { sessionId: undefined })
+    expect(cold.slotCalls).not.toContain('conversation.hero.suggestions')
   })
 
   it('prompt failure renders the promptError strip (ordinary failure, no transaction UI)', () => {

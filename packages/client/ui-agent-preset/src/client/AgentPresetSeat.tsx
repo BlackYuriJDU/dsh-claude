@@ -12,7 +12,7 @@
  * Picking stages; the choice reaches a session when one becomes current.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import type { ObservableSnapshot, SnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import {
@@ -20,6 +20,8 @@ import {
 } from '@deepseek-ai/dsh-client-ui-primitives'
 // Type-only: pulls the ui-conversation SlotMap merge (the hero seat).
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { ConfigFormSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
+import type { SeatPolicy } from '../seat-policy.ts'
 import type { AgentPresetSeatState } from './seat-store.ts'
 import { presetDisplayText } from './locales.ts'
 import { requiresCodingTools } from './settings-store.ts'
@@ -32,6 +34,8 @@ export interface AgentPresetSeatInjected {
     developerTools: ObservableSnapshot<boolean>
     /** Seat snapshot bound by the renderer as useAgentPresetSeat. */
     agentPresetSeat: SnapshotStore<AgentPresetSeatState>
+    /** Host picker policy; an unread value keeps the menu with every preset. */
+    seatPolicy: ObservableSnapshot<ConfigFormSnapshot<SeatPolicy>>
   }
   /** Read the roster when the chip first renders. */
   load: () => Promise<void>
@@ -78,10 +82,26 @@ export type AgentPresetSeatProps =
  * @param props - composed slot props.
  * @returns The chip and any pending selection refusal, or null outside the main view.
  */
+const next = (from: number, last: number): number => (from >= last ? 0 : from + 1)
+const previous = (from: number, last: number): number => (from <= 0 ? last : from - 1)
+
+/** Segment index each radio-group key moves to, from the checked index (-1 for none) and the last index. */
+const SEGMENT_KEYS: Readonly<Partial<Record<string, (from: number, last: number) => number>>> = {
+  ArrowRight: next,
+  ArrowDown: next,
+  ArrowLeft: previous,
+  ArrowUp: previous,
+  Home: () => 0,
+  End: (_from, last) => last,
+}
+
 export function AgentPresetSeat({
-  sessionId, useSessionRetainInfo, load, select, dismissRefusal, introduced, useAgentPresetSeat, useDeveloperTools, t,
+  sessionId, useSessionRetainInfo, load, select, dismissRefusal, introduced, useAgentPresetSeat, useDeveloperTools,
+  useSeatPolicy, t,
 }: AgentPresetSeatProps) {
   const developerTools = useDeveloperTools(value => value)
+  const segmented = useSeatPolicy(snapshot => snapshot.value?.seatPresentation === 'segmented')
+  const hidden = useSeatPolicy(snapshot => snapshot.value?.seatHiddenPresets)
   const state = useAgentPresetSeat(snapshot => snapshot)
   const main = useSessionRetainInfo(info => sessionId === undefined
     || (info?.retainedBy.mainView ?? 0) > 0)
@@ -103,8 +123,9 @@ export function AgentPresetSeat({
   }, [load])
 
   const options = useMemo(
-    () => state.options.filter(option => developerTools || !requiresCodingTools(option)),
-    [state.options, developerTools],
+    () => state.options.filter(option => (developerTools || !requiresCodingTools(option))
+      && (option.id === state.current || hidden?.includes(option.id) !== true)),
+    [state.options, state.current, developerTools, hidden],
   )
 
   useEffect(() => {
@@ -159,6 +180,66 @@ export function AgentPresetSeat({
     )
     : label
 
+  const refusal = toast !== null && (
+    <Toast
+      key={toast.seq}
+      text={t('switchRefused', { name: presetDisplayText(toast.error.preset, t).name, reason: toast.error.reason })}
+      icon={<IconWarningOutlineRegular />}
+      holdMs={REFUSAL_HOLD_MS}
+      // The composer card, which is the content column this chip sits
+      // above rather than inside — hence a page query, not `closest`.
+      // Absent, the banner centers on the window, which is off-center
+      // whenever the sidebar is open.
+      anchor={document.querySelector<HTMLElement>('[data-composer-card]')}
+      onDone={() => { dismissRefusal(toast.error) }}
+    />
+  )
+
+  // Radio-group keys: the arrows, Home, and End move to a segment and select it.
+  const moveSegment = (event: KeyboardEvent<HTMLDivElement>): void => {
+    const move = SEGMENT_KEYS[event.key]
+    const to = move === undefined ? -1 : move(options.findIndex(option => option.id === state.current), options.length - 1)
+    const target = options[to]
+    if (target === undefined || state.busy) return
+    event.preventDefault()
+    // The segments render in roster order, one radio per option.
+    event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]').item(to).focus()
+    if (target.id !== state.current) void select(target.id)
+  }
+
+  if (segmented) {
+    return (
+      <>
+        {ready && (
+          <div className={css.segments} role="radiogroup" aria-label={t('seatHint')} onKeyDown={moveSegment}>
+            {options.map((option, index) => {
+              const text = presetDisplayText(option, t)
+              const checked = option.id === state.current
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={checked}
+                  // One Tab stop for the group: the checked segment, or the first one.
+                  tabIndex={checked || index === 0 && !options.some(other => other.id === state.current) ? 0 : -1}
+                  className={css.segment}
+                  title={text.description ?? t('noDescription')}
+                  // aria-disabled, not disabled: a disabled button drops the focus the keys just moved.
+                  aria-disabled={state.busy || undefined}
+                  onClick={() => { if (!checked && !state.busy) void select(option.id) }}
+                >
+                  {text.name}
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {refusal}
+      </>
+    )
+  }
+
   return (
     <>
       {ready && <Menu
@@ -202,20 +283,7 @@ export function AgentPresetSeat({
           </button>
         )}
       />}
-      {toast !== null && (
-        <Toast
-          key={toast.seq}
-          text={t('switchRefused', { name: presetDisplayText(toast.error.preset, t).name, reason: toast.error.reason })}
-          icon={<IconWarningOutlineRegular />}
-          holdMs={REFUSAL_HOLD_MS}
-          // The composer card, which is the content column this chip sits
-          // above rather than inside — hence a page query, not `closest`.
-          // Absent, the banner centers on the window, which is off-center
-          // whenever the sidebar is open.
-          anchor={document.querySelector<HTMLElement>('[data-composer-card]')}
-          onDone={() => { dismissRefusal(toast.error) }}
-        />
-      )}
+      {refusal}
     </>
   )
 }

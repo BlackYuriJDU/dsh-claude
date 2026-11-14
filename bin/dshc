@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# dshc — DSHC launcher over a built DeepSeek Harness checkout.
+#
+# Starts the `dshc` profile (dsh-base + dsh-web-app + dsh-dshc) isolated from
+# a stock dsh install:
+#   DSH_HOME   → ~/.dshc            (settings, credentials, profiles, sessions)
+#   workspace  → ~/dsh-claude-work  (the app's working directory)
+#   port       → 3090               (a stock `dsh web` defaults to 3080)
+# Overrides: DSHC_DSH_HOME, DSHC_WORKSPACE, DSHC_PORT, DSHC_HOME (checkout).
+# With $SEARXNG_URL set and no provider pinned, web search is pinned to the
+# keyless SearXNG provider.
+set -euo pipefail
+export DSH_HOME="${DSHC_DSH_HOME:-$HOME/.dshc}"
+DSHC_WORKSPACE="${DSHC_WORKSPACE:-$HOME/dsh-claude-work}"
+DSHC_PORT="${DSHC_PORT:-3090}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DSHC_HOME="${DSHC_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+BIN="$DSHC_HOME/apps/cli/lib/bin.js"
+if [ ! -f "$BIN" ]; then
+  echo "dshc: built CLI not found at $BIN" >&2
+  echo "dshc: run 'pnpm install && pnpm run build' in $DSHC_HOME first," >&2
+  echo "dshc: or point DSHC_HOME at a built checkout." >&2
+  exit 1
+fi
+if [ -n "${SEARXNG_URL:-}" ] && [ -z "${DSH_WEB_SEARCH_PROVIDER:-}" ]; then
+  export DSH_WEB_SEARCH_PROVIDER=searxng
+fi
+mkdir -p "$DSHC_WORKSPACE"
+cd "$DSHC_WORKSPACE"
+# dsh reads its own options up to the first token it does not know and hands
+# the rest to the app, so the default --port goes after the launcher options.
+launcher=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --patch|--from-default-profile)
+      [ "$#" -ge 2 ] || break
+      launcher+=("$1" "$2"); shift 2 ;;
+    --patch=*|--from-default-profile=*|--dump-config|--dump-config-schema|--dump-default-config)
+      launcher+=("$1"); shift ;;
+    *) break ;;
+  esac
+done
+port=(--port "$DSHC_PORT")
+for arg in ${launcher[@]+"${launcher[@]}"} "$@"; do
+  # A config dump takes no app arguments, and an explicit --port wins.
+  case "$arg" in --dump-config|--dump-config-schema|--dump-default-config|--port|--port=*) port=() ;; esac
+done
+# The ${a[@]+...} form keeps an empty array from failing `set -u` on bash 3.2.
+exec node "$BIN" dshc ${launcher[@]+"${launcher[@]}"} ${port[@]+"${port[@]}"} "$@"

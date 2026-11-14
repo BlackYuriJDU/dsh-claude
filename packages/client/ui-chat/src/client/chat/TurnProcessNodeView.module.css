@@ -60,3 +60,10 @@
     transition: none;
   }
 }
+
+/* Failed Tool results stay visible on the collapsed Turn header. */
+.failed {
+  flex: none;
+  margin-left: 6px;
+  color: var(--dsw-alias-state-error-primary);
+}

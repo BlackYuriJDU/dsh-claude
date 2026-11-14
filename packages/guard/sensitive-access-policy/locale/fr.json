@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Politique d’accès sensible",
+    "description": "Demande une approbation avant qu’un outil lise un chemin protégé ou envoie des données à un site hors de la liste autorisée."
+  }
+}

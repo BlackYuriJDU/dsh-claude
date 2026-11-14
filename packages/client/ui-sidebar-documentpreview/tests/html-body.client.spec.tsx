@@ -16,6 +16,8 @@ import { HtmlBody } from '../src/client/html/HtmlBody.tsx'
 import type { HtmlBodyProps } from '../src/client/html/HtmlBody.tsx'
 import { htmlBodyDefinition } from '../src/client/html/index.ts'
 import { en } from '../src/client/html/locales.ts'
+import { COMMENT_MESSAGE, COMMENT_MODE_MESSAGE } from '../src/client/html/comments.ts'
+import { fireEvent } from '@testing-library/react'
 import { ADDRESS, ABSOLUTE_PATH, SESSION, TAB_ID, documentSlots, harness } from './fixtures.client.ts'
 
 const translations: ReadonlyMap<string, string> = new Map(Object.entries(en))
@@ -52,6 +54,7 @@ function props(text = '<p>hello</p>'): HtmlBodyProps {
     sessionId: 'html' as SessionId,
     useTabInfo: () => ({ tab: { id: TAB_ID, signal } }),
     readRelated: vi.fn(),
+    comment: vi.fn(() => true),
     addResource: vi.fn(),
     setResources: vi.fn(),
     useResource: () => ({ value: undefined }),
@@ -292,5 +295,47 @@ describe('HtmlBody', () => {
     expect(bytes).toHaveBeenCalledOnce()
     expect(create).toHaveBeenCalledOnce()
     expect(revoke).not.toHaveBeenCalled()
+  })
+})
+
+describe('HtmlBody design comments', () => {
+  const report = { type: COMMENT_MESSAGE, tag: 'h2', id: 'title', classes: ['hero'], text: 'Pricing' }
+
+  async function mounted() {
+    const p = props()
+    render(<HtmlBody {...p} />)
+    const frame = await waitFor(() => {
+      const element = document.querySelector<HTMLIFrameElement>('iframe[data-html-preview]')
+      if (element === null) throw new Error('frame not mounted')
+      return element
+    })
+    return { p, frame }
+  }
+
+  it('offers the comment switch only in the interactive preview', () => {
+    render(<HtmlBody {...props()} useInteractivePreview={select => select(false)} />)
+    expect(screen.queryByRole('button', { name: en['comment'] })).toBeNull()
+  })
+
+  it('switches comment mode inside the frame and quotes reports from that frame only', async () => {
+    const { p, frame } = await mounted()
+    const post = vi.spyOn(frame.contentWindow!, 'postMessage')
+    const toggle = screen.getByRole('button', { name: en['comment'] })
+    expect(toggle.getAttribute('aria-pressed')).toBe('false')
+    // The page's own scripts can post a report while comment mode is off.
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: report, source: frame.contentWindow })) })
+    expect(p.comment).not.toHaveBeenCalled()
+    fireEvent.click(toggle)
+    expect(toggle.getAttribute('aria-pressed')).toBe('true')
+    await waitFor(() => { expect(post).toHaveBeenCalledWith({ type: COMMENT_MODE_MESSAGE, on: true }, '*') })
+    fireEvent.load(frame)
+    expect(post).toHaveBeenLastCalledWith({ type: COMMENT_MODE_MESSAGE, on: true }, '*')
+
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: report, source: window })) })
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: { ...report, tag: '<img>' }, source: frame.contentWindow })) })
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: report })) })
+    expect(p.comment).not.toHaveBeenCalled()
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: report, source: frame.contentWindow })) })
+    expect(p.comment).toHaveBeenCalledExactlyOnceWith(p.resourceAddress, { tag: 'h2', id: 'title', classes: ['hero'], text: 'Pricing' })
   })
 })

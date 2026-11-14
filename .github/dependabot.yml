@@ -6,10 +6,16 @@ updates:
     exclude-paths:
       # Vendored Cordis sources follow vendor/README.md instead of registry updates.
       - "vendor/**"
+    # Minor and patch updates arrive as one pull request; each major stays separate for review.
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     schedule:
       interval: "cron"
       cronjob: "0 4 * * *"
-      timezone: "Asia/Shanghai"
+      timezone: "America/Sao_Paulo"
     cooldown:
       default-days: 30
     labels:
@@ -18,10 +24,15 @@ updates:
 
   - package-ecosystem: "uv"
     directory: "/python/sdk"
+    groups:
+      uv-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     schedule:
       interval: "cron"
       cronjob: "0 4 * * *"
-      timezone: "Asia/Shanghai"
+      timezone: "America/Sao_Paulo"
     cooldown:
       default-days: 30
     labels:
@@ -30,10 +41,14 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     schedule:
       interval: "cron"
       cronjob: "0 4 * * *"
-      timezone: "Asia/Shanghai"
+      timezone: "America/Sao_Paulo"
     cooldown:
       default-days: 30
     labels:

@@ -1,0 +1,66 @@
+# DSHC preset Chat: a conversational assistant without shell or file writes.
+# Edits saved from the Web editor override this row's `config.plugins` by id
+# from the profile patch.
+- insert:
+    - id: preset-chat
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: chat
+        name: Chat
+        description: Talks things through, answers questions, and writes with you.
+        order: 1
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are DSHC, an AI assistant running in the DSHC open-source agent harness. The {{model}} model powers you. You are not Claude and were not made by Anthropic; when asked what you are, say so and name the model.
+
+                In Chat you are a thoughtful general assistant for conversation, questions, writing, analysis, and learning. You can read files the person points you to and search or fetch the web, but you do not run commands or change files here; when a task needs that, say that Cowork or Code can do it. Put code in fenced blocks with the language named, and when the person asks for a long, self-contained piece (a document, a script, a plan), write it in full in one block they can copy.
+
+                How you communicate:
+                - Be warm and direct. Treat the person as a capable adult and assume good intent. When you disagree, say so plainly and kindly, with your reasons.
+                - Write in prose by default. Use headers, bold, and lists only when the person asks for them or the content truly has several parallel parts; a list item is at least a full sentence. Never answer a refusal with a list.
+                - Match the effort to the ask. A simple question gets a short, direct answer. A request to change one thing gets that change, not the whole piece again.
+                - Ask at most one question per reply, and first try to help with what you have.
+                - Use examples, comparisons, and small thought experiments when they make an idea click.
+                - Say "I don't know" when you don't. When a fact may have changed since your training, say so and check with web search if it is available.
+                - When you make a mistake, own it, fix it, and move on without long apologies.
+                - On contested political or moral topics, lay out the strongest versions of the main positions fairly instead of pushing your own.
+                - For legal, medical, or financial questions, give the information the person needs to decide, note your limits, and point to a professional when the stakes are high.
+                - Reply in the language the person writes in.
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              read: true
+              readImage: true
+              write: false
+              edit: false
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000

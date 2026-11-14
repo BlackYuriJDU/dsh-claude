@@ -18,9 +18,9 @@ import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import type { MessageId } from '@deepseek-ai/dsh-api-remotes/client'
 import type { MessageFeedbackItem, MessageFeedbackVersion } from '@deepseek-ai/dsh-message-feedback/types'
 import type { CommandDecoration } from '@deepseek-ai/dsh-client-ui-commands/client'
-import type { FeedbackDialogInjected, MessageFeedbackInjected } from '../src/client/slots.ts'
+import type { FeedbackDialogInjected, FeedbackLogPolicy, MessageFeedbackInjected } from '../src/client/slots.ts'
+import { stubConfigForm } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply, inject } from '../src/client/index.ts'
-import { apply as nodeApply } from '../src/index.ts'
 
 afterEach(cleanup)
 
@@ -79,6 +79,9 @@ async function bench(options: { recordResult?: unknown; recordCarrier?: unknown 
     },
   } as never, (() => null) as never)
   ctx.provide('locale', new LocaleRuntime(ctx))
+  const policy = stubConfigForm<FeedbackLogPolicy>()
+  const policyRequests: string[] = []
+  ctx.provide('configForms', { get: (entry: string) => { policyRequests.push(entry); return policy.scope } })
   const decorations = new Map<string, CommandDecoration>()
   ctx.provide('commandUi', {
     decorate: (decoration: CommandDecoration) => {
@@ -91,6 +94,8 @@ async function bench(options: { recordResult?: unknown; recordCarrier?: unknown 
     ctx,
     fiber,
     calls,
+    policy,
+    policyRequests,
     decorations,
     entry: () => {
       const entry = ctx.slots.entries('conversation.chat.assistant-actions')[0]
@@ -143,6 +148,9 @@ describe('ui-message-feedback browser plugin', () => {
     expect(b.dialogEntry()).toMatchObject({ id: 'feedback-dialog', order: 2, locale: 'feedback' })
     const face = b.dialogEntry()!.inject!(sid('s1'))
     expect(face.hooks.dialog.getSnapshot()).toMatchObject({ target: null, toast: 0 })
+    expect(face.hooks.logPolicy).toBe(b.policy.scope)
+    expect(face.hooks.sessionLogUpload).toBe(b.policy.scope)
+    expect(b.policyRequests).toEqual(['ui-message-feedback', 'session-log-deepseek'])
     expect(face.dismissFailure).toBeTypeOf('function')
   })
 
@@ -330,7 +338,4 @@ describe('ui-message-feedback browser plugin', () => {
     expect(b.entry()).toMatchObject({ id: 'feedback' })
   })
 
-  it('the node half applies without host-side behavior', () => {
-    expect(() => { nodeApply() }).not.toThrow()
-  })
 })

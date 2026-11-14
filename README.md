@@ -1,77 +1,44 @@
-# DeepSeek Harness
+# DSHC
 
 English | [中文](README.zh.md)
 
-DeepSeek Harness (`dsh`) is an open-source agent harness developed by [DeepSeek AI](https://deepseek.com).
+DSHC (`dshc`) is a fork of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), an open-source, plugin-based agent harness, with a Web client styled after the Claude app. You bring your own models and API keys; the harness, tools, and interface stay open.
 
-It is built on an **everything-is-a-plugin** architecture and powered by [Cordis](https://github.com/cordiverse/cordis), whose design is described in [_A Programming Paradigm for Spatiotemporal Composability_](https://arxiv.org/abs/2608.25512).
+> **Not affiliated with Anthropic.** DSHC is an independent open-source project. "Claude" is a trademark of Anthropic, PBC, used here only to describe the design inspiration. No Anthropic logos, fonts, or other assets are included.
 
-Documentation: [https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/)
+## What the fork adds
 
-## Developer preview
+The fork is a layer over the upstream harness, so upstream updates merge without touching it:
 
-DeepSeek Harness is in _developer preview_ and iterating rapidly. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
-
-Review the [safety notice](SAFETY.md) before running the project.
+- [`ui-brand-dshc`](packages/client/ui-brand-dshc/README.md) recolors the light and dark palettes to the Claude app's warm neutrals and clay accent and shows the DSHC mark.
+- [`web-search-searxng`](packages/web/web-search-searxng/README.md) searches the web through a SearXNG instance with no API key.
+- [`dsh-dshc`](packages/bundle/dshc/README.md) is the patch layer of the `dshc` profile, which stacks both over the Web profile.
+- [`bin/dshc`](bin/dshc) starts that profile with its own home directory and port, so it runs beside a stock `dsh` install.
 
 ## Run
 
-### Run from `npm`
-
-Install `Node.js`, then run:
-
-```sh
-npx @deepseek-ai/dsh web
-```
-
-The command starts the Web UI at `http://127.0.0.1:3080` by default and opens it in the default browser for a local launch. An SSH launch only prints the host URL because the SSH client or editor owns the local forwarded address. Pass `--no-open` to run the server without opening a browser. See [Web UI guide](docs/user/guide/index.md).
+<a id="run-from-source"></a>
 
 ### Run from source
 
-To run from a repository checkout:
+Build the checkout, then start DSHC:
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/BlackYuriJDU/dsh-claude.git
+cd dsh-claude
 pnpm install
 pnpm run build
-pnpm dsh web
+bin/dshc
 ```
 
-`pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
+`bin/dshc` serves `http://127.0.0.1:3090` from the built CLI at `apps/cli/lib/bin.js` and keeps its state in `~/.dshc`. Set `DSHC_PORT`, `DSHC_DSH_HOME`, `DSHC_WORKSPACE`, or `DSHC_HOME` to change the port, the home directory, the working directory, or the checkout. Set `SEARXNG_URL` to a SearXNG instance with JSON output enabled to turn on keyless web search. The `dsh` options `--patch`, `--from-default-profile`, and the `--dump-*` flags pass through to `dsh`; any other argument goes to the app.
 
-## Community and support
+The upstream profiles still work from the same checkout, for example `pnpm dsh web` on port 3080.
 
-- Submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).
-- Add the [`dsh-plugin`](https://github.com/topics/dsh-plugin) topic to your plugin repository for discoverability.
-- Join <a href="https://discord.gg/4MrtZUhpxg">DeepSeek Harness Discord community</a>.
+## Upstream
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Development
-
-Start with the [development guide](docs/development.md) and [architecture documentation](docs/architecture.md).
-
-`pnpm run dev:web` builds, serves, and rebuilds client bundles on source edits in one terminal, and `make help` lists the matching Make targets for Web and Desktop; the guide's application commands section owns the full table.
-
-For agents, follow [AGENTS.md](AGENTS.md).
-
-## Citation
-
-```bibtex
-@misc{deepseek-harness2026,
-  title={DeepSeek Harness: Everything is a Plugin},
-  author={DeepSeek-AI},
-  year={2026},
-  publisher={GitHub},
-  howpublished={\url{https://github.com/deepseek-ai/deepseek-harness}},
-}
-```
+DeepSeek Harness documentation: [https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/). Start with the [development guide](docs/development.md) and [architecture documentation](docs/architecture.md); agents follow [AGENTS.md](AGENTS.md). Review the [safety notice](SAFETY.md) before running the project.
 
 ## License
 
-[MIT](LICENSE)
-
-Third-party dependencies and their licenses are disclosed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE), inherited from DeepSeek Harness. Third-party dependencies and their licenses are disclosed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

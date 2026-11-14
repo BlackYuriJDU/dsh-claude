@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-03-keyless-searxng-search-provider.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-11-03-keyless-searxng-search-provider.md
+/agent-note-keyless-web-search-through-a-searxng-provider:
+  en: 78a0a4ef49be8b27
+  zh: f151f67d29d3ea4b
+/agent-note-keyless-web-search-through-a-searxng-provider/problem:
+  en: 2cdef9d9925d482e
+  zh: eb337cfd4fc3ea36
+/agent-note-keyless-web-search-through-a-searxng-provider/decision:
+  en: 5b2466a262901510
+  zh: 0069a28dd7334fd1
+/agent-note-keyless-web-search-through-a-searxng-provider/alternatives-considered:
+  en: 883c16e6be3e49a4
+  zh: 79668b04edcbbc87
+/agent-note-keyless-web-search-through-a-searxng-provider/consequences:
+  en: 45ea18aebc6ac3d1
+  zh: 30c044cda8a48a45

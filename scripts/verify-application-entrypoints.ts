@@ -34,6 +34,8 @@ const EXECUTABLE_SOURCE_ALLOWLIST = new Map<string, string>([
   ['apps/cli/src/installed-bin.ts', 'installed dsh command entry'],
   ['apps/cli/src/bin.ts', 'supported dsh application launcher'],
   ['apps/desktop/scripts/logged-notarytool.mjs', 'build-only notarization logging wrapper'],
+  ['packages/client/ui-memory/tests/fixtures/driver.host.ts', 'test-only subprocess driver'],
+  ['packages/client/ui-projects/tests/fixtures/driver.host.ts', 'test-only subprocess driver'],
   ['packages/context/time-context/tests/fixtures/driver.ts', 'test-only subprocess driver'],
   ['packages/experimental/webworker-packer/bin.js', 'build-only wrapper'],
   ['packages/experimental/webworker-packer/src/bin.ts', 'build-only implementation'],

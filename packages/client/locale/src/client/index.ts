@@ -153,6 +153,9 @@ function syncDocumentLanguage(snapshot: LocaleSnapshot): void {
   if (document.documentElement.lang !== language) document.documentElement.lang = language
 }
 
+/** Name the `{product}` placeholder shows while no brand registers one. */
+export const DEFAULT_PRODUCT_NAME = 'DeepSeek Harness'
+
 /**
  * Dictionary registry plus locale preference. Lookup walks the active
  * language's declared fallback chain in the entry namespace, then repeats it
@@ -176,6 +179,8 @@ export class LocaleRuntime {
   private provisional: LocaleId
   /** Last explicit selection, including one awaiting an external registration. */
   private preference: LocaleId | undefined
+  /** Brand-registered product name; one occupant at a time. */
+  private product: { readonly name: string } | undefined
 
   /**
    * @param ctx - owning context (change events are emitted on it; the scope
@@ -441,6 +446,29 @@ export class LocaleRuntime {
   }
 
   /**
+   * Register the product name that fills every `{product}` placeholder whose
+   * caller passes no `product` parameter. One brand owns the name; without a
+   * registration the placeholder shows {@link DEFAULT_PRODUCT_NAME}.
+   * @param name - non-blank product name shown in interface copy.
+   * @returns disposer restoring the default name (idempotent).
+   * @throws when the name is blank or another registration is active.
+   */
+  registerProductName(name: string): () => void {
+    if (name.trim() === '') throw new Error('product name must not be blank')
+    if (this.product !== undefined) {
+      throw new Error(`product name is already registered as "${this.product.name}"`)
+    }
+    const registration = { name }
+    this.product = registration
+    this.publish(this.snapshot.active, false)
+    return () => {
+      if (this.product !== registration) return
+      this.product = undefined
+      this.publish(this.snapshot.active, false)
+    }
+  }
+
+  /**
    * Bind a declared namespace to a translate function typed to its
    * dictionary key union (plus the shared common vocabulary) — the same key
    * domain the framework-injected `t` seat carries. The returned reference
@@ -472,9 +500,12 @@ export class LocaleRuntime {
     const template = this.lookup(ns, key, chain)
       ?? (ns !== COMMON_NS ? this.lookup(COMMON_NS, key, chain) : undefined)
       ?? key
-    if (!params) return template
+    const values = template.includes('{product}') && !(params !== undefined && 'product' in params)
+      ? { product: this.product?.name ?? DEFAULT_PRODUCT_NAME, ...params }
+      : params
+    if (!values) return template
     return template.replace(/\{(\w+)\}/g, (match, name: string) =>
-      name in params ? String(params[name]) : match)
+      name in values ? String(values[name]) : match)
   }
 
   private lookup(ns: string, key: string, chain: readonly LocaleId[]): string | undefined {

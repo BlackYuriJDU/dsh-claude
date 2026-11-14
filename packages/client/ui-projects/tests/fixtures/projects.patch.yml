@@ -1,0 +1,36 @@
+# Test-only patch over the shipped headless profile with workspaces; the driver saves the project.
+- id: headless-startup
+  disabled: true
+
+- id: headless-runner
+  disabled: true
+
+- id: agent-loop
+  config:
+    agents:
+      - id: main
+        provider: ui-projects-mock
+        model: ui-projects-mock
+        cwd: !!js process.cwd()
+
+- id: session-persistence-jsonl
+  config:
+    root: './.sessions'
+    compression: none
+
+- insert:
+    - id: ui-projects-mock-llm
+      name: './mock-llm.host.ts'
+
+    - id: workspace
+      name: '@deepseek-ai/dsh-workspace'
+
+    - id: ui-projects
+      name: '@deepseek-ai/dsh-client-ui-projects'
+
+
+- id: sandbox-policy
+  inject: []
+  config:
+    mode: !!js process.env.DSH_PERMISSION_MODE ?? 'workspace-write'
+    workspaceRoot: !!js process.cwd()

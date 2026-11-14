@@ -29,7 +29,7 @@ function reply(node: ChatNode): boolean {
 
 function sameSummary(left: ProcessActivitySummary, right: ProcessActivitySummary): boolean {
   return left.running === right.running && left.runningDetail === right.runningDetail
-    && left.preparing === right.preparing
+    && left.preparing === right.preparing && left.failed === right.failed
     && left.counts.length === right.counts.length && left.counts.every((value, index) =>
     value.kind === right.counts[index]?.kind && value.count === right.counts[index].count)
 }
@@ -68,7 +68,9 @@ class ProcessGroup {
     const unchanged = nodes.length === this.nodes.length && nodes.every((node, index) => node === this.nodes[index])
     const previous = this.snapshot.data
     const activity = unchanged && previous.closed === closed ? previous.summary : processActivity(nodes)
-    const summary = closed ? { counts: activity.counts, running: undefined, runningDetail: '' } : activity
+    const summary = closed
+      ? { counts: activity.counts, running: undefined, runningDetail: '', ...activity.failed === undefined ? {} : { failed: activity.failed } }
+      : activity
     this.nodes = nodes
     if (previous.closed !== closed || !sameSummary(previous.summary, summary)) {
       this.snapshot = {

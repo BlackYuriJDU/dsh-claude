@@ -1,7 +1,7 @@
 - text: "Use the read tool twice in one assistant message: read a.txt and b.txt. Then reply with the single word DONE and stop. {{clock}}"
 - button "Copy"
 - status: Completed
-- button "Completed in {{duration}}"
+- button "Completed in {{duration}} 2 failed"
 - text: FORK_BRANCH_USER Summarize what this branch knows about the reads. {{clock}}
 - button "Copy"
 - status: Completed

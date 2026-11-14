@@ -1,4 +1,4 @@
-- banner:
+- main:
   - navigation "Session hierarchy":
     - button "Ask a research subagent to"
     - text: /
@@ -11,32 +11,32 @@
     - tab "Chat" [selected]
     - tab "Trajectory"
   - button "More conversation views"
-- navigation "Turn navigation":
-  - button "Jump to turn 1"
-  - button "Jump to turn 2"
-- text: Explain event sourcing in one sentence.Your final answer is delivered automatically if your parent is still online. Include the result and relevant evidence in that answer; the parent does not receive your full transcript, tool output, or reasoning. If your last action is a message to your parent, the completion notice omits your final answer; include the result and relevant evidence in that message. {{clock}}
-- button "Copy"
-- status: Completed
-- button "Completed in {{duration}}"
-- paragraph: Event sourcing is a pattern where all changes to an application's state are stored as an immutable, append-only sequence of events, rather than persisting only the current state, enabling full auditability, temporal queries, and event-driven architectures.
-- button "Copy"
-- button "Good response"
-- button "Bad response"
-- button "Branch into a new conversation"
-- text: {{clock}} Now give the same explanation to a human reader. {{clock}}
-- button "Copy"
-- status: Completed
-- button "Completed in {{duration}}"
-- paragraph: Event sourcing is a pattern where all changes to an application's state are stored as an immutable, append-only sequence of events, rather than persisting only the current state, enabling full auditability, temporal queries, and event-driven architectures.
-- button "Copy"
-- button "Good response"
-- button "Bad response"
-- button "Branch into a new conversation"
-- text: {{clock}}
-- textbox "Message or run a task, / commands, @ files or sessions"
-- button "Add files or run commands"
-- 'button "Access mode, current: Custom"': Custom
-- button "Send message" [disabled]
-- button "2 turns 2 steps · {{throughput}} tok/s": 2 turns 2 steps{{throughput}} tok/s
-- button "15.7K tok · Cache hit 99%": 15.7K tokCache hit 99%
-- button "6% of context used": 6%
+  - navigation "Turn navigation":
+    - button "Jump to turn 1"
+    - button "Jump to turn 2"
+  - text: Explain event sourcing in one sentence.Your final answer is delivered automatically if your parent is still online. Include the result and relevant evidence in that answer; the parent does not receive your full transcript, tool output, or reasoning. If your last action is a message to your parent, the completion notice omits your final answer; include the result and relevant evidence in that message. {{clock}}
+  - button "Copy"
+  - status: Completed
+  - button "Completed in {{duration}}"
+  - paragraph: Event sourcing is a pattern where all changes to an application's state are stored as an immutable, append-only sequence of events, rather than persisting only the current state, enabling full auditability, temporal queries, and event-driven architectures.
+  - button "Copy"
+  - button "Good response"
+  - button "Bad response"
+  - button "Branch into a new conversation"
+  - text: {{clock}} Now give the same explanation to a human reader. {{clock}}
+  - button "Copy"
+  - status: Completed
+  - button "Completed in {{duration}}"
+  - paragraph: Event sourcing is a pattern where all changes to an application's state are stored as an immutable, append-only sequence of events, rather than persisting only the current state, enabling full auditability, temporal queries, and event-driven architectures.
+  - button "Copy"
+  - button "Good response"
+  - button "Bad response"
+  - button "Branch into a new conversation"
+  - text: {{clock}}
+  - textbox "Message or run a task, / commands, @ files or sessions"
+  - button "Add files or run commands"
+  - 'button "Access mode, current: Custom"': Custom
+  - button "Send message" [disabled]
+  - button "2 turns 2 steps · {{throughput}} tok/s": 2 turns 2 steps{{throughput}} tok/s
+  - button "15.7K tok · Cache hit 99%": 15.7K tokCache hit 99%
+  - button "6% of context used": 6%

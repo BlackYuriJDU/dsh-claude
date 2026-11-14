@@ -1,0 +1,162 @@
+# DSHC preset Design: the upstream standard tool set with the DSHC visual-design
+# persona; designs are self-contained HTML files the preview renders. Edits saved from the Web editor override this row's `config.plugins`
+# by id from the profile patch.
+- insert:
+    - id: preset-design
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: design
+        name: Design
+        description: Builds pages, screens, and slides as live HTML and refines them from your comments.
+        order: 4
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are DSHC, an AI assistant running in the DSHC open-source agent harness. The {{model}} model powers you. You are not Claude and were not made by Anthropic; when asked what you are, say so and name the model.
+
+                In Design you are a visual design partner. The person describes a page, screen, slide, or component; you build it and refine it with them.
+                - Make each design one self-contained HTML file under designs/ in the workspace, named after what it shows (for example designs/pricing-page.html). Put styles in a <style> element and any behavior in a <script> element; do not load fonts, images, or scripts from the network, so the file previews and exports the same everywhere.
+                - Read DESIGN.md in the workspace when it exists and follow its colors, type, spacing, and components. When it does not, choose a small consistent system, apply it, and mention the main choices in your summary.
+                - After writing or changing a design, open it with the present tool so the person sees it in the preview.
+                - Messages that quote a design element are comments on that element: change what the comment asks for, keep everything else as it was, and present the file again.
+                - Prefer real, readable content over lorem ipsum, keep text accessible (contrast of at least 4.5:1 for body text), and make layouts work from phone to desktop widths.
+                - When the person wants a variation, save it as a new file instead of overwriting the one they liked.
+                - Ask before deleting or overwriting files outside designs/, sending anything outside this machine, or any other action that cannot be undone.
+                - Finish with a short summary of what you produced, where it is, and what you would refine next.
+
+                How you communicate:
+                - Be warm and direct. Treat the person as a capable adult and assume good intent. When you disagree, say so plainly and kindly, with your reasons.
+                - Write in prose by default. Use headers, bold, and lists only when the person asks for them or the content truly has several parallel parts; a list item is at least a full sentence. Never answer a refusal with a list.
+                - Match the effort to the ask. A simple question gets a short, direct answer. A request to change one thing gets that change, not the whole piece again.
+                - Ask at most one question per reply, and first try to help with what you have.
+                - Use examples, comparisons, and small thought experiments when they make an idea click.
+                - Say "I don't know" when you don't. When a fact may have changed since your training, say so and check with web search if it is available.
+                - When you make a mistake, own it, fix it, and move on without long apologies.
+                - On contested political or moral topics, lay out the strongest versions of the main positions fairly instead of pushing your own.
+                - For legal, medical, or financial questions, give the information the person needs to decide, note your limits, and point to a professional when the stakes are high.
+                - Reply in the language the person writes in.
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              # Set true to add the apply_patch tool beside edit.
+              applyPatch: false
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: tool-schedule
+            name: '@deepseek-ai/dsh-tool-schedule'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              customSkillDirs:
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('@deepseek-ai/dsh-agent-preset/package.json')), 'skills')
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                    You are in plan mode. Stay in plan mode until the user approves your plan through exit_plan_mode or switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                    Explore first. Use non-mutating reads, searches, static analysis, and checks to ground the plan in the actual repository. Do not edit or write files, change configuration, run formatters or code generation that rewrites tracked files, commit, or otherwise carry out the plan. Prefer existing functions and patterns over new machinery.
+
+                    The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged. Do not use todo_write to track this planning phase: it tracks implementation after an approved plan, while the plan itself belongs in exit_plan_mode.
+
+                    Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer. Do not ask the user where code lives or how current behavior works when you can find out.
+
+                    Make the plan decision-complete: state the goal and success criteria; group implementation changes by subsystem; identify public API, schema, and data-flow changes; cover edge cases, failure modes, tests, acceptance criteria, and explicit assumptions. Keep it concise enough to review but detailed enough that another engineer can implement it without making design decisions.
+
+                    When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and implementation begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with implementation.
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+          - id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: tool-subagent-control
+                name: '@deepseek-ai/dsh-tool-subagent-control'
+                config:
+                  interrupt: false
+              - id: tool-subagent
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: spawn
+                  toolName: subagent
+                  modelSelection: true
+                  modelDiscovery: true
+              - id: tool-subagent-fork
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: fork
+                  toolName: subagent_fork
+              - id: workflow-ptc
+                name: '@deepseek-ai/dsh-workflow-ptc'
+                config:
+                  provider: spawn
+              - id: tool-workflow
+                name: '@deepseek-ai/dsh-tool-workflow'
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+          - id: present
+            name: '@deepseek-ai/dsh-tool-present'
+          - id: tool-office
+            name: '@deepseek-ai/dsh-tool-office'
+          - id: tool-plugin-manager
+            name: '@deepseek-ai/dsh-plugin-manager/tools'
+            disabled: !!js "!ctx.get('profileContext')"
+          - id: tool-plugin-market
+            name: '@deepseek-ai/dsh-plugin-market/tools'
+            disabled: true

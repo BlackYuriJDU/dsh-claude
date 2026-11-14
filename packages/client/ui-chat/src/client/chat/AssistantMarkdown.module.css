@@ -14,7 +14,11 @@
   color: var(--dsw-alias-label-primary);
 }
 
+/* Response prose family: a user font choice leads, then the
+   --dsh-font-family-response theme token, then the interface stack. Without
+   either the response keeps the interface family. */
 .body {
+  --dsh-markdown-font-family: var(--dsh-font-family-text, var(--dsh-font-family-response, var(--dsh-font-family-text-default))), var(--dsh-font-family-text-default);
   --dsh-assistant-block-gap: 16px;
   display: flex;
   flex-direction: column;

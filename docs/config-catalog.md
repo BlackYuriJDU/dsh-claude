@@ -355,6 +355,8 @@ export interface Config {
 export interface Config {
   /** Override the system Documents directory with a fully qualified path. */
   documentsDirectory?: string
+  /** Folder under Documents that holds the default Workspace; one path segment. */
+  productDirectory?: string
   /** Maximum duration of the operating system's Documents lookup. */
   documentsLookupTimeoutMs?: number
 }
@@ -610,6 +612,38 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-account-notifications -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-memory -->
+<a id="deepseek-aidsh-client-ui-memory"></a>
+
+## `@deepseek-ai/dsh-client-ui-memory`
+
+- `inject`: `settings` · `systemPrompt`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/client/ui-memory/src/index.ts:20`](../packages/client/ui-memory/src/index.ts)
+
+```ts config-catalog
+/** Plugin config. */
+export interface Config {
+  /** Ordered saved memories, edited from Settings. */
+  memories: Volatile<MemoryItem[]>
+  /** What the person wants to be called, edited from Settings. */
+  profileName: Volatile<string>
+  /** The person's instructions for every conversation, edited from Settings. */
+  instructions: Volatile<string>
+  /** Bound on each complete context text (profile and memories), in characters. */
+  maxChars: number
+}
+
+/** One remembered fact, preference, or correction. */
+export interface MemoryItem {
+  /** Stable identity within the list. */
+  id: string
+  /** The memory in the person's words. */
+  text: string
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-memory -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-plugin-manager -->
 <a id="deepseek-aidsh-client-ui-plugin-manager"></a>
 
@@ -629,6 +663,44 @@ export interface Config {
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-plugin-manager -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-projects -->
+<a id="deepseek-aidsh-client-ui-projects"></a>
+
+## `@deepseek-ai/dsh-client-ui-projects`
+
+- `inject`: `settings` · `systemPrompt` · `workspaceRegistry` · `workingDirectory`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/client/ui-projects/src/index.ts:21`](../packages/client/ui-projects/src/index.ts)
+
+```ts config-catalog
+/** Plugin config. */
+export interface Config {
+  /** Project content keyed by workspace id, edited from Settings. */
+  projects: Volatile<Record<string, ProjectEntry>>
+  /** Characters kept from one knowledge file. */
+  maxFileChars: number
+  /** Bound on the complete project text of one session. */
+  maxTotalChars: number
+}
+
+/** One project's content: instructions plus knowledge files. */
+export interface ProjectEntry {
+  /** Instructions the agent follows in every session of the project. */
+  readonly instructions?: string
+  /** Knowledge files whose content joins the instructions. */
+  readonly files?: readonly ProjectKnowledgeFile[]
+}
+
+/** One knowledge file attached to a project. */
+export interface ProjectKnowledgeFile {
+  /** Stable id within the project's list. */
+  readonly id: string
+  /** Path to the file on the Host: absolute, or relative to the workspace folder. */
+  readonly path: string
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-client-ui-projects -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-ui-settings-account -->
 <a id="deepseek-aidsh-client-ui-settings-account"></a>
@@ -3027,7 +3099,7 @@ export interface Config {
 
 ## `@deepseek-ai/dsh-sandbox-local`
 
-- `source`: [`packages/sandbox/sandbox-local/src/index.ts:63`](../packages/sandbox/sandbox-local/src/index.ts)
+- `source`: [`packages/sandbox/sandbox-local/src/index.ts:65`](../packages/sandbox/sandbox-local/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config. All optional — `static Config` supplies the defaults. */
@@ -3052,6 +3124,20 @@ export interface Config {
   runnerFailureSignatures?: string[]
   /** Positive timeout for each functional probe; zero would mean unbounded to Node. */
   probeTimeoutMs?: number
+  /**
+   * Absolute paths, or paths starting with `~/`, that confined commands must
+   * not read. Each confinement resolves them to their real paths and skips
+   * those that do not exist; a directory hides its subtree. bwrap and Seatbelt
+   * enforce them; Landlock and the Windows ACL runner cannot, and report
+   * `partial` enforcement while any is configured.
+   */
+  denyReadPaths?: string[]
+  /**
+   * `off` removes network access from confined commands under bwrap and
+   * Seatbelt; Landlock and the Windows ACL runner cannot, and report `partial`
+   * enforcement.
+   */
+  network?: 'on' | 'off'
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-sandbox-local -->
@@ -3164,6 +3250,37 @@ export interface JsonRpcConfig {
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-sdk-jsonrpc-server -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-sensitive-access-policy -->
+<a id="deepseek-aidsh-sensitive-access-policy"></a>
+
+## `@deepseek-ai/dsh-sensitive-access-policy`
+
+- `inject`: `tools`
+- `source`: [`packages/guard/sensitive-access-policy/src/index.ts:30`](../packages/guard/sensitive-access-policy/src/index.ts)
+
+```ts config-catalog
+/** Plugin config. Every field defaults to no restriction. */
+export interface Config {
+  /**
+   * Glob patterns (`node:path` `matchesGlob` syntax) for paths that `read`,
+   * `read_image`, `grep`, and `glob` may reach only with approval. A pattern is
+   * absolute, starts with `~/` for the Host account's home, or starts with
+   * `**` to match at any depth; anything else fails at load.
+   */
+  sensitivePaths?: string[]
+  /** `with-data` asks before a `web_fetch` whose address carries data to a site outside {@link fetchAllowedDomains}. */
+  fetchApproval?: FetchApproval
+  /** Domains `web_fetch` reaches without approval; each also covers its subdomains. */
+  fetchAllowedDomains?: string[]
+  /** Address paths longer than this many characters count as carrying data. */
+  fetchPathLengthLimit?: number
+}
+
+/** When `web_fetch` asks for approval. */
+export type FetchApproval = 'never' | 'with-data'
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-sensitive-access-policy -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-session-log-deepseek -->
 <a id="deepseek-aidsh-session-log-deepseek"></a>
@@ -4977,6 +5094,36 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-web-search-deepseek -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-web-search-searxng -->
+<a id="deepseek-aidsh-web-search-searxng"></a>
+
+## `@deepseek-ai/dsh-web-search-searxng`
+
+- `inject`: `web`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/web/web-search-searxng/src/index.ts:27`](../packages/web/web-search-searxng/src/index.ts)
+
+```ts config-catalog
+/**
+ * Plugin config. Every field is live: Settings edits apply to the next search
+ * without reloading the plugin.
+ */
+export interface Config {
+  /** Instance base URL. Empty or unset falls back to `$SEARXNG_URL`; neither → provider unavailable. */
+  baseURL: Volatile<string | undefined>
+  /** Search language sent as `language` (for example `pt-BR`). Unset = instance default. */
+  language: Volatile<string | undefined>
+  /** Comma-separated SearXNG categories (for example `general,news`). Unset = instance default. */
+  categories: Volatile<string | undefined>
+  /** SafeSearch level: 0 off, 1 moderate, 2 strict. Unset = instance default. */
+  safeSearch: Volatile<SearxngSafeSearch | undefined>
+}
+
+/** SafeSearch levels SearXNG accepts: off, moderate, strict. */
+export type SearxngSafeSearch = 0 | 1 | 2
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-web-search-searxng -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-webhook-github -->
 <a id="deepseek-aidsh-webhook-github"></a>
 
@@ -5092,6 +5239,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 | `@deepseek-ai/dsh-client-ui-agent-team` | — | [`packages/client/ui-agent-team/src/index.ts`](../packages/client/ui-agent-team/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-approval` | — | [`packages/client/ui-approval/src/index.ts`](../packages/client/ui-approval/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-attachment` | — | [`packages/client/ui-attachment/src/index.ts`](../packages/client/ui-attachment/src/index.ts) |
+| `@deepseek-ai/dsh-client-ui-brand-dshc` | — | [`packages/client/ui-brand-dshc/src/index.ts`](../packages/client/ui-brand-dshc/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-brand-official` | — | [`packages/client/ui-brand-official/src/index.ts`](../packages/client/ui-brand-official/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-chat` | — | [`packages/client/ui-chat/src/index.ts`](../packages/client/ui-chat/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-commands` | — | [`packages/client/ui-commands/src/index.ts`](../packages/client/ui-commands/src/index.ts) |
@@ -5126,6 +5274,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 | `@deepseek-ai/dsh-client-ui-settings-general` | — | [`packages/client/ui-settings-general/src/index.ts`](../packages/client/ui-settings-general/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-settings-plugin-inventory` | — | [`packages/client/ui-settings-plugin-inventory/src/index.ts`](../packages/client/ui-settings-plugin-inventory/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-settings-plugins` | — | [`packages/client/ui-settings-plugins/src/index.ts`](../packages/client/ui-settings-plugins/src/index.ts) |
+| `@deepseek-ai/dsh-client-ui-settings-searxng` | — | [`packages/client/ui-settings-searxng/src/index.ts`](../packages/client/ui-settings-searxng/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-settings-session-log` | — | [`packages/client/ui-settings-session-log/src/index.ts`](../packages/client/ui-settings-session-log/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-settings-shell` | — | [`packages/client/ui-settings-shell/src/index.ts`](../packages/client/ui-settings-shell/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-settings-subagent` | — | [`packages/client/ui-settings-subagent/src/index.ts`](../packages/client/ui-settings-subagent/src/index.ts) |
@@ -5244,6 +5393,7 @@ Imported as libraries by other packages; a `cordis.yml` cannot load them.
 | `@deepseek-ai/dsh-cmdline` | — | [`packages/boot/cmdline/src/index.ts`](../packages/boot/cmdline/src/index.ts) |
 | `@deepseek-ai/dsh-cua-bundle` | — | [`packages/experimental/cua-bundle/src/index.ts`](../packages/experimental/cua-bundle/src/index.ts) |
 | `@deepseek-ai/dsh-deque` | — | [`packages/util/deque/src/index.ts`](../packages/util/deque/src/index.ts) |
+| `@deepseek-ai/dsh-dshc` | — | [`packages/bundle/dshc/src/index.ts`](../packages/bundle/dshc/src/index.ts) |
 | `@deepseek-ai/dsh-error` | — | [`packages/util/error/src/index.ts`](../packages/util/error/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-badge-skill-bundle` | — | [`packages/experimental/badge-skill-bundle/src/index.ts`](../packages/experimental/badge-skill-bundle/src/index.ts) |
 | `@deepseek-ai/dsh-experimental-browser-use-runtime` | — | [`packages/experimental/browser-use-runtime/src/index.ts`](../packages/experimental/browser-use-runtime/src/index.ts) |

@@ -1,11 +1,15 @@
 /* Visual baseline: deepsuite `@deepseek/md` markdown.css, adapted to CSS
    Modules. Cite pills and header anchors are absent (no matching DOM).
-   Token names match that sheet. */
+   Token names match that sheet. Prose text (body and headings) takes its
+   family from --dsh-markdown-font-family when an ancestor sets it, otherwise
+   from the interface family; tables keep the interface family, whose weights
+   their header token needs, and code keeps the code family. */
 
 .markdown {
   min-width: 0;
   overflow-wrap: anywhere;
   font: var(--dsw-font-markdown-base);
+  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   color: var(--dsw-alias-label-primary);
 }
 
@@ -15,26 +19,31 @@
 
 .markdown h1 {
   font: var(--dsw-font-markdown-h1);
+  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   margin: 32px 0 16px;
 }
 
 .markdown h2 {
   font: var(--dsw-font-markdown-h2);
+  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   margin: 32px 0 16px;
 }
 
 .markdown h3 {
   font: var(--dsw-font-markdown-h3);
+  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   margin: 32px 0 16px;
 }
 
 .markdown h4 {
   font: var(--dsw-font-markdown-h4);
+  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   margin: 16px 0;
 }
 
 .markdown :where(h5, h6) {
   font: var(--dsw-font-markdown-base-strong);
+  font-family: var(--dsh-markdown-font-family, var(--dsw-font-family));
   margin: 16px 0;
 }
 
