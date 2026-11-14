@@ -28,7 +28,8 @@ afterEach(() => {
 })
 
 function fixture() {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'dsh-sensitive-access-')))
+  // The native resolver expands Windows 8.3 short names (RUNNER~1) the way the policy's realpath does.
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'dsh-sensitive-access-')))
   tempDirs.push(root)
   mkdirSync(join(root, 'secrets'))
   writeFileSync(join(root, 'secrets', 'id_rsa'), 'k')
