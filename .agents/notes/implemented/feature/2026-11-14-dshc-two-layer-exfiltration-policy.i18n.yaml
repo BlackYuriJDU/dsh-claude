@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-11-14-dshc-two-layer-exfiltration-policy.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-11-14-dshc-two-layer-exfiltration-policy.md
+/agent-note-dshc-two-layer-exfiltration-policy:
+  en: bae0d49954ecb71b
+  zh: 1ff1b69c9b8dbfe6
+/agent-note-dshc-two-layer-exfiltration-policy/problem:
+  en: 43a82493cbef054e
+  zh: a53faacd7771e25d
+/agent-note-dshc-two-layer-exfiltration-policy/decision:
+  en: bc5090871ed6f347
+  zh: 03de8319a9259238
+/agent-note-dshc-two-layer-exfiltration-policy/alternatives-considered:
+  en: 77c81097848ccfb1
+  zh: dc2bb926947f1e3c
+/agent-note-dshc-two-layer-exfiltration-policy/consequences:
+  en: f2d0dbdc49c3f9e0
+  zh: 66f336abf1baf7d7

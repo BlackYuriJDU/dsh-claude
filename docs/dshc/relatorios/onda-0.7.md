@@ -162,6 +162,33 @@ As capturas em 1280 e 390 px, nos temas claro e escuro, ficam em `docs/dshc/refe
 - Favicon e manifest do app web por perfil: vêm do app web do upstream, compartilhado por todos os perfis, e trocá-los para o `dshc` exige sobrescrever recursos no build.
 - Enviar ao upstream, como PR, as correções genéricas desta onda (marcos, árvore vazia, rótulos da barra lateral, seletor segmentado e a regra 2.5.3).
 
+## Onda 2: segurança e licenças
+
+Decisões do dono: D13, `web_fetch` pede aprovação só quando o endereço leva dados; D14, licenças fora da política entram como exceções nomeadas, cada uma com motivo.
+
+| Item | Resultado | Commit (assunto) |
+|---|---|---|
+| Camada 1, sandbox | `denyReadPaths` e `network` em `sandbox-local`. bwrap usa tmpfs só leitura, `/dev/null` e `--unshare-net`; Seatbelt usa `deny file-read*` e `deny network*`; Landlock e ACL do Windows reportam `partial`. Os padrões não restringem nada | hide configured paths and remove network access |
+| Camada 2, ferramentas | Pacote `dsh-sensitive-access-policy`: `read`, `read_image`, `grep` e `glob` pedem aprovação em caminhos protegidos; `web_fetch` pede quando leva dados a um site fora da lista. Spec com cobertura de 100% e prova de que um `deny` posterior prevalece | ask before tools read protected paths or send data to unlisted sites |
+| Padrões do DSHC | Protege `~/.ssh`, `~/.aws`, `~/.config/gh`, `~/.gnupg` e `**/.env*`; esconde os quatro diretórios dos comandos de shell; `fetchApproval: with-data` com lista vazia | idem |
+| Composição real e N4 | `dshc-privacy.e2e.ts`: nenhum host externo no navegador nem no Host durante a inicialização e 5 s ociosos; ler o `.env` do workspace e um fetch com dados param na aprovação. Sem `**/.env*` no bundle, o teste reprova | prove DSHC stays local and gates sensitive reads in its real composition |
+| Licenças | `verify-dependency-licenses` no `run-gates` estático e no `hygiene`. Cobre 469 pacotes de runtime e 1.154 só de desenvolvimento; a spec reprova GPL sem alternativa, tldraw, licença desconhecida e exceção sem uso | check the licenses of the whole dependency closure and group Dependabot updates |
+| Dependabot | Minor e patch agrupados por ecossistema, majors separados, fuso `America/Sao_Paulo` | idem |
+| Agent Note | `2026-11-14-dshc-two-layer-exfiltration-policy`, em en e zh | record the two-layer exfiltration policy |
+
+### Desvios do plano
+
+- Os dois snapshots sem chave viraram o teste de composição real. As sessões gravadas exigem uma chave da DeepSeek para gravar, e o caso do `bash` exige bwrap, que este container não tem. O `dshc-privacy.e2e.ts` cobre a camada 2 na composição DSHC carregada pelo Loader, com ferramentas `read` e `web_fetch` substitutas no contexto raiz, porque os presets registram as ferramentas reais por agente.
+- O `bash cat` negado pela camada 1 é provado em `sandbox-local/tests/bwrap.e2e.ts` (arquivo e diretório escondidos, rede em outro namespace). Esse teste roda na faixa `e2e` do CI, que neste fork falha antes por falta do secret.
+- O gate de licenças chama-se `verify-dependency-licenses`, porque o `gen-third-party-notices` do upstream já valida as declarações diretas com o mesmo `isPermissive`, e o novo cobre o fecho transitivo. O nome do diretório do pacote é `sensitive-access-policy`, igual ao nome do pacote, porque o gerador de aliases do `tsconfig` exige isso.
+- O `THIRD_PARTY_NOTICES.md` estava desatualizado desde a Onda 1 (`axe-core`) e foi regenerado.
+
+### Pendente
+
+- O launcher do Landlock precisa aceitar negação de leitura e rede para a camada 1 valer fora do bwrap e do Seatbelt.
+- A camada 1 não aceita glob, então um `.env` dentro do workspace continua legível por comandos de shell.
+- Propor ao upstream, como PR, as mudanças de `sandbox-local`.
+
 ## Próximo passo
 
-Onda 2: segurança e licenças (política contra exfiltração, `scripts/verify-licenses.ts` e Dependabot).
+Onda 3: artifacts duráveis (G1), sobre `ui-sidebar-right` e `documentpreview`.

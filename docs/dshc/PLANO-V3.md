@@ -25,7 +25,9 @@
 | D9 | Destino da PR de migração | **recomendação aplicada, ver 0.3** | Branch `dshc/base` |
 | D10 | Publicar app desktop | em aberto, não bloqueia | Decidir antes da Onda 9 |
 | D11 | Texto do login DeepSeek no onboarding | aplicada a recomendação: texto neutro | Onda 1 |
-| D12 | Símbolo "clay burst" | **em aberto, decisão sua** | Recomendo trocar (0.2) |
+| D12 | Símbolo "clay burst" | **decidida: monograma DSHC** | Onda 1 |
+| D13 | `web_fetch` e exfiltração pela URL | **decidida: pedir aprovação só quando o endereço leva dados** | Onda 2 |
+| D14 | Licenças fora de MIT, Apache, BSD e ISC | **decidida: exceções nomeadas por pacote, com motivo** | Onda 2 |
 
 ### 0.1 Nome: "DSHC", não "dsh-claude"
 
