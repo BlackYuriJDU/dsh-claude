@@ -15,6 +15,7 @@
     "apps/web/tests/plugin-recommendations.e2e.ts",
     "apps/web/tests/japanese-plugin-metadata.e2e.ts",
     "apps/web/tests/accessibility.e2e.ts",
+    "apps/web/tests/dshc-privacy.e2e.ts",
     "apps/web/tests/additional-locales.e2e.ts",
     "apps/web/tests/rich-text-quotes.e2e.ts",
     "apps/web/tests/hover-input.e2e.ts",
